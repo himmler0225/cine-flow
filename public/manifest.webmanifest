@@ -1,0 +1,19 @@
+{
+  "name": "Cine-Flow — Xem phim Vietsub",
+  "short_name": "Cine-Flow",
+  "description": "Xem phim mới HD, Vietsub, Thuyết minh miễn phí",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /watch/
+Disallow: /favorites
+Disallow: /search
+
+Sitemap: https://phimstream-viet.lovable.app/sitemap.xml
