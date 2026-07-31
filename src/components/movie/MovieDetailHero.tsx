@@ -1,23 +1,26 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { Play, Plus, Check, Calendar, Clock, ArrowLeft } from "lucide-react";
+import { Play, Check, Calendar, Clock, ArrowLeft, Heart, Share2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DetailPoster } from "@/components/movie/DetailPoster";
 import { MovieDescription } from "@/components/movie/MovieDescription";
 import { WatchlistMenu } from "@/components/movie/WatchlistMenu";
-import { ShareButton } from "@/components/movie/ShareButton";
+import { copyMovieLink } from "@/lib/seo/share";
 import { MovieRating } from "@/components/movie/MovieRating";
+import { MetaBadges } from "@/components/movie/MetaBadges";
 import { movieActionButtonVariants } from "@/components/movie/movieActionButton";
+import { TrailerButton } from "@/components/movie/TrailerButton";
 import { formatTime } from "@/utils/formatTime";
 import { useAuthStore } from "@/store/authStore";
+import { cn } from "@/lib/utils";
 import type { MovieDetail } from "@/types/movie";
 import type { WatchHistoryItem } from "@/utils/localHistory";
 
 const primaryActionClass = movieActionButtonVariants({
   intent: "primary",
-  className: "gap-2.5 px-8 whitespace-normal",
+  className: "gap-2.5 px-8",
 });
+
 const secondaryActionClass = movieActionButtonVariants({ intent: "secondary" });
-const solidActionClass = movieActionButtonVariants({ intent: "solid" });
 
 interface MovieDetailHeroProps {
   movie: MovieDetail;
@@ -44,7 +47,6 @@ export function MovieDetailHero({
   const navigate = useNavigate();
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-
   const handleBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.history.back();
@@ -52,7 +54,13 @@ export function MovieDetailHero({
     }
     void navigate({ to: "/" });
   };
-
+  const iconBtn = (active?: boolean) =>
+    cn(
+      "inline-flex h-11 w-11 items-center justify-center rounded-full ring-1 transition-colors",
+      active
+        ? "bg-netflix-red text-white ring-netflix-red"
+        : "bg-white/5 text-white ring-white/15 hover:bg-white/10",
+    );
   return (
     <div className="relative">
       <div className="absolute inset-0 overflow-hidden">
@@ -71,7 +79,7 @@ export function MovieDetailHero({
         <button
           type="button"
           onClick={handleBack}
-          className="mb-4 inline-flex items-center gap-2 text-sm uppercase tracking-wide text-netflix-muted transition-colors hover:text-white"
+          className="mb-4 inline-flex items-center gap-2 text-sm text-netflix-muted transition-colors hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" /> {t("common.back")}
         </button>
@@ -99,17 +107,16 @@ export function MovieDetailHero({
               <MovieRating slug={slug} />
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-              {movie.quality && (
-                <span className="rounded bg-amber-300 px-2 py-0.5 font-bold text-black">
-                  {movie.quality}
-                </span>
-              )}
-              {movie.lang && (
-                <span className="rounded bg-blue-600 px-2 py-0.5 font-medium text-white">
-                  {movie.lang}
-                </span>
-              )}
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+              <MetaBadges
+                quality={movie.quality}
+                lang={movie.lang}
+                episode={
+                  movie.episode_current
+                    ? `${movie.episode_current}${movie.episode_total ? ` / ${movie.episode_total}` : ""}`
+                    : undefined
+                }
+              />
               {movie.year && (
                 <span className="inline-flex items-center gap-1 text-netflix-muted">
                   <Calendar className="h-4 w-4" /> {movie.year}
@@ -118,12 +125,6 @@ export function MovieDetailHero({
               {movie.time && (
                 <span className="inline-flex items-center gap-1 text-netflix-muted">
                   <Clock className="h-4 w-4" /> {movie.time}
-                </span>
-              )}
-              {movie.episode_current && (
-                <span className="rounded bg-white/10 px-2 py-0.5 text-netflix-muted">
-                  {movie.episode_current}
-                  {movie.episode_total && ` / ${movie.episode_total}`}
                 </span>
               )}
             </div>
@@ -135,7 +136,7 @@ export function MovieDetailHero({
                     key={c.slug}
                     to="/genre/$slug"
                     params={{ slug: c.slug }}
-                    className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white hover:border-netflix-red/50 hover:bg-white/10"
+                    className="rounded border border-white/15 bg-white/5 px-3 py-1 text-xs text-white hover:border-netflix-red/50 hover:bg-white/10"
                   >
                     {c.name}
                   </Link>
@@ -167,7 +168,7 @@ export function MovieDetailHero({
               </div>
             )}
 
-            <div className="relative z-20 mt-6 flex flex-col gap-2.5 md:flex-row md:flex-wrap md:items-center">
+            <div className="relative z-20 mt-6 flex flex-wrap items-center gap-2.5">
               {canResume && lastEpisode ? (
                 <>
                   <button
@@ -186,12 +187,7 @@ export function MovieDetailHero({
                     className={primaryActionClass}
                   >
                     <Play className="h-5 w-5 fill-current" />
-                    {lastEpisode.episode_name
-                      ? t("movie.resumeEpisodeAt", {
-                          episode: lastEpisode.episode_name,
-                          time: formatTime(lastEpisode.progress_sec),
-                        })
-                      : t("movie.resumeWatching", { time: formatTime(lastEpisode.progress_sec) })}
+                    {t("movie.resumeWatching", { time: formatTime(lastEpisode.progress_sec) })}
                   </button>
                   <button
                     type="button"
@@ -223,25 +219,38 @@ export function MovieDetailHero({
                 </button>
               )}
 
+              {movie.trailer_url && (
+                <TrailerButton
+                  trailerUrl={movie.trailer_url}
+                  movieName={movie.name}
+                  className={secondaryActionClass}
+                />
+              )}
+
               {isAuthenticated && (
                 <button
                   type="button"
                   onClick={onToggleFavorite}
-                  className={isFav ? solidActionClass : secondaryActionClass}
+                  className={iconBtn(isFav)}
+                  aria-label={
+                    isFav
+                      ? t("movie.removeFavoriteAria", { name: movie.name })
+                      : t("movie.addFavoriteAria", { name: movie.name })
+                  }
                 >
-                  {isFav ? (
-                    <>
-                      <Check className="h-4 w-4" /> {t("movie.favorited")}
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-4 w-4" /> {t("movie.addFavorite")}
-                    </>
-                  )}
+                  {isFav ? <Check className="h-4 w-4" /> : <Heart className="h-4 w-4" />}
                 </button>
               )}
-              {isAuthenticated && <WatchlistMenu slug={slug} movieName={movie.name} />}
-              <ShareButton slug={slug} movieName={movie.name} />
+              {isAuthenticated && <WatchlistMenu slug={slug} movieName={movie.name} iconOnly />}
+              <button
+                type="button"
+                onClick={() => void copyMovieLink(slug, movie.name)}
+                className={iconBtn()}
+                aria-label={t("movie.shareAria")}
+                title={t("movie.shareTitle")}
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
             </div>
           </div>
         </div>

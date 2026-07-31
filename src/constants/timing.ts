@@ -1,4 +1,5 @@
-const SECOND = 1_000;
+const SECOND = 1000;
+
 const MINUTE = 60 * SECOND;
 
 export const CACHE_TTL = {
@@ -21,14 +22,23 @@ export const UI_DELAY_MS = {
   debounceDefault: 300,
   searchDebounce: 350,
   countdownTick: SECOND,
-  chatFloat: 1_800,
-  copyFeedback: 2_000,
-  reaction: 2_800,
-  heroSlide: 12_000,
+  chatFloat: 1800,
+  copyFeedback: 2000,
+  reaction: 2800,
+  heroSlide: 12000,
 } as const;
 
 export const QUERY_RETRY = {
   attempts: 2,
   baseDelayMs: SECOND,
   maxDelayMs: 8 * SECOND,
+} as const;
+
+export const MOVIE_API_TIMEOUT_MS = 30 * SECOND;
+
+export const AUTO_ADVANCE_SECONDS = 5;
+
+export const WATCH_PARTY_MS = {
+  syncTick: 3 * SECOND,
+  reactionTtl: 3 * SECOND,
 } as const;

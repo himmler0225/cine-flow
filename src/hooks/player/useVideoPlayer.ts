@@ -1,14 +1,24 @@
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "@/store/settingsStore";
-import { isEmbedUrl, readSkipAdsPreference, writeSkipAdsPreference } from "@/utils/player";
+import { usePremium } from "@/hooks/usePremium";
+import {
+  isEmbedUrl,
+  readSkipAdsPreference,
+  resolvePlayableSrc,
+  writeSkipAdsPreference,
+} from "@/utils/player";
 import { createInitialPlayerUi, playerUiReducer } from "@/hooks/player/playerReducer";
 import type { UseVideoPlayerOptions } from "@/hooks/player/types";
 import { usePlayerEmbedMode } from "@/hooks/player/usePlayerEmbedMode";
 import { usePlayerHlsSource } from "@/hooks/player/usePlayerHlsSource";
-import { usePlayerTelemetry } from "@/hooks/player/usePlayerTelemetry";
+import { usePlayerTelemetry, type SeekLock } from "@/hooks/player/usePlayerTelemetry";
 import { usePlayerResume, usePlayerSeekEvent } from "@/hooks/player/usePlayerResume";
 import { usePlayerKeyboard } from "@/hooks/player/usePlayerKeyboard";
 import { createPlayerControls } from "@/hooks/player/usePlayerControls";
+import { DEFAULT_MIDROLL_AD, getActiveAdRange } from "@/lib/hlsAdSkip";
 
 export function useVideoPlayer({
   src,
@@ -17,54 +27,106 @@ export function useVideoPlayer({
   onEnded,
   onError,
   onProgress,
+  onLiveTime,
   onResumeApplied,
   onNextEpisode,
 }: UseVideoPlayerOptions) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { isPremium } = usePremium();
   const dataSaver = useSettingsStore((s) => s.dataSaver);
+  const playableSrc = resolvePlayableSrc(src, embed);
   const embedSrc = embed || (isEmbedUrl(src) ? src : "");
   const preferEmbed = dataSaver && !!embedSrc;
-  const shouldUseEmbed = preferEmbed || (!!embedSrc && (!src || isEmbedUrl(src)));
-
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const pendingSeekRef = useRef<number | null>(null);
+  const blockEmbedFallbackRef = useRef(false);
+  const seekLockRef = useRef<SeekLock | null>(null);
+  const [preferNative, setPreferNative] = useState(false);
+  const initialSkip = isPremium && readSkipAdsPreference();
   const [state, dispatch] = useReducer(
     playerUiReducer,
-    { shouldUseEmbed, skipAds: readSkipAdsPreference() },
+    {
+      shouldUseEmbed: preferEmbed || (!playableSrc && !!embedSrc),
+      skipAds: initialSkip,
+    },
     ({ shouldUseEmbed: useEmbed, skipAds }) => createInitialPlayerUi(useEmbed, skipAds),
   );
 
   useEffect(() => {
-    writeSkipAdsPreference(state.skipAds);
-  }, [state.skipAds]);
+    setPreferNative(false);
+    blockEmbedFallbackRef.current = false;
+    pendingSeekRef.current = null;
+    seekLockRef.current = null;
+  }, [playableSrc, embedSrc]);
 
-  usePlayerEmbedMode(videoRef, src, embedSrc, shouldUseEmbed, state.useEmbed, dispatch);
+  const shouldUseEmbed =
+    !preferNative && (state.forceEmbed || preferEmbed || (!playableSrc && !!embedSrc));
 
-  const { adRangesRef, skipAdsRef } = usePlayerHlsSource(
+  const onFallbackEmbed = useCallback(() => {
+    setPreferNative(false);
+    blockEmbedFallbackRef.current = false;
+    pendingSeekRef.current = null;
+    seekLockRef.current = null;
+    dispatch({ type: "setForceEmbed", forceEmbed: true });
+  }, []);
+
+  useEffect(() => {
+    if (!isPremium && state.skipAds) {
+      dispatch({ type: "setSkipAds", skipAds: false });
+    }
+  }, [isPremium, state.skipAds]);
+
+  useEffect(() => {
+    if (isPremium) writeSkipAdsPreference(state.skipAds);
+  }, [state.skipAds, isPremium]);
+
+  usePlayerEmbedMode(
     videoRef,
-    src,
+    playableSrc,
+    embedSrc,
+    shouldUseEmbed,
+    state.useEmbed,
+    dispatch,
+    !preferNative,
+  );
+  const hls = usePlayerHlsSource(
+    videoRef,
+    playableSrc,
     embedSrc,
     state.useEmbed,
     state.skipAds,
     dispatch,
     onError,
+    pendingSeekRef,
+    onFallbackEmbed,
   );
-
   usePlayerTelemetry({
     videoRef,
     useEmbed: state.useEmbed,
     embedSrc,
-    adRangesRef,
-    skipAdsRef,
+    adRangesRef: hls.adRangesRef,
+    skipAdsRef: hls.skipAdsRef,
+    seekLockRef,
+    blockEmbedFallbackRef,
     dispatch,
     onEnded,
     onError,
     onProgress,
+    onLiveTime,
   });
-
-  usePlayerResume(videoRef, state.useEmbed, initialTime, src, dispatch, onResumeApplied);
-  usePlayerSeekEvent(videoRef, state.useEmbed, dispatch);
-
+  usePlayerResume(
+    videoRef,
+    state.useEmbed,
+    preferNative || seekLockRef.current ? 0 : initialTime,
+    playableSrc,
+    dispatch,
+    onResumeApplied,
+    pendingSeekRef,
+    seekLockRef,
+  );
+  usePlayerSeekEvent(videoRef, state.useEmbed, dispatch, seekLockRef);
   const { toggleFullscreen } = usePlayerKeyboard(
     videoRef,
     containerRef,
@@ -72,14 +134,65 @@ export function useVideoPlayer({
     dispatch,
     onNextEpisode,
   );
+  const controls = createPlayerControls(
+    videoRef,
+    containerRef,
+    state,
+    dispatch,
+    toggleFullscreen,
+    (cur, dur) => {
+      onLiveTime?.(cur, dur);
+      onProgress?.(cur, dur);
+    },
+  );
 
-  const controls = createPlayerControls(videoRef, containerRef, state, dispatch, toggleFullscreen);
+  const setSkipAds = (updater: boolean | ((prev: boolean) => boolean)) => {
+    const next = typeof updater === "function" ? updater(state.skipAds) : updater;
+    if (next && !isPremium) {
+      toast.message(t("player.skipAdsPremiumOnly"), {
+        action: {
+          label: t("premium.upgrade"),
+          onClick: () => navigate({ to: "/premium" }),
+        },
+      });
+      return;
+    }
+    controls.setSkipAds(next);
+  };
+
+  const activeAd = getActiveAdRange(state.progress, hls.adRangesRef.current);
+
+  const skipCurrentAd = () => {
+    const end = DEFAULT_MIDROLL_AD.end;
+    const video = videoRef.current;
+    if (state.useEmbed || !video || !playableSrc) return;
+
+    seekLockRef.current = { minTime: end, until: Date.now() + 10000 };
+    pendingSeekRef.current = null;
+    dispatch({ type: "incrementAdsSkipped", count: 1 });
+    dispatch({ type: "setProgress", progress: end });
+
+    const dur =
+      video.duration && Number.isFinite(video.duration)
+        ? video.duration
+        : Math.max(end + 1, state.duration || 0);
+
+    try {
+      video.currentTime = Math.min(end, Math.max(0, dur - 0.25));
+    } catch {
+      /* best-effort seek — setting currentTime can throw on some browsers/readyStates */
+    }
+    void video.play().catch(() => {});
+    onLiveTime?.(end, dur);
+    onProgress?.(end, dur);
+  };
 
   return {
     videoRef,
     containerRef,
     dataSaver,
     embedSrc,
+    playableSrc,
     useEmbed: state.useEmbed,
     hasError: state.hasError,
     playing: state.playing,
@@ -92,8 +205,23 @@ export function useVideoPlayer({
     showSpeed: state.showSpeed,
     setShowSpeed: controls.setShowSpeed,
     skipAds: state.skipAds,
-    setSkipAds: controls.setSkipAds,
+    setSkipAds,
+    isPremium,
     adsSkipped: state.adsSkipped,
+    activeAd,
+    skipCurrentAd,
+    useBackupPlayer: () => {
+      setPreferNative(false);
+      blockEmbedFallbackRef.current = false;
+      seekLockRef.current = null;
+      dispatch({ type: "setForceEmbed", forceEmbed: true });
+    },
+    levels: hls.levels,
+    subtitleTracks: hls.subtitleTracks,
+    currentLevel: hls.currentLevel,
+    subtitleId: hls.subtitleId,
+    selectQuality: hls.selectQuality,
+    selectSubtitle: hls.selectSubtitle,
     toggleFullscreen: controls.toggleFullscreen,
     togglePiP: controls.togglePiP,
     seek: controls.seek,

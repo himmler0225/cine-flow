@@ -8,6 +8,8 @@ import { getImageUrl, getImageWebp } from "@/lib/movie/movieImages";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuthStore } from "@/store/authStore";
 import { useMovieDetail } from "@/hooks/useMovieDetail";
+import { MetaBadges } from "@/components/movie/MetaBadges";
+import { TrailerButton } from "@/components/movie/TrailerButton";
 import { cn } from "@/lib/utils";
 import { stripHtml } from "@/utils/stripHtml";
 import { UI_DELAY_MS } from "@/constants/timing";
@@ -20,14 +22,13 @@ export function HeroBanner({ movies }: Props) {
   const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
   const [firstLoaded, setFirstLoaded] = useState(false);
+  const [paused, setPaused] = useState(false);
   const featured = useMemo(() => movies.slice(0, 6), [movies]);
   const { isFavorite, toggleFavorite } = useFavorites();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const currentSlug = featured[idx]?.slug ?? "";
   const isFav = isFavorite(currentSlug);
   const detail = useMovieDetail(currentSlug);
-
-  // Track which slides have been visited so we only mount their <img> once seen.
   const [visited, setVisited] = useState<Set<number>>(() => new Set([0]));
   useEffect(() => {
     setVisited((prev) => {
@@ -37,25 +38,20 @@ export function HeroBanner({ movies }: Props) {
       return next;
     });
   }, [idx]);
-
   useEffect(() => {
     if (featured.length === 0) return;
     if (idx >= featured.length) setIdx(0);
   }, [featured.length, idx]);
-
   useEffect(() => {
-    if (featured.length === 0) return;
-    // Don't advance until the first image is visible — avoids "black banner" on slow networks.
+    if (featured.length === 0 || paused) return;
     if (!firstLoaded) return;
     const nextTimer = window.setTimeout(
       () => setIdx((i) => (i + 1) % featured.length),
       UI_DELAY_MS.heroSlide,
     );
     return () => window.clearTimeout(nextTimer);
-  }, [featured.length, idx, firstLoaded]);
-
+  }, [featured.length, idx, firstLoaded, paused]);
   const firstSrc = featured[0] ? getImageWebp(featured[0].thumb_url || featured[0].poster_url) : "";
-
   if (featured.length === 0) {
     return (
       <div className="relative h-[80vh] min-h-[480px] w-full overflow-hidden bg-netflix-surface">
@@ -72,16 +68,21 @@ export function HeroBanner({ movies }: Props) {
       </div>
     );
   }
-
   const m = featured[idx];
   const movieDetail = detail.data?.movie;
   const description = stripHtml(movieDetail?.content) || m.origin_name;
-
   return (
-    <div className="relative h-[80vh] min-h-[480px] w-full overflow-hidden bg-netflix-black">
-      {/* Tell the browser to start fetching the hero image ASAP */}
+    <div
+      className="relative h-[80vh] min-h-[480px] w-full overflow-hidden bg-netflix-black"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPaused(false);
+      }}
+    >
       {firstSrc && <link rel="preload" as="image" href={firstSrc} fetchPriority="high" />}
-      {/* Blurred low-res backdrop while the hi-res image loads — no more solid black */}
+
       {!firstLoaded && firstSrc && (
         <div
           aria-hidden
@@ -94,7 +95,6 @@ export function HeroBanner({ movies }: Props) {
         />
       )}
       {featured.map((slide, i) => {
-        // Only mount images for slides the user has seen (current + previously visited).
         if (!visited.has(i)) return null;
         const isCurrent = i === idx;
         return (
@@ -120,7 +120,6 @@ export function HeroBanner({ movies }: Props) {
                 if (i === 0) setFirstLoaded(true);
                 const step = img.dataset.fallback || "0";
                 if (step === "0") {
-                  // WebP proxy failed → try original phimimg URL
                   img.dataset.fallback = "1";
                   img.src = getImageUrl(slide.thumb_url || slide.poster_url);
                 } else if (step === "1" && slide.poster_url) {
@@ -147,20 +146,13 @@ export function HeroBanner({ movies }: Props) {
             <h1 className="text-shadow-hero mb-3 text-3xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl">
               {m.name}
             </h1>
-            <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-              {m.quality && (
-                <span className="rounded bg-netflix-red px-2 py-0.5 font-bold text-white">
-                  {m.quality}
-                </span>
-              )}
-              {m.lang && (
-                <span className="rounded border border-white/30 px-2 py-0.5 text-white">
-                  {m.lang}
-                </span>
-              )}
-              {m.year && <span className="text-netflix-muted">{m.year}</span>}
-              {m.episode_current && <span className="text-netflix-muted">{m.episode_current}</span>}
-            </div>
+            <MetaBadges
+              quality={m.quality}
+              lang={m.lang}
+              year={m.year}
+              episode={m.episode_current}
+              className="mb-4"
+            />
             <p className="mb-6 line-clamp-3 max-w-xl text-base text-netflix-text/90 md:text-lg">
               {description}
             </p>
@@ -179,6 +171,13 @@ export function HeroBanner({ movies }: Props) {
               >
                 <Info className="h-5 w-5" /> {t("movie.details")}
               </Link>
+              {movieDetail?.trailer_url && (
+                <TrailerButton
+                  trailerUrl={movieDetail.trailer_url}
+                  movieName={m.name}
+                  className="inline-flex items-center gap-2 rounded bg-white/20 px-6 py-2.5 font-semibold text-white backdrop-blur transition-colors hover:bg-white/30"
+                />
+              )}
               {isAuthenticated && (
                 <button
                   type="button"
@@ -207,7 +206,6 @@ export function HeroBanner({ movies }: Props) {
         </AnimatePresence>
       </div>
 
-      {/* indicators */}
       <div className="absolute bottom-6 right-6 z-10 flex gap-1.5">
         {featured.map((_, i) => (
           <button
