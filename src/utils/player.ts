@@ -3,7 +3,7 @@ import {
   HLS_EXTENSION_PATTERN,
   PLAYER_PATH_PATTERN,
 } from "@/constants/patterns";
-import { STORAGE_KEYS } from "@/constants/storage";
+import { readStorageKey, writeStorageKey } from "@/constants/storage";
 
 export const PLAYBACK_SPEEDS = [0.5, 1, 1.25, 1.5, 2] as const;
 
@@ -16,13 +16,31 @@ export function isEmbedUrl(url?: string): boolean {
   );
 }
 
+export function extractM3u8Url(url?: string | null): string {
+  if (!url) return "";
+  const trimmed = url.trim();
+  if (HLS_EXTENSION_PATTERN.test(trimmed)) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    const nested = parsed.searchParams.get("url");
+    if (nested && HLS_EXTENSION_PATTERN.test(nested)) return nested.trim();
+  } catch {
+    /* malformed URL — fall back to empty result below */
+  }
+  return "";
+}
+
+export function resolvePlayableSrc(src?: string | null, embed?: string | null): string {
+  return extractM3u8Url(src) || extractM3u8Url(embed) || "";
+}
+
 export function readSkipAdsPreference(): boolean {
-  if (typeof window === "undefined") return true;
-  const v = window.localStorage.getItem(STORAGE_KEYS.skipAds);
-  return v === null ? true : v === "1";
+  if (typeof window === "undefined") return false;
+  const v = readStorageKey("skipAds");
+  return v === "1";
 }
 
 export function writeSkipAdsPreference(enabled: boolean): void {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEYS.skipAds, enabled ? "1" : "0");
+  writeStorageKey("skipAds", enabled ? "1" : "0");
 }

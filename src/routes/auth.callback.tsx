@@ -3,10 +3,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LEADING_HASH_PATTERN } from "@/constants/patterns";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { getSession } from "@/services/platform/auth.service";
-import { fetchMyProfile } from "@/services/platform/profiles.service";
+import { authApi } from "@/services/platform/auth.service";
+import { profilesApi } from "@/services/platform/profiles.service";
 import { useAuthStore } from "@/store/authStore";
-import { setAccessToken } from "@/lib/auth/authToken";
+import { applySessionTokens, clearAuthTokens } from "@/lib/auth/authToken";
 
 export const Route = createFileRoute("/auth/callback")({
   component: AuthCallbackPage,
@@ -14,22 +14,24 @@ export const Route = createFileRoute("/auth/callback")({
 
 function AuthCallbackPage() {
   const navigate = useNavigate();
-
   useEffect(() => {
     let cancelled = false;
-
-    const finish = (to: "/" | "/login", message?: { type: "error" | "success"; text: string }) => {
+    const finish = (
+      to: "/" | "/login",
+      message?: {
+        type: "error" | "success";
+        text: string;
+      },
+    ) => {
       if (cancelled) return;
       if (message?.type === "error") toast.error(message.text);
       if (message?.type === "success") toast.success(message.text);
       navigate({ to, replace: true });
     };
-
     (async () => {
       try {
         const query = new URLSearchParams(window.location.search);
         const hash = new URLSearchParams(window.location.hash.replace(LEADING_HASH_PATTERN, ""));
-
         const oauthError = query.get("error");
         if (oauthError) {
           const messages: Record<string, string> = {
@@ -44,27 +46,26 @@ function AuthCallbackPage() {
           });
           return;
         }
-
         const tokenFromHash = hash.get("access_token");
+        const refreshFromHash = hash.get("refresh_token");
         if (!tokenFromHash) {
           finish("/login", { type: "error", text: "Không nhận được token đăng nhập. Thử lại." });
           return;
         }
-
-        setAccessToken(tokenFromHash);
+        applySessionTokens({
+          access_token: tokenFromHash,
+          refresh_token: refreshFromHash ?? undefined,
+        });
         window.history.replaceState(null, "", window.location.pathname);
-
-        const session = await getSession();
+        const session = await authApi.getSession();
         if (!session) {
-          setAccessToken(null);
+          clearAuthTokens();
           finish("/login", { type: "error", text: "Phiên đăng nhập không hợp lệ. Thử lại." });
           return;
         }
-
         useAuthStore.getState().setSession(session);
-
         try {
-          const profile = await fetchMyProfile();
+          const profile = await profilesApi.fetchMine();
           if (profile) {
             useAuthStore.getState().setProfile(profile);
             useAuthStore.getState().setSession({
@@ -80,23 +81,20 @@ function AuthCallbackPage() {
               },
             });
           }
-        } catch {
-          /* profile optional — session vẫn hợp lệ */
+        } catch (error) {
+          console.warn("[auth-callback] profile fetch failed", error);
         }
-
         finish("/", { type: "success", text: "Đăng nhập thành công!" });
       } catch (err) {
-        setAccessToken(null);
+        clearAuthTokens();
         const message = err instanceof Error ? err.message : "Đăng nhập thất bại.";
         finish("/login", { type: "error", text: message });
       }
     })();
-
     return () => {
       cancelled = true;
     };
   }, [navigate]);
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black">
       <div className="text-center text-white">

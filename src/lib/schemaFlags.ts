@@ -1,12 +1,3 @@
-/**
- * Runtime flags for optional Supabase columns that may not exist yet on
- * older databases. They start as `true` (optimistic) and flip to `false`
- * the first time PostgREST returns a "column does not exist" / "schema
- * cache" error for that column. This avoids retrying broken queries
- * every render while still benefiting once the migration is applied.
- *
- * Apply `docs/fix-missing-columns.sql` to clear these permanently.
- */
 type Flags = {
   watchHistoryThumbUrl: boolean;
   watchHistoryEpisodeIndex: boolean;
@@ -52,7 +43,7 @@ function persist() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(schemaFlags));
   } catch {
-    /* ignore */
+    /* storage unavailable (private mode / quota) — non-critical */
   }
 }
 
@@ -64,10 +55,12 @@ export function markMissing(key: keyof Flags) {
   }
 }
 
-/** Returns true when the PostgREST error indicates a missing column. */
 export function isMissingColumnError(err: unknown): boolean {
   if (!err || typeof err !== "object") return false;
-  const e = err as { code?: string; message?: string };
+  const e = err as {
+    code?: string;
+    message?: string;
+  };
   if (e.code === "42703" || e.code === "PGRST204") return true;
   const msg = (e.message || "").toLowerCase();
   return msg.includes("does not exist") || msg.includes("schema cache");

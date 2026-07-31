@@ -2,21 +2,11 @@ import { create } from "zustand";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import type { Session, User } from "@/services/platform/auth.service";
-import {
-  getSession,
-  onAuthStateChange,
-  signInWithGoogle as authSignInWithGoogle,
-  signInWithPassword,
-  signOut as authSignOut,
-  signUp,
-} from "@/services/platform/auth.service";
-import {
-  fetchProfile,
-  updateProfile as updateProfileRow,
-} from "@/services/platform/profiles.service";
-import { migrateLocalHistoryToSupabase } from "@/services/platform/watchHistory.service";
-import { migrateLocalFavoritesToSupabase } from "@/services/platform/favorites.service";
-import { migrateLocalWatchlistsToSupabase } from "@/services/platform/watchlist.service";
+import { authApi } from "@/services/platform/auth.service";
+import { profilesApi } from "@/services/platform/profiles.service";
+import { watchHistoryApi } from "@/services/platform/watchHistory.service";
+import { favoritesApi } from "@/services/platform/favorites.service";
+import { watchlistApi } from "@/services/platform/watchlist.service";
 import type { Profile } from "@/types/database";
 import { goToAuth } from "@/lib/auth/authNavigation";
 import { STORAGE_KEYS } from "@/constants/storage";
@@ -29,7 +19,6 @@ interface AuthState {
   session: Session | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-
   initialize: () => Promise<void>;
   requestAuth: (tab?: "login" | "register") => void;
   fetchProfile: (userId: string) => Promise<void>;
@@ -51,12 +40,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   isLoading: true,
   isAuthenticated: false,
-
   initialize: async () => {
     if (initPromise) return initPromise;
     initPromise = (async () => {
       set({ isLoading: true });
-      const session = await getSession();
+      const session = await authApi.getSession();
       set({
         session,
         user: session?.user ?? null,
@@ -65,14 +53,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       if (session?.user) {
         void get().fetchProfile(session.user.id);
-        void migrateLocalHistoryToSupabase(session.user.id);
-        void migrateLocalFavoritesToSupabase(session.user.id).then(async () => {
+        void watchHistoryApi.migrateLocalToServer();
+        void favoritesApi.migrateLocalToServer().then(async () => {
           const { clearFavoritesCache } = await import("@/hooks/useFavorites");
           clearFavoritesCache();
         });
-        void migrateLocalWatchlistsToSupabase(session.user.id);
+        void watchlistApi.migrateLocalToServer();
       }
-      onAuthStateChange(async (event, newSession) => {
+      authApi.onAuthStateChange(async (event, newSession) => {
         set({
           session: newSession,
           user: newSession?.user ?? null,
@@ -82,12 +70,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (newSession?.user) {
           void get().fetchProfile(newSession.user.id);
           if (event === "SIGNED_IN") {
-            void migrateLocalHistoryToSupabase(newSession.user.id);
-            void migrateLocalFavoritesToSupabase(newSession.user.id).then(async () => {
+            void watchHistoryApi.migrateLocalToServer();
+            void favoritesApi.migrateLocalToServer().then(async () => {
               const { clearFavoritesCache } = await import("@/hooks/useFavorites");
               clearFavoritesCache();
             });
-            void migrateLocalWatchlistsToSupabase(newSession.user.id);
+            void watchlistApi.migrateLocalToServer();
           }
         } else {
           set({ profile: null });
@@ -100,7 +88,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
     return initPromise;
   },
-
   requestAuth: (tab = "login") => {
     const redirect =
       typeof window !== "undefined" && window.location.pathname !== "/login"
@@ -108,10 +95,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         : undefined;
     goToAuth(tab, redirect);
   },
-
   fetchProfile: async (userId) => {
     try {
-      const profile = await fetchProfile(userId);
+      const profile = await profilesApi.fetchById(userId);
       if (!profile) return;
       set({ profile });
       const session = get().session;
@@ -131,11 +117,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           },
         },
       });
-    } catch {
-      /* ignore */
+    } catch (error) {
+      console.error("[auth] fetchProfile failed", error);
     }
   },
-
   setSession: (session) =>
     set({
       session,
@@ -143,30 +128,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isAuthenticated: !!session,
       isLoading: false,
     }),
-
   setProfile: (profile) => set({ profile }),
-
   clearAuth: () => set({ session: null, user: null, profile: null, isAuthenticated: false }),
-
   signInWithEmail: async (email, password) => {
-    const { data, error } = await signInWithPassword(email, password);
+    const { data, error } = await authApi.signInWithPassword(email, password);
     if (error) throw new Error(error.message);
     if (data.user) await get().fetchProfile(data.user.id);
     toast.success(t("toast.welcomeBack"));
   },
-
   signUpWithEmail: async (email, password, username) => {
-    const { error } = await signUp(email, password, username);
+    const { error } = await authApi.signUp(email, password, username);
     if (error) throw new Error(error.message);
   },
-
   signInWithGoogle: async () => {
-    const { error } = await authSignInWithGoogle();
+    const { error } = await authApi.signInWithGoogle();
     if (error) throw new Error(error.message);
   },
-
   signOut: async () => {
-    await authSignOut();
+    await authApi.signOut();
     set({ user: null, profile: null, session: null, isAuthenticated: false });
     toast.success(t("toast.loggedOut"));
     if (typeof window !== "undefined") {
@@ -174,11 +153,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       window.location.href = "/login";
     }
   },
-
   updateProfile: async (data) => {
     const user = get().user;
     if (!user) return;
-    const { error } = await updateProfileRow(user.id, data);
+    const { error } = await profilesApi.update(data);
     if (error) throw new Error(error.message);
     await get().fetchProfile(user.id);
   },

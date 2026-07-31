@@ -1,9 +1,10 @@
-const KEY = "kkflix_recent_searches";
+import { readStorageKey, writeStorageKey } from "@/constants/storage";
+
 const MAX = 8;
 
 export function getRecentSearches(): string[] {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = readStorageKey("recentSearches");
     return raw ? (JSON.parse(raw) as string[]) : [];
   } catch {
     return [];
@@ -15,16 +16,16 @@ export function pushRecentSearch(q: string): void {
   if (trimmed.length < 2) return;
   try {
     const prev = getRecentSearches().filter((s) => s.toLowerCase() !== trimmed.toLowerCase());
-    localStorage.setItem(KEY, JSON.stringify([trimmed, ...prev].slice(0, MAX)));
+    writeStorageKey("recentSearches", JSON.stringify([trimmed, ...prev].slice(0, MAX)));
   } catch {
-    /* ignore */
+    /* storage unavailable (private mode / quota) — non-critical */
   }
 }
 
 export function clearRecentSearches(): void {
   try {
-    localStorage.removeItem(KEY);
+    writeStorageKey("recentSearches", null);
   } catch {
-    /* ignore */
+    /* storage unavailable (private mode / quota) — non-critical */
   }
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { movieService } from "@/services/movies";
+import { moviesApi } from "@/services/movies";
 import { useTrackedSeriesSlugs } from "@/hooks/useTrackedSeriesSlugs";
 import { queryKeys } from "@/constants/queryKeys";
 import { CACHE_TTL } from "@/constants/timing";
@@ -32,9 +32,7 @@ export function useEpisodeNotifications() {
   const trackedSlugs = useTrackedSeriesSlugs();
   const qc = useQueryClient();
   const [readAt, setReadAt] = useState(getNotificationsReadAt);
-
   const slugsKey = trackedSlugs.slice(0, 20).join(",");
-
   const { data: notifications = [], refetch } = useQuery({
     queryKey: queryKeys.episodeNotifications(slugsKey),
     enabled: trackedSlugs.length > 0,
@@ -44,16 +42,14 @@ export function useEpisodeNotifications() {
       const snapshots = getEpisodeSnapshots();
       const out: EpisodeNotification[] = [];
       const toCheck = trackedSlugs.slice(0, 20);
-
       await Promise.all(
         toCheck.map(async (slug) => {
           try {
-            const detail = await movieService.getMovieDetail(slug);
+            const detail = await moviesApi.getMovieDetail(slug);
             const movie = detail.movie;
             if (!isSeriesType(movie.type)) return;
             const current = movie.episode_current ?? "";
             if (!current) return;
-
             const snap = snapshots[slug]?.episode;
             if (snap && snap !== current) {
               out.push({
@@ -67,28 +63,23 @@ export function useEpisodeNotifications() {
               });
             }
             setEpisodeSnapshot(slug, current);
-          } catch {
-            /* skip */
+          } catch (error) {
+            console.warn("[episode-notifications] check failed", slug, error);
           }
         }),
       );
-
       return out.sort((a, b) => b.at - a.at);
     },
   });
-
   const unreadCount = notifications.filter((n) => n.at > readAt).length;
-
   const markRead = useCallback(() => {
     markNotificationsRead();
     setReadAt(Date.now());
     void qc.invalidateQueries({ queryKey: ["episode-notifications"] });
   }, [qc]);
-
   useEffect(() => {
     if (trackedSlugs.length === 0) return;
     void refetch();
   }, [trackedSlugs.length, slugsKey, refetch]);
-
   return { notifications, unreadCount, markRead, refetch };
 }
