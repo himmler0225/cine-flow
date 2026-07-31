@@ -2,15 +2,18 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { formatDistanceToNow } from "date-fns";
 import { enUS, vi as viLocale } from "date-fns/locale";
-
 import vi from "@/locales/vi.json";
+import en from "@/locales/en.json";
 
-export const SUPPORTED_LANGUAGES = ["vi"] as const;
+export const SUPPORTED_LANGUAGES = ["vi", "en"] as const;
+
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+
 export const DEFAULT_LANGUAGE: AppLanguage = "vi";
 
 const resources = {
   vi: { translation: vi },
+  en: { translation: en },
 };
 
 if (!i18n.isInitialized) {

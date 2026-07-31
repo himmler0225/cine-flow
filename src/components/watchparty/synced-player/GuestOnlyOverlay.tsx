@@ -8,10 +8,8 @@ type Props = {
 export function GuestOnlyOverlay({ disabled, onGuestPlay }: Props) {
   const { t } = useTranslation();
   if (!disabled) return null;
-
   const allowGuestButton = (target: EventTarget | null) =>
     target instanceof HTMLElement && !!target.closest("[data-guest-play-button]");
-
   return (
     <div
       className="absolute inset-0 z-10 cursor-not-allowed"

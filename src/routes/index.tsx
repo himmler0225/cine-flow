@@ -30,7 +30,6 @@ function HomePage() {
   const heroItems =
     trending.items.length > 0 ? trending.items.map((t) => t.m) : (newMovies.data?.items ?? []);
   const rows = getHomeRows().filter((r) => r.type);
-
   return (
     <div>
       <HeroBanner movies={heroItems} />
@@ -40,7 +39,8 @@ function HomePage() {
           title={t("home.rows.newUpdates")}
           movies={newMovies.data?.items}
           isLoading={newMovies.isLoading}
-        />
+          href={{ to: "/new" }}
+        />{" "}
         <TopRanking />
         {rows.map((row, i) => (
           <LazyTypedRow key={row.key} type={row.type!} titleKey={row.titleKey} eager={i < 2} />
@@ -63,7 +63,6 @@ function LazyTypedRow({
   const title = t(titleKey);
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(eager);
-
   useEffect(() => {
     if (active) return;
     const el = ref.current;
@@ -75,13 +74,11 @@ function LazyTypedRow({
           obs.disconnect();
         }
       },
-      // Bắt đầu fetch khi còn cách viewport ~600px
       { rootMargin: "600px 0px" },
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, [active]);
-
   return (
     <div ref={ref} className="min-h-[280px]">
       {active ? <TypedRow type={type} titleKey={titleKey} /> : <MovieRow title={title} isLoading />}
@@ -102,5 +99,12 @@ function TypedRow({ type, titleKey }: { type: string; titleKey: string }) {
       />
     );
   }
-  return <MovieRow title={title} movies={data?.items} isLoading={isLoading} />;
+  return (
+    <MovieRow
+      title={title}
+      movies={data?.items}
+      isLoading={isLoading}
+      href={{ to: "/catalog/$slug", params: { slug: type } }}
+    />
+  );
 }

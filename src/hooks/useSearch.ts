@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { movieService } from "@/services/movies";
+import { moviesApi } from "@/services/movies";
 import { queryKeys } from "@/constants/queryKeys";
 import { CACHE_TTL, UI_DELAY_MS } from "@/constants/timing";
 import { getNextPage } from "@/utils/pagination";
@@ -18,7 +18,17 @@ export const useSearch = (keyword: string) => {
   const debounced = useDebounced(keyword.trim(), UI_DELAY_MS.searchDebounce);
   const query = useInfiniteQuery({
     queryKey: queryKeys.movies.searchInfinite(debounced),
-    queryFn: ({ pageParam }) => movieService.searchMovies(debounced, pageParam),
+    queryFn: async ({ pageParam }) => {
+      const result = await moviesApi.searchMovies(debounced, pageParam);
+      if (pageParam === 1 && debounced.length >= 2) {
+        const { analyticsApi } = await import("@/services/platform/analytics.service");
+        void analyticsApi.trackSearch(
+          debounced,
+          result.pagination?.totalItems ?? result.items.length,
+        );
+      }
+      return result;
+    },
     initialPageParam: 1,
     getNextPageParam: (last) => getNextPage(last.pagination),
     enabled: debounced.length >= 2,

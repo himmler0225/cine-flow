@@ -48,12 +48,9 @@ export function WatchPartyRoomView({ state }: Props) {
     navigate,
     reactions,
   } = state;
-
   if (!room) return null;
-
   const waitingForHost = !isHost && !hostHasJoined && !room.is_playing;
   const hostAwayOverlay = !isHost && hostHasJoined && !hostIsOnline && !room.is_playing;
-
   const chatPanel = (
     <RoomChat
       messages={messages}
@@ -66,7 +63,6 @@ export function WatchPartyRoomView({ state }: Props) {
       disabled={!user}
     />
   );
-
   return (
     <TooltipProvider delayDuration={300}>
       <div className="min-h-screen bg-netflix-black pt-16">

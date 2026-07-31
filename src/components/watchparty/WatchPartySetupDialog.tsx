@@ -24,12 +24,10 @@ export function WatchPartySetupDialog({ open, onClose, movieName, onConfirm, loa
   const { isPremium } = usePremium();
   const [isPrivate, setIsPrivate] = useState(false);
   const [pin, setPin] = useState("");
-
   const handleConfirm = () => {
     if (isPrivate && pin.trim().length < 4) return;
     onConfirm({ isPrivate, pin: isPrivate ? pin.trim() : null });
   };
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md border-white/10 bg-[#1a1a1a] text-white">

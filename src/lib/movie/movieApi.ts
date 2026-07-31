@@ -1,7 +1,6 @@
 import { TRAILING_SLASH_PATTERN } from "@/constants/patterns";
 import { clientEnv } from "@/config/env";
 
-/** Base URL of movie-aggregator-api (no trailing slash). */
 export const MOVIE_API_BASE_URL = clientEnv.movieApiUrl.replace(TRAILING_SLASH_PATTERN, "");
 
 export const MOVIE_API_PREFIX = "/api/movies";

@@ -9,6 +9,7 @@ export function usePlayerEmbedMode(
   shouldUseEmbed: boolean,
   useEmbed: boolean,
   dispatch: React.Dispatch<PlayerUiAction>,
+  allowAutoFallback = true,
 ) {
   useEffect(() => {
     dispatch({ type: "reset", useEmbed: shouldUseEmbed });
@@ -21,13 +22,14 @@ export function usePlayerEmbedMode(
   }, [src, embedSrc, dispatch]);
 
   useEffect(() => {
-    if (useEmbed || !embedSrc) return;
+    if (!allowAutoFallback) return;
+    if (useEmbed || !embedSrc || !src || isEmbedUrl(src)) return;
     const timer = window.setTimeout(() => {
       const v = videoRef.current;
       if (!v || !Number.isFinite(v.duration) || v.duration === 0) {
         dispatch({ type: "setUseEmbed", useEmbed: true });
       }
-    }, 3500);
+    }, 12000);
     return () => window.clearTimeout(timer);
-  }, [src, embedSrc, useEmbed, videoRef, dispatch]);
+  }, [src, embedSrc, useEmbed, videoRef, dispatch, allowAutoFallback]);
 }

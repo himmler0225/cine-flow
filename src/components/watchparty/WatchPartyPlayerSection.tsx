@@ -1,4 +1,4 @@
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SyncedPlayer } from "@/components/watchparty/SyncedPlayer";
 import { ReactionOverlay } from "@/components/watchparty/ReactionOverlay";
@@ -24,13 +24,21 @@ type Props = {
   reactions: FloatingReaction[];
   waitingForHost: boolean;
   hostAwayOverlay: boolean;
-  iframeInfo: { provider: IframeProvider; supportsAuto: boolean } | null;
+  iframeInfo: {
+    provider: IframeProvider;
+    supportsAuto: boolean;
+  } | null;
   autoSyncActive: boolean;
   manualSync: boolean;
   onPlay: (time: number) => void;
   onPause: (time: number) => void;
   onSeek: (time: number) => void;
-  onProviderReady: (info: { provider: IframeProvider; supportsAuto: boolean } | null) => void;
+  onProviderReady: (
+    info: {
+      provider: IframeProvider;
+      supportsAuto: boolean;
+    } | null,
+  ) => void;
   onLeave: () => void;
   onStartCountdown: () => void;
   onAdjustTime: (delta: number) => void;
@@ -61,7 +69,6 @@ export function WatchPartyPlayerSection({
   onBroadcastPause,
 }: Props) {
   const { t } = useTranslation();
-
   return (
     <div className="space-y-3">
       <div className="relative">
@@ -100,7 +107,9 @@ export function WatchPartyPlayerSection({
 
         {waitingForHost && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-lg bg-black/85 backdrop-blur-sm">
-            <div className="animate-pulse text-5xl">⏳</div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10">
+              <Loader2 className="h-7 w-7 animate-spin text-netflix-red" />
+            </div>
             <div className="text-center">
               <p className="text-base font-semibold text-white">
                 {t("watchparty.waitingHostJoin")}

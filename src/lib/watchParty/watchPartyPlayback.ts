@@ -14,7 +14,6 @@ function normalize(s: string | null | undefined): string {
   return s.toString().trim().toLowerCase().replace(WHITESPACE_PATTERN, " ");
 }
 
-/** Try exact name, then normalized name, then slug match. */
 function findEpisode(episodes: EpisodeServer[], serverIndex: number, episodeName?: string | null) {
   const server = episodes[serverIndex];
   if (!server) return null;
@@ -30,7 +29,6 @@ function findEpisode(episodes: EpisodeServer[], serverIndex: number, episodeName
   return null;
 }
 
-/** Prefer HLS (m3u8) — required for auto sync. Scans all servers to find the right episode. */
 export function pickWatchPartyPlayable(
   episodes: EpisodeServer[] | undefined,
   room: WatchRoom | null,
@@ -38,10 +36,7 @@ export function pickWatchPartyPlayable(
   if (!episodes?.length || !room) {
     return { src: "", embed: "", serverIndex: room?.server_index ?? 0, usesHls: false };
   }
-
   const preferredIndex = Math.min(Math.max(room.server_index, 0), episodes.length - 1);
-
-  // 1) Try preferred server, by name first.
   const current = findEpisode(episodes, preferredIndex, room.episode_name);
   if (current?.link_m3u8) {
     return {
@@ -51,8 +46,6 @@ export function pickWatchPartyPlayable(
       usesHls: true,
     };
   }
-
-  // 2) Scan ALL servers for an episode matching the room's episode name.
   if (room.episode_name) {
     for (let i = 0; i < episodes.length; i++) {
       const ep = findEpisode(episodes, i, room.episode_name);
@@ -65,7 +58,6 @@ export function pickWatchPartyPlayable(
         };
       }
       if (ep?.link_embed) {
-        // remember embed fallback at first match
         return {
           src: "",
           embed: ep.link_embed,
@@ -75,10 +67,6 @@ export function pickWatchPartyPlayable(
       }
     }
   }
-
-  // 3) Last resort: preferred server's m3u8 with current episode (embed only) — DO NOT
-  //    silently fall back to episode 1 on a different server; keep user on the requested episode
-  //    even if it's embed-only.
   if (current?.link_embed) {
     return {
       src: "",
@@ -87,7 +75,6 @@ export function pickWatchPartyPlayable(
       usesHls: false,
     };
   }
-
   return {
     src: "",
     embed: "",

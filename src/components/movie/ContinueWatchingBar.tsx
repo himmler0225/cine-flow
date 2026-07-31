@@ -1,40 +1,17 @@
-import { useMemo } from "react";
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Play, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useWatchHistory } from "@/hooks/user/useWatchHistory";
+import { useContinueWatchingBar } from "@/hooks/useContinueWatchingBarVisible";
 import { MoviePosterImg } from "@/components/movie/MoviePosterImg";
 import { formatTime } from "@/utils/formatTime";
-import { getWatchProgressPercent, isWatchFinished } from "@/utils/watchProgress";
-
-const HIDDEN_PREFIXES = ["/watch/", "/watch-party/", "/admin"];
+import { getWatchProgressPercent } from "@/utils/watchProgress";
 
 export function ContinueWatchingBar() {
   const { t } = useTranslation();
-  const location = useLocation();
-  const { history, deleteItem } = useWatchHistory();
-
-  const item = useMemo(() => {
-    return (
-      history.find(
-        (h) =>
-          h.duration_sec > 0 &&
-          h.progress_sec >= 10 &&
-          !isWatchFinished(h.progress_sec, h.duration_sec),
-      ) ?? null
-    );
-  }, [history]);
-
-  const hidden =
-    !item ||
-    HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p)) ||
-    location.pathname === "/";
-
-  if (hidden) return null;
-
+  const { item, visible, deleteItem } = useContinueWatchingBar();
+  if (!visible || !item) return null;
   const pct = getWatchProgressPercent(item.progress_sec, item.duration_sec);
   const tapParam = item.episode_index !== undefined ? item.episode_index + 1 : 1;
-
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-netflix-black/95 backdrop-blur-md lg:hidden">
       <div className="flex items-center gap-3 px-3 py-2.5">

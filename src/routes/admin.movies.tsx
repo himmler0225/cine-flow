@@ -27,9 +27,7 @@ function MoviesPage() {
   const [search, setSearch] = useState(q ?? "");
   const [sortBy, setSortBy] = useState<"views" | "completion" | "recent">("views");
   const [open, setOpen] = useState<MovieAgg | null>(null);
-
   const movies = useAdminMovies(dateRange, getDateFrom());
-
   const filtered = (movies.data ?? [])
     .filter((m) => !search || m.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
@@ -37,7 +35,6 @@ function MoviesPage() {
       if (sortBy === "completion") return b.completion - a.completion;
       return b.lastWatched.localeCompare(a.lastWatched);
     });
-
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.movies")}</h1>

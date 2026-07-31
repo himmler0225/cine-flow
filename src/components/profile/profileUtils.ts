@@ -4,6 +4,7 @@ import type { Favorite } from "@/types/database";
 export type FavoriteRow = Favorite;
 
 export const PROFILE_TAB_IDS = ["overview", "favorites", "history"] as const;
+
 export type ProfileTabId = (typeof PROFILE_TAB_IDS)[number];
 
 const AVATAR_COLORS = [

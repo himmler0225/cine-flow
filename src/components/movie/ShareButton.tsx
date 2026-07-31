@@ -13,7 +13,6 @@ interface ShareButtonProps {
 
 export function ShareButton({ slug, movieName, className, variant = "hero" }: ShareButtonProps) {
   const { t } = useTranslation();
-
   return (
     <button
       type="button"

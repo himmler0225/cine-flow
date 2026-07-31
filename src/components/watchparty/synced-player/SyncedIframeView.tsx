@@ -11,7 +11,6 @@ type Props = {
 
 export function SyncedIframeView({ iframeRef, iframeInfo, disabled, onGuestPlay }: Props) {
   const { t } = useTranslation();
-
   return (
     <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
       <iframe

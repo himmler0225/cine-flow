@@ -3,14 +3,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
-import {
-  getSession,
-  onAuthStateChange,
-  updateUserPassword,
-} from "@/services/platform/auth.service";
+import { authApi } from "@/services/platform/auth.service";
 import { t } from "@/lib/i18n";
 import {
   AuthCard,
+  AuthCinematicFrame,
   AuthError,
   AuthField,
   AuthPasswordToggle,
@@ -37,36 +34,33 @@ function ResetPasswordPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   useEffect(() => {
-    const { data: sub } = onAuthStateChange(async (event) => {
+    const { data: sub } = authApi.onAuthStateChange(async (event) => {
       if (event === "PASSWORD_RECOVERY") setReady(true);
     });
-    getSession().then((session) => {
+    authApi.getSession().then((session) => {
       if (session) setReady(true);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (pwd.length < 6) return setError(tr("auth.errors.passwordMin"));
     if (pwd !== pwd2) return setError(tr("auth.errors.passwordMismatch"));
     setLoading(true);
-    const { error } = await updateUserPassword(pwd);
+    const { error } = await authApi.updateUserPassword(pwd);
     setLoading(false);
     if (error) return setError(error.message);
     toast.success(tr("toast.passwordChanged"));
     navigate({ to: "/" });
   };
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4 pt-20">
+    <AuthCinematicFrame>
       <AuthCard>
-        <h1 className="text-2xl font-bold text-foreground">{tr("auth.resetPasswordTitle")}</h1>
+        <h1 className="text-2xl font-bold text-white">{tr("auth.resetPasswordTitle")}</h1>
         {!ready ? (
-          <p className="mt-4 text-sm text-muted-foreground">{tr("auth.openResetLink")}</p>
+          <p className="mt-4 text-sm text-netflix-muted">{tr("auth.openResetLink")}</p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <AuthField
@@ -92,6 +86,6 @@ function ResetPasswordPage() {
           </form>
         )}
       </AuthCard>
-    </div>
+    </AuthCinematicFrame>
   );
 }

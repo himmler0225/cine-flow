@@ -7,7 +7,6 @@ export function SearchThumb({ src, eager = false }: { src?: string; eager?: bool
   const candidates = getImageCandidates(src);
   const webp = candidates[0] ?? "";
   const fallback = candidates[1] ?? "";
-
   return (
     <div className="relative h-16 w-12 flex-none overflow-hidden rounded bg-white/5">
       {!loaded && (

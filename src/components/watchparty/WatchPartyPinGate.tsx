@@ -2,32 +2,26 @@ import { useState } from "react";
 import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { markPinVerified, verifyRoomPin } from "@/lib/watchParty/watchPartyPin";
 
 interface WatchPartyPinGateProps {
   code: string;
-  roomPin: string;
-  onVerified: () => void;
+  pending: boolean;
+  error: string | null;
+  onSubmit: (pin: string) => void;
 }
 
-export function WatchPartyPinGate({ code, roomPin, onVerified }: WatchPartyPinGateProps) {
+export function WatchPartyPinGate({ code, pending, error, onSubmit }: WatchPartyPinGateProps) {
   const { t } = useTranslation();
   const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
-
+  const [localError, setLocalError] = useState("");
   const submit = () => {
-    if (pin.length < 4) {
-      setError(t("watchparty.pinMinLength"));
+    if (pin.trim().length < 4) {
+      setLocalError(t("watchparty.pinMinLength"));
       return;
     }
-    if (!verifyRoomPin(roomPin, pin)) {
-      setError(t("watchparty.pinIncorrect"));
-      return;
-    }
-    markPinVerified(code);
-    onVerified();
+    setLocalError("");
+    onSubmit(pin.trim());
   };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4 pt-16">
       <div className="w-full max-w-sm rounded-xl border border-white/10 bg-white/5 p-6">
@@ -40,22 +34,41 @@ export function WatchPartyPinGate({ code, roomPin, onVerified }: WatchPartyPinGa
         <p className="mt-1 text-center text-sm text-netflix-muted">
           {t("watchparty.enterPinForRoom", { code })}
         </p>
+        <label htmlFor="watchparty-pin" className="sr-only">
+          {t("watchparty.enterPinForRoom", { code })}
+        </label>
         <input
+          id="watchparty-pin"
           type="password"
           inputMode="numeric"
           maxLength={6}
           value={pin}
           onChange={(e) => {
             setPin(e.target.value);
-            setError("");
+            setLocalError("");
           }}
           onKeyDown={(e) => e.key === "Enter" && submit()}
           placeholder="••••"
-          className="mt-4 w-full rounded-lg border border-white/15 bg-black/40 px-4 py-3 text-center font-mono text-2xl tracking-[0.5em] text-white placeholder:text-white/20 focus:border-netflix-red focus:outline-none"
+          disabled={pending}
+          aria-invalid={!!(localError || error)}
+          aria-describedby={localError || error ? "watchparty-pin-error" : undefined}
+          className="mt-4 w-full rounded-lg border border-white/15 bg-black/40 px-4 py-3 text-center font-mono text-2xl tracking-[0.5em] text-white placeholder:text-white/20 focus:border-netflix-red focus:outline-none disabled:opacity-50"
         />
-        {error && <p className="mt-2 text-center text-sm text-red-400">{error}</p>}
-        <Button onClick={submit} className="mt-4 w-full bg-netflix-red hover:bg-netflix-red-hover">
-          {t("watchparty.enterRoom")}
+        {(localError || error) && (
+          <p
+            id="watchparty-pin-error"
+            role="alert"
+            className="mt-2 text-center text-sm text-red-400"
+          >
+            {localError || error || t("watchparty.pinIncorrect")}
+          </p>
+        )}
+        <Button
+          onClick={submit}
+          disabled={pending}
+          className="mt-4 w-full bg-netflix-red hover:bg-netflix-red-hover"
+        >
+          {pending ? t("watchparty.creating") : t("watchparty.enterRoom")}
         </Button>
       </div>
     </div>

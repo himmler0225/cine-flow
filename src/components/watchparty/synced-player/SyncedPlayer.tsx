@@ -26,23 +26,18 @@ export const SyncedPlayer = forwardRef<SyncedPlayerHandle, SyncedPlayerProps>(fu
   const seekingFromSyncRef = useRef(false);
   const lastIframeTimeRef = useRef(0);
   const iframePausedRef = useRef(true);
-
   const syncRefs = {
     lastSyncRef,
     seekingFromSyncRef,
     lastIframeTimeRef,
     iframePausedRef,
   };
-
   const { setHlsFailed, useIframe, iframeInfo } = useSyncedPlayerMode(src, embed);
-
   useSyncedProviderReady(iframeInfo, onProviderReady);
   useSyncedHlsSource(videoRef, src, useIframe, () => setHlsFailed(true));
-
   const eventHandlers = { onPlay, onPause, onSeek };
   useSyncedVideoEvents(videoRef, useIframe, syncRefs, eventHandlers);
   useSyncedIframeEvents(iframeRef, useIframe, iframeInfo, syncRefs, eventHandlers);
-
   useImperativeHandle(
     ref,
     () =>
@@ -55,7 +50,6 @@ export const SyncedPlayer = forwardRef<SyncedPlayerHandle, SyncedPlayerProps>(fu
       }),
     [useIframe, iframeInfo],
   );
-
   const attemptJoinerPlay = useCallback(() => {
     if (!disabled) return;
     if (useIframe) {
@@ -67,7 +61,6 @@ export const SyncedPlayer = forwardRef<SyncedPlayerHandle, SyncedPlayerProps>(fu
     }
     playVideoElement(videoRef.current);
   }, [disabled, useIframe, iframeInfo]);
-
   if (useIframe && iframeInfo) {
     return (
       <SyncedIframeView
@@ -78,7 +71,6 @@ export const SyncedPlayer = forwardRef<SyncedPlayerHandle, SyncedPlayerProps>(fu
       />
     );
   }
-
   return (
     <SyncedVideoView
       videoRef={videoRef}

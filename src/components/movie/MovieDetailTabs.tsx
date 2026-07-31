@@ -7,9 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovieRow } from "@/components/movie/MovieRow";
 import { MovieComments } from "@/components/movie/MovieComments";
 import { EpisodeList } from "@/components/player/EpisodeList";
-import { useAuthStore } from "@/store/authStore";
 import { getYoutubeEmbed } from "@/utils/youtube";
-
 import type { MovieDetailTabsProps } from "@/types/movieDetail";
 import { getDefaultDetailTab } from "@/types/movieDetail";
 
@@ -23,17 +21,13 @@ export function MovieDetailTabs({
 }: MovieDetailTabsProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [serverIdx, setServerIdx] = useState(0);
   const [episodeIdx, setEpisodeIdx] = useState(0);
-
   const trailerEmbed = movie.trailer_url ? getYoutubeEmbed(movie.trailer_url) : null;
   const defaultTab = getDefaultDetailTab(episodes, !!trailerEmbed);
   const episodeNames = episodes[0]?.server_data.map((e) => e.name) ?? [];
-
   const tabTriggerClass =
     "shrink-0 snap-start rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-netflix-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-netflix-red data-[state=active]:border-netflix-red data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:shadow-none";
-
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -60,11 +54,9 @@ export function MovieDetailTabs({
             <TabsTrigger value="similar" className={tabTriggerClass}>
               {t("movie.similar")}
             </TabsTrigger>
-            {isAuthenticated && (
-              <TabsTrigger value="comments" className={tabTriggerClass}>
-                {t("movie.comments")}
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="comments" className={tabTriggerClass}>
+              {t("movie.comments")}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="episodes" className="mt-0">
@@ -166,15 +158,13 @@ export function MovieDetailTabs({
             />
           </TabsContent>
 
-          {isAuthenticated && (
-            <TabsContent value="comments" className="mt-0">
-              <MovieComments
-                slug={slug}
-                movieName={movie.name}
-                episodeOptions={episodeNames.length > 1 ? episodeNames : undefined}
-              />
-            </TabsContent>
-          )}
+          <TabsContent value="comments" className="mt-0">
+            <MovieComments
+              slug={slug}
+              movieName={movie.name}
+              episodeOptions={episodeNames.length > 1 ? episodeNames : undefined}
+            />
+          </TabsContent>
         </Tabs>
       </div>
     </motion.section>

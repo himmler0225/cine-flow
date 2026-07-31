@@ -45,7 +45,11 @@ async function fetchAggregator<T>(
     return data;
   } catch (err) {
     if (err instanceof AxiosError && err.response?.status === 404) {
-      const body = err.response.data as { error?: string } | undefined;
+      const body = err.response.data as
+        | {
+            error?: string;
+          }
+        | undefined;
       throw new MovieNotFoundError(body?.error || "Movie not found");
     }
     if (err instanceof MovieNotFoundError) throw err;
@@ -56,99 +60,110 @@ async function fetchAggregator<T>(
   }
 }
 
-export const movieService = {
-  getNewMovies: async (page = 1): Promise<MovieListResult> => {
+class MoviesApi {
+  async getNewMovies(page = 1): Promise<MovieListResult> {
     const envelope = await fetchAggregator<AggregatorEnvelope<MovieListItem[]>>(
       "/new",
       { page },
       TIMEOUT.list,
     );
     return toListResult(envelope);
-  },
-
-  getMoviesByType: async (
+  }
+  async getMoviesByType(
     type: string,
     page = 1,
     extra: MovieFilterParams = {},
-  ): Promise<MovieListResult> => {
+  ): Promise<MovieListResult> {
     const envelope = await fetchAggregator<AggregatorEnvelope<MovieListItem[]>>(
       `/type/${encodeURIComponent(type)}`,
       { page, limit: 24, ...cleanParams(extra) },
       TIMEOUT.list,
     );
     return toListResult(envelope);
-  },
-
-  getMovieDetail: async (slug: string): Promise<DetailResponse> => {
+  }
+  async getMovieDetail(slug: string): Promise<DetailResponse> {
     const envelope = await fetchAggregator<
-      AggregatorEnvelope<{ movie: MovieDetail; episodes: DetailResponse["episodes"] }>
+      AggregatorEnvelope<{
+        movie: MovieDetail;
+        episodes: DetailResponse["episodes"];
+      }>
     >(`/${encodeURIComponent(slug)}`, undefined, TIMEOUT.detail);
     return toDetailResponse(envelope);
-  },
-
-  searchMovies: async (keyword: string, page = 1): Promise<MovieListResult> => {
+  }
+  async searchMovies(keyword: string, page = 1): Promise<MovieListResult> {
     const envelope = await fetchAggregator<AggregatorEnvelope<MovieListItem[]>>(
       "/search",
       { keyword, page, limit: 24 },
       TIMEOUT.search,
     );
     return toListResult(envelope);
-  },
-
-  getByGenre: async (
+  }
+  async getByGenre(
     slug: string,
     page = 1,
     extra: MovieFilterParams = {},
-  ): Promise<MovieListResult> => {
+  ): Promise<MovieListResult> {
     const envelope = await fetchAggregator<AggregatorEnvelope<MovieListItem[]>>(
       `/genres/${encodeURIComponent(slug)}`,
       { page, limit: 24, ...cleanParams(extra) },
       TIMEOUT.list,
     );
     return toListResult(envelope);
-  },
-
-  getByCountry: async (
+  }
+  async getByCountry(
     slug: string,
     page = 1,
     extra: MovieFilterParams = {},
-  ): Promise<MovieListResult> => {
+  ): Promise<MovieListResult> {
     const envelope = await fetchAggregator<AggregatorEnvelope<MovieListItem[]>>(
       `/countries/${encodeURIComponent(slug)}`,
       { page, limit: 24, ...cleanParams(extra) },
       TIMEOUT.list,
     );
     return toListResult(envelope);
-  },
-
-  getByYear: async (
-    year: number,
-    page = 1,
-    extra: MovieFilterParams = {},
-  ): Promise<MovieListResult> => {
+  }
+  async getByYear(year: number, page = 1, extra: MovieFilterParams = {}): Promise<MovieListResult> {
     const envelope = await fetchAggregator<AggregatorEnvelope<MovieListItem[]>>(
       `/years/${year}`,
       { page, limit: 24, ...cleanParams(extra) },
       TIMEOUT.list,
     );
     return toListResult(envelope);
-  },
-};
+  }
+}
 
-export const genreService = {
-  getAll: async () => {
+class GenresApi {
+  async getAll() {
     const envelope = await fetchAggregator<
-      AggregatorEnvelope<Array<{ _id: string; name: string; slug: string }>>
+      AggregatorEnvelope<
+        Array<{
+          _id: string;
+          name: string;
+          slug: string;
+        }>
+      >
     >("/meta/genres", undefined, TIMEOUT.meta);
     return toMetadataList(envelope);
-  },
-};
+  }
+}
 
-export const countryService = {
-  getAll: async () => {
+class CountriesApi {
+  async getAll() {
     const envelope = await fetchAggregator<
-      AggregatorEnvelope<Array<{ _id: string; name: string; slug: string }>>
+      AggregatorEnvelope<
+        Array<{
+          _id: string;
+          name: string;
+          slug: string;
+        }>
+      >
     >("/meta/countries", undefined, TIMEOUT.meta);
     return toMetadataList(envelope);
-  },
-};
+  }
+}
+
+export const moviesApi = new MoviesApi();
+
+export const genresApi = new GenresApi();
+
+export const countriesApi = new CountriesApi();

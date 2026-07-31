@@ -3,9 +3,7 @@ import type { EpisodeServer } from "@/types/movie";
 import { cn } from "@/lib/utils";
 
 export interface EpisodeProgressInfo {
-  /** 0..1 — phần trăm đã xem của tập */
   ratio: number;
-  /** true nếu đã xem hơn 95% (coi như hoàn tất) */
   finished: boolean;
 }
 
@@ -14,19 +12,13 @@ interface Props {
   serverIdx: number;
   episodeIdx: number;
   onSelect: (s: number, e: number) => void;
-  /** map theo episode name → tiến độ đã xem (lấy từ useWatchHistory) */
   progressByEpisode?: Record<string, EpisodeProgressInfo>;
-  /** Sidebar hẹp: xếp server dọc; mặc định wrap ngang */
   serverLayout?: "wrap" | "stack";
-  /** Ẩn nhãn "Danh sách tập" khi đã có tiêu đề section bên ngoài */
   hideEpisodeHeading?: boolean;
-  /** Trang chi tiết: giảm đỏ lặp; trang xem: accent đậm hơn */
   accent?: "primary" | "soft";
-  /** "tile": ô vuông 2 dòng (TẬP / số) cho sidebar trang xem; mặc định "compact" */
   variant?: "compact" | "tile";
 }
 
-/** "Tập 09" → "09" để hiển thị dạng ô; trả null nếu tên không theo mẫu (vd "Full") */
 function parseEpisodeNumber(name: string): string | null {
   const m = name.match(/^t(?:ập|ap)\s*0*(\d+)$/i);
   if (!m) return null;
@@ -45,25 +37,21 @@ export function EpisodeList({
   variant = "compact",
 }: Props) {
   const { t } = useTranslation();
-
   if (!servers?.length) return null;
   const stacked = serverLayout === "stack";
   const soft = accent === "soft";
   const tile = variant === "tile";
-
   const serverActive = soft
     ? "border border-netflix-red/60 bg-white/10 text-white shadow-[inset_0_0_0_1px_rgba(229,9,20,0.15)]"
     : "bg-netflix-red text-white";
   const serverIdle = soft
     ? "border border-white/10 bg-white/[0.04] text-netflix-text hover:border-white/25 hover:bg-white/[0.08]"
     : "bg-white/10 text-netflix-text hover:bg-white/20";
-
   const episodeActive = soft
     ? "border-netflix-red/70 bg-white/10 text-white ring-1 ring-netflix-red/25"
     : "border-netflix-red bg-netflix-red text-white";
   const episodeIdle =
     "border-white/10 bg-white/5 text-netflix-text hover:border-white/30 hover:bg-white/10";
-
   return (
     <div className="space-y-5">
       <div>
@@ -121,9 +109,7 @@ export function EpisodeList({
                 key={ep.slug + i}
                 onClick={() => onSelect(serverIdx, i)}
                 aria-current={i === episodeIdx ? "true" : undefined}
-                aria-label={`${ep.name}${i === episodeIdx ? t("player.nowPlaying") : ""}${
-                  prog?.finished ? " · đã xem xong" : ""
-                }${showBar ? ` · đã xem ${Math.round(ratio * 100)}%` : ""}`}
+                aria-label={`${ep.name}${i === episodeIdx ? t("player.nowPlaying") : ""}${prog?.finished ? " · đã xem xong" : ""}${showBar ? ` · đã xem ${Math.round(ratio * 100)}%` : ""}`}
                 className={cn(
                   "relative overflow-hidden rounded-lg border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-netflix-red/50",
                   tile ? "min-h-[3.25rem] px-2 py-1.5" : "min-h-9 px-2 py-2 text-xs font-medium",

@@ -1,11 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
-import {
-  fetchRatingAggregate,
-  fetchUserRating,
-  upsertRating,
-} from "@/services/platform/ratings.service";
+import { ratingsApi } from "@/services/platform/ratings.service";
 import { useAuthStore } from "@/store/authStore";
 import { useRatingStore } from "@/store/ratingStore";
 import { CACHE_TTL } from "@/constants/timing";
@@ -15,7 +11,10 @@ const ratingKeys = {
   user: (userId: string, slug: string) => ["ratings", "user", userId, slug] as const,
 };
 
-type Aggregate = { average: number; count: number };
+type Aggregate = {
+  average: number;
+  count: number;
+};
 
 export function useMovieRating(slug: string) {
   const userId = useAuthStore((s) => s.user?.id);
@@ -23,27 +22,24 @@ export function useMovieRating(slug: string) {
   const localScore = useRatingStore((s) => s.ratings[slug] ?? null);
   const setLocal = useRatingStore((s) => s.set);
   const qc = useQueryClient();
-
   const aggregateQuery = useQuery({
     queryKey: ratingKeys.aggregate(slug),
-    queryFn: () => fetchRatingAggregate(slug),
+    queryFn: () => ratingsApi.fetchAggregate(slug),
     staleTime: CACHE_TTL.twoMinutes,
   });
-
   const userQuery = useQuery({
     queryKey: ratingKeys.user(userId ?? "", slug),
-    queryFn: () => fetchUserRating(userId!, slug),
+    queryFn: () => ratingsApi.fetchUserRating(slug),
     enabled: !!userId,
     staleTime: CACHE_TTL.minute,
   });
-
   const mutation = useMutation({
     mutationFn: async (score: number) => {
       if (!userId) {
         setLocal(slug, score);
         return;
       }
-      await upsertRating(userId, slug, score);
+      await ratingsApi.upsert(slug, score);
     },
     onMutate: async (score: number) => {
       if (!userId) return { prevUser: null, prevAgg: null };
@@ -53,8 +49,6 @@ export function useMovieRating(slug: string) {
       await qc.cancelQueries({ queryKey: aggKey });
       const prevUser = qc.getQueryData<number | null>(userKey) ?? null;
       const prevAgg = qc.getQueryData<Aggregate>(aggKey) ?? null;
-
-      // Optimistic: cập nhật điểm user + tính lại aggregate
       qc.setQueryData<number | null>(userKey, score);
       if (prevAgg) {
         const isNew = prevUser == null;
@@ -78,9 +72,7 @@ export function useMovieRating(slug: string) {
       }
     },
   });
-
   const userScore = userId ? (userQuery.data ?? null) : localScore;
-
   const rate = (score: number): Promise<void> => {
     if (!userId) {
       setLocal(slug, score);
@@ -88,7 +80,6 @@ export function useMovieRating(slug: string) {
     }
     return mutation.mutateAsync(score);
   };
-
   const rateOrLogin = (score: number) => {
     if (!userId) {
       requestAuth("login");
@@ -96,7 +87,6 @@ export function useMovieRating(slug: string) {
     }
     return rate(score);
   };
-
   return {
     average: aggregateQuery.data?.average ?? 0,
     count: aggregateQuery.data?.count ?? 0,

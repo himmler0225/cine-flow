@@ -23,12 +23,10 @@ function getRange(page: number, total: number): Array<number | "..."> {
 
 export function Pagination({ page, totalPages, onChange }: Props) {
   const { t } = useTranslation();
-
   if (!totalPages || totalPages < 2) return null;
   const items = getRange(page, totalPages);
   const canGoPrev = page > 1;
   const canGoNext = page < totalPages;
-
   return (
     <nav
       aria-label={t("filters.pagination")}

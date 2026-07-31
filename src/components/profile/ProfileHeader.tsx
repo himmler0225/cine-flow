@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { enUS, vi } from "date-fns/locale";
 import { toast } from "sonner";
@@ -6,8 +7,9 @@ import { Camera, Pencil, Check, X, Crown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import { resolveUserDisplay } from "@/lib/userDisplay";
-import { uploadAvatar } from "@/services/platform/profiles.service";
+import { profilesApi } from "@/services/platform/profiles.service";
 import { useAuthStore } from "@/store/authStore";
+import { isPremiumPlan } from "@/constants/premium";
 import { cn } from "@/lib/utils";
 import { ProfileStatsRow } from "@/components/profile/ProfileStatsRow";
 
@@ -17,18 +19,13 @@ export function ProfileHeader() {
   const profile = useAuthStore((s) => s.profile);
   const updateProfile = useAuthStore((s) => s.updateProfile);
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
-
   const dateLocale = i18n.language === "vi" ? vi : enUS;
-
   const { displayName } = resolveUserDisplay(user, profile);
-
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(displayName);
   useEffect(() => setName(displayName), [displayName]);
-
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-
   const onUpload = async (file: File) => {
     if (!user) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -37,11 +34,7 @@ export function ProfileHeader() {
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const publicUrl = await uploadAvatar(user.id, file, {
-        path: `${user.id}/avatar.${ext}`,
-        contentType: file.type,
-      });
+      const publicUrl = await profilesApi.uploadAvatar(file);
       const url = `${publicUrl}?t=${Date.now()}`;
       await updateProfile({ avatar_url: url });
       await fetchProfile(user.id);
@@ -56,7 +49,6 @@ export function ProfileHeader() {
       setUploading(false);
     }
   };
-
   const saveName = async () => {
     const v = name.trim();
     if (v.length < 2 || v.length > 30) {
@@ -71,16 +63,14 @@ export function ProfileHeader() {
       toast.error((e as Error).message);
     }
   };
-
   const joined = user?.created_at
     ? format(new Date(user.created_at), i18n.language === "vi" ? "'tháng' M, yyyy" : "MMMM yyyy", {
         locale: dateLocale,
       })
     : "";
-  const isPremium = profile?.plan === "premium";
-
+  const isPremium = isPremiumPlan(profile?.plan);
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-700/50 bg-gradient-to-r from-gray-900 to-gray-800 p-4 sm:p-6 md:p-8">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-netflix-dark/80 p-4 sm:p-6 md:p-8">
       <div className="flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-6">
         <div
           className="group relative h-20 w-20 shrink-0 cursor-pointer sm:h-24 sm:w-24"
@@ -120,7 +110,7 @@ export function ProfileHeader() {
                         setName(displayName);
                       }
                     }}
-                    className="min-w-0 w-full max-w-[min(100%,14rem)] rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-base text-white focus:border-netflix-red focus:outline-none sm:max-w-xs sm:text-xl"
+                    className="min-w-0 w-full max-w-[min(100%,14rem)] rounded-md border border-white/15 bg-netflix-black px-3 py-1.5 text-base text-white focus:border-netflix-red focus:outline-none sm:max-w-xs sm:text-xl"
                   />
                   <div className="flex shrink-0 items-center gap-1">
                     <button
@@ -135,7 +125,7 @@ export function ProfileHeader() {
                         setEditing(false);
                         setName(displayName);
                       }}
-                      className="rounded p-1 text-gray-400 hover:text-white"
+                      className="rounded p-1 text-netflix-muted hover:text-white"
                       aria-label={t("common.cancel")}
                     >
                       <X className="h-5 w-5" />
@@ -149,7 +139,7 @@ export function ProfileHeader() {
                   </h1>
                   <button
                     onClick={() => setEditing(true)}
-                    className="shrink-0 text-gray-400 hover:text-white"
+                    className="shrink-0 text-netflix-muted hover:text-white"
                     aria-label={t("profile.editName")}
                   >
                     <Pencil className="h-4 w-4" />
@@ -158,23 +148,28 @@ export function ProfileHeader() {
               )}
               <span
                 className={cn(
-                  "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                  "shrink-0 rounded px-2.5 py-0.5 text-xs font-semibold",
                   isPremium
                     ? "bg-gradient-to-r from-amber-400 to-yellow-500 text-black"
-                    : "bg-gray-700 text-gray-300",
+                    : "bg-white/10 text-netflix-muted",
                 )}
               >
                 {isPremium ? t("profile.premiumPlan") : t("profile.freePlan")}
               </span>
             </div>
-            <p className="w-full truncate text-sm text-gray-400">{user?.email}</p>
+            <p className="w-full truncate text-sm text-netflix-muted">{user?.email}</p>
             {joined && (
-              <p className="text-xs text-gray-500">{t("profile.memberSince", { date: joined })}</p>
+              <p className="text-xs text-netflix-muted/70">
+                {t("profile.memberSince", { date: joined })}
+              </p>
             )}
             {!isPremium && (
-              <button className="mt-1 w-full max-w-xs rounded-lg border border-amber-400/60 px-4 py-2 text-sm font-semibold text-amber-400 transition-colors hover:bg-amber-400/10 sm:w-auto">
-                <Crown className="mr-1 inline h-4 w-4" /> {t("profile.upgradePremiumBtn")}
-              </button>
+              <Link
+                to="/premium"
+                className="mt-1 inline-flex w-full max-w-xs items-center justify-center gap-1.5 rounded-lg border border-amber-400/50 px-4 py-2 text-sm font-semibold text-amber-400 transition-colors hover:bg-amber-400/10 sm:w-auto"
+              >
+                <Crown className="h-4 w-4" /> {t("profile.upgradePremiumBtn")}
+              </Link>
             )}
           </div>
         </div>

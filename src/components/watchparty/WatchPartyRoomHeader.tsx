@@ -24,7 +24,6 @@ export function WatchPartyRoomHeader({
   onLeave,
 }: Props) {
   const { t } = useTranslation();
-
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
       <Button variant="ghost" size="sm" asChild className="text-netflix-muted hover:text-white">

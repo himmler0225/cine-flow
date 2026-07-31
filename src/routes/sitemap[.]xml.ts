@@ -9,9 +9,6 @@ interface SitemapEntry {
   priority?: string;
 }
 
-// Các trang tĩnh + thể loại / quốc gia / năm phổ biến.
-// Trang chi tiết phim (/movie/$slug) sinh theo nội dung từ API nên được crawler
-// tự khám phá qua liên kết nội bộ.
 const staticEntries: SitemapEntry[] = [{ path: "/", changefreq: "daily", priority: "1.0" }];
 
 const genreSlugs = [
@@ -60,7 +57,6 @@ export const Route = createFileRoute("/sitemap.xml")({
         for (let y = currentYear; y >= currentYear - 10; y--) {
           years.push({ path: `/year/${y}`, changefreq: "weekly", priority: "0.5" });
         }
-
         const entries: SitemapEntry[] = [
           ...staticEntries,
           ...genreSlugs.map((s) => ({
@@ -75,7 +71,6 @@ export const Route = createFileRoute("/sitemap.xml")({
           })),
           ...years,
         ];
-
         const urls = entries.map((e) =>
           [
             `  <url>`,
@@ -87,14 +82,12 @@ export const Route = createFileRoute("/sitemap.xml")({
             .filter(Boolean)
             .join("\n"),
         );
-
         const xml = [
           `<?xml version="1.0" encoding="UTF-8"?>`,
           `<urlset xmlns="${EXTERNAL_URLS.sitemapNamespace}">`,
           ...urls,
           `</urlset>`,
         ].join("\n");
-
         return new Response(xml, {
           headers: {
             "Content-Type": "application/xml",

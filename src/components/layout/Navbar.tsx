@@ -13,6 +13,7 @@ import { useNavbarUiStore } from "@/components/layout/store/navbarUiStore";
 const SearchModal = lazy(() =>
   import("@/components/search/SearchModal").then((m) => ({ default: m.SearchModal })),
 );
+
 const JoinRoomModal = lazy(() =>
   import("@/components/watchparty/JoinRoomModal").then((m) => ({ default: m.JoinRoomModal })),
 );
@@ -22,7 +23,6 @@ export function Navbar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const requestAuth = useAuthStore((s) => s.requestAuth);
-
   const scrolled = useNavbarUiStore((s) => s.scrolled);
   const openSearch = useNavbarUiStore((s) => s.openSearch);
   const openJoin = useNavbarUiStore((s) => s.openJoin);
@@ -31,14 +31,12 @@ export function Navbar() {
   const setOpenSearch = useNavbarUiStore((s) => s.setOpenSearch);
   const setOpenJoin = useNavbarUiStore((s) => s.setOpenJoin);
   const setOpenDrawer = useNavbarUiStore((s) => s.setOpenDrawer);
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [setScrolled]);
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -49,7 +47,6 @@ export function Navbar() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [setOpenSearch]);
-
   return (
     <>
       <header

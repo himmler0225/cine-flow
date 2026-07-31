@@ -8,7 +8,6 @@ export const MOVIE_TYPES = {
   PHIM_LONG_TIENG: "phim-long-tieng",
 } as const;
 
-/** Map API movie type → slug danh sách phim liên quan. */
 export const RELATED_TYPE_MAP: Record<string, string> = {
   single: MOVIE_TYPES.PHIM_LE,
   series: MOVIE_TYPES.PHIM_BO,
@@ -16,7 +15,11 @@ export const RELATED_TYPE_MAP: Record<string, string> = {
   tvshows: MOVIE_TYPES.TV_SHOWS,
 };
 
-export type HomeRowDef = { key: string; titleKey: string; type?: string };
+export type HomeRowDef = {
+  key: string;
+  titleKey: string;
+  type?: string;
+};
 
 export function getHomeRows(): HomeRowDef[] {
   return [

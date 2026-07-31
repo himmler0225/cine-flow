@@ -2,6 +2,18 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { MovieListItem } from "@/types/movie";
 import { setEpisodeSnapshot } from "@/utils/episodeSnapshots";
+import { STORAGE_KEYS, LEGACY_STORAGE_KEYS } from "@/constants/storage";
+
+function migratePersistName(next: string, legacy: string | null) {
+  if (typeof window === "undefined" || !legacy) return;
+  if (localStorage.getItem(next) != null) return;
+  const old = localStorage.getItem(legacy);
+  if (old == null) return;
+  localStorage.setItem(next, old);
+  localStorage.removeItem(legacy);
+}
+
+migratePersistName(STORAGE_KEYS.favorites, LEGACY_STORAGE_KEYS.favorites);
 
 interface FavState {
   favorites: MovieListItem[];
@@ -31,6 +43,6 @@ export const useFavoriteStore = create<FavState>()(
       has: (slug) => get().favorites.some((f) => f.slug === slug),
       clearAll: () => set({ favorites: [] }),
     }),
-    { name: "kk-favorites" },
+    { name: STORAGE_KEYS.favorites },
   ),
 );

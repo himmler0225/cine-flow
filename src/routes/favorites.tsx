@@ -26,7 +26,6 @@ function FavoritesPage() {
     const seen = new Set<string>();
     return history.filter((h) => (seen.has(h.movie_slug) ? false : (seen.add(h.movie_slug), true)));
   }, [history]);
-
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <h1 className="mb-2 px-4 text-2xl font-bold text-white md:px-12 md:text-3xl">

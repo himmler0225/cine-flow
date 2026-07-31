@@ -21,7 +21,6 @@ export class MovieNotFoundError extends Error {
   }
 }
 
-/** Every aggregator list endpoint shares this envelope — normalize them all the same way. */
 export function toListResult(envelope: AggregatorEnvelope<MovieListItem[]>): MovieListResult {
   return {
     items: envelope.data ?? [],

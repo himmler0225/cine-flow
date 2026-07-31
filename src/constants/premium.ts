@@ -1,13 +1,14 @@
 import { t } from "@/lib/i18n";
+import { ROLE } from "@/constants/roles";
 
-export const PREMIUM_PLAN = "premium";
+export const PREMIUM_PLAN = ROLE.PREMIUM;
 
 export function getPremiumFeatures(): string[] {
   return [
     t("premium.features.watchParty12h"),
     t("premium.features.privatePin"),
     t("premium.features.badge"),
-    t("premium.features.noAds"),
+    t("premium.features.skipAds"),
   ];
 }
 
@@ -16,7 +17,6 @@ export function getFreeFeatures(): string[] {
     t("premium.features.unlimited"),
     t("premium.features.watchParty6h"),
     t("premium.features.favoritesHistory"),
-    t("premium.features.aiKira"),
   ];
 }
 

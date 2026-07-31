@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { movieService } from "@/services/movies";
+import { moviesApi } from "@/services/movies";
 import { queryKeys } from "@/constants/queryKeys";
 import { useWatchHistory } from "@/hooks/user/useWatchHistory";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -34,26 +34,21 @@ function toSuggestion(m: MovieListItem, source: SearchSuggestion["source"]): Sea
 export function useSearchSuggestions(enabled: boolean) {
   const { favoritesList } = useFavorites();
   const { history } = useWatchHistory();
-
   const { data: trending } = useQuery({
     queryKey: queryKeys.movies.new(1),
     enabled,
     staleTime: CACHE_TTL.fiveMinutes,
-    queryFn: () => movieService.getNewMovies(1),
+    queryFn: () => moviesApi.getNewMovies(1),
   });
-
   const recentSearches = getRecentSearches();
-
   const suggestions = (() => {
     const seen = new Set<string>();
     const out: SearchSuggestion[] = [];
-
     const push = (item: SearchSuggestion) => {
       if (seen.has(item.slug)) return;
       seen.add(item.slug);
       out.push(item);
     };
-
     history.slice(0, 6).forEach((h) =>
       push({
         slug: h.movie_slug,
@@ -62,13 +57,9 @@ export function useSearchSuggestions(enabled: boolean) {
         source: "history",
       }),
     );
-
     favoritesList.slice(0, 6).forEach((f) => push(toSuggestion(f, "favorite")));
-
     (trending?.items ?? []).slice(0, 6).forEach((m) => push(toSuggestion(m, "trending")));
-
     return out;
   })();
-
   return { suggestions, recentSearches };
 }

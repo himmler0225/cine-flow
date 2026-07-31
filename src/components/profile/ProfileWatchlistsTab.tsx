@@ -5,7 +5,7 @@ import { ListPlus, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useWatchlistStore } from "@/store/watchlistStore";
-import { movieService } from "@/services/movies";
+import { moviesApi } from "@/services/movies";
 import { queryKeys } from "@/constants/queryKeys";
 import { CACHE_TTL } from "@/constants/timing";
 import { MoviePosterImg } from "@/components/movie/MoviePosterImg";
@@ -18,18 +18,15 @@ export function ProfileWatchlistsTab() {
   const removeFromList = useWatchlistStore((s) => s.removeFromList);
   const [newName, setNewName] = useState("");
   const [activeId, setActiveId] = useState(lists[0]?.id ?? "default");
-
   const active = lists.find((l) => l.id === activeId) ?? lists[0];
   const slugs = active?.slugs ?? [];
-
   const movies = useQueries({
     queries: slugs.map((slug) => ({
       queryKey: queryKeys.movies.detail(slug),
-      queryFn: () => movieService.getMovieDetail(slug),
+      queryFn: () => moviesApi.getMovieDetail(slug),
       staleTime: CACHE_TTL.fiveMinutes,
     })),
   });
-
   const handleCreate = () => {
     const name = newName.trim();
     if (!name) return;
@@ -38,13 +35,12 @@ export function ProfileWatchlistsTab() {
     setActiveId(id);
     toast.success(t("toast.listCreatedNamed", { name }));
   };
-
   if (lists.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
         <ListPlus className="h-16 w-16 text-netflix-red" />
         <h3 className="text-xl font-semibold text-white">{t("profile.noWatchlists")}</h3>
-        <p className="text-sm text-gray-400">{t("profile.noListsDesc")}</p>
+        <p className="text-sm text-netflix-muted">{t("profile.noListsDesc")}</p>
         <Link
           to="/"
           className="mt-3 rounded-lg bg-netflix-red px-5 py-2 text-sm font-semibold text-white hover:bg-red-700"
@@ -54,7 +50,6 @@ export function ProfileWatchlistsTab() {
       </div>
     );
   }
-
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       <aside className="lg:w-56 shrink-0">

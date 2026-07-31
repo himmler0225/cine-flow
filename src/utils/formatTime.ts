@@ -1,4 +1,3 @@
-/** Định dạng giây → M:SS hoặc H:MM:SS */
 export function formatTime(sec: number): string {
   if (!Number.isFinite(sec) || sec < 0) return "0:00";
   const total = Math.floor(sec);

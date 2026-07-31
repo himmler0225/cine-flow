@@ -6,7 +6,7 @@ import { MovieGrid } from "@/components/movie/MovieGrid";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { Pagination } from "@/components/filters/Pagination";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
-import { filterSearchSchema, optionalPage } from "@/lib/filterSearch";
+import { filterSearchSchema, optionalPage, hasActiveFilters } from "@/lib/filterSearch";
 import { buildListingHead } from "@/lib/seo/seo";
 import { t } from "@/lib/i18n";
 import { getMovieListLabel } from "@/constants/movieLists";
@@ -33,15 +33,11 @@ function ListPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const page = search.page ?? 1;
   const [isPending, startTransition] = useTransition();
-
   const { data, isFetching, isPlaceholderData } = useMoviesByTypePaged(slug, page, search);
-
   const items = data?.items ?? [];
   const totalPages = data?.pagination?.totalPages ?? 0;
   const title = useMemo(() => getMovieListLabel(slug), [slug]);
-
   useScrollToTopOnChange(page);
-
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <div className="px-4 md:px-12">
@@ -58,6 +54,10 @@ function ListPage() {
         <MovieGrid
           movies={items}
           isLoading={isFetching && !isPlaceholderData && items.length === 0}
+          hasFilters={hasActiveFilters(search)}
+          onClearFilters={() =>
+            startTransition(() => navigate({ search: { page: undefined }, replace: true }))
+          }
         />
       </div>
       <div className="px-4 md:px-12">

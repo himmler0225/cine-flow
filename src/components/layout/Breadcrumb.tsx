@@ -11,7 +11,7 @@ export function Breadcrumb({ items }: { items: Crumb[] }) {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="mb-4 flex flex-wrap items-center gap-1 text-sm text-gray-500"
+      className="mb-4 flex flex-wrap items-center gap-1 text-sm text-netflix-muted"
     >
       {items.map((item, idx) => {
         const isLast = idx === items.length - 1;
@@ -21,8 +21,7 @@ export function Breadcrumb({ items }: { items: Crumb[] }) {
             {item.to && !isLast ? (
               <Link
                 to={item.to as never}
-                // @ts-expect-error router params
-                params={item.params}
+                params={item.params as never}
                 className="transition-colors hover:text-white"
               >
                 {item.label}

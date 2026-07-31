@@ -15,7 +15,6 @@ interface Props {
 export function StatCard({ icon, label, value, change, loading, format }: Props) {
   const { t, i18n } = useTranslation();
   const [display, setDisplay] = useState(0);
-
   useEffect(() => {
     if (loading) return;
     let raf = 0;
@@ -30,13 +29,11 @@ export function StatCard({ icon, label, value, change, loading, format }: Props)
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [value, loading]);
-
   const locale = getIntlLocale(i18n.language);
   const fmt = format ?? ((n: number) => n.toLocaleString(locale));
   const trend = change == null ? 0 : change;
   const trendColor = trend > 0 ? "text-emerald-400" : trend < 0 ? "text-red-400" : "text-zinc-500";
   const TrendIcon = trend > 0 ? ArrowUp : trend < 0 ? ArrowDown : Minus;
-
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.05]">
       <div className="mb-3 flex items-center justify-between">

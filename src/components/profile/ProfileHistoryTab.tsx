@@ -15,13 +15,11 @@ export function ProfileHistoryTab() {
   const { history, deleteItem, clearAll: clearWatchHistory } = useWatchHistory();
   const [q, setQ] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
-
   const entries = useMemo(() => {
     if (!q.trim()) return history;
     const s = q.toLowerCase();
     return history.filter((e) => e.movie_name.toLowerCase().includes(s));
   }, [history, q]);
-
   const groups = useMemo(() => {
     const g: Record<string, typeof entries> = {};
     entries.forEach((e) => {
@@ -38,19 +36,17 @@ export function ProfileHistoryTab() {
     });
     return g;
   }, [entries, t]);
-
   const clearAll = async () => {
     await clearWatchHistory();
     setConfirmClear(false);
     toast.success(t("toast.historyCleared"));
   };
-
   if (history.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <Clock className="h-16 w-16 text-gray-500" />
+        <Clock className="h-16 w-16 text-netflix-muted" />
         <h3 className="text-xl font-semibold text-white">{t("profile.noHistory")}</h3>
-        <p className="text-sm text-gray-400">{t("profile.historyEmptyDesc")}</p>
+        <p className="text-sm text-netflix-muted">{t("profile.historyEmptyDesc")}</p>
         <Link
           to="/"
           className="mt-3 rounded-lg bg-netflix-red px-5 py-2 text-sm font-semibold text-white hover:bg-red-700"
@@ -60,21 +56,20 @@ export function ProfileHistoryTab() {
       </div>
     );
   }
-
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-netflix-muted">
           {t("profile.episodesWatched", { count: history.length })}
         </p>
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-netflix-muted" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={t("profile.searchMovies")}
-              className="rounded-md border border-gray-700 bg-gray-900 py-1.5 pl-8 pr-3 text-sm text-white"
+              className="rounded-md border border-white/10 bg-netflix-dark py-1.5 pl-8 pr-3 text-sm text-white"
             />
           </div>
           <button
@@ -89,7 +84,7 @@ export function ProfileHistoryTab() {
       <div className="space-y-6">
         {Object.entries(groups).map(([label, items]) => (
           <div key={label}>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-netflix-muted">
               — {label} —
             </h3>
             <ul className="space-y-2">
@@ -99,7 +94,7 @@ export function ProfileHistoryTab() {
                 return (
                   <li
                     key={`${e.movie_slug}-${e.episode_name}`}
-                    className="flex items-center gap-3 rounded-lg border border-gray-800 bg-black/30 p-3"
+                    className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/30 p-3"
                   >
                     <Link to="/movie/$slug" params={{ slug: e.movie_slug }} className="shrink-0">
                       <MoviePosterImg
@@ -117,8 +112,8 @@ export function ProfileHistoryTab() {
                       >
                         {e.movie_name}
                       </Link>
-                      <p className="text-xs text-gray-400">{e.episode_name}</p>
-                      <div className="mt-2 h-[3px] w-full overflow-hidden rounded bg-gray-800">
+                      <p className="text-xs text-netflix-muted">{e.episode_name}</p>
+                      <div className="mt-2 h-[3px] w-full overflow-hidden rounded bg-white/10">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
@@ -126,7 +121,7 @@ export function ProfileHistoryTab() {
                           className="h-full bg-netflix-red"
                         />
                       </div>
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-netflix-muted">
                         {t("profile.atTime", {
                           time: format(new Date(e.watched_at), "HH:mm"),
                         })}
@@ -142,7 +137,7 @@ export function ProfileHistoryTab() {
                     </Link>
                     <button
                       onClick={() => void deleteItem(e.movie_slug, e.episode_name)}
-                      className="rounded-md p-2 text-gray-400 hover:bg-red-500/10 hover:text-red-400"
+                      className="rounded-md p-2 text-netflix-muted hover:bg-red-500/10 hover:text-red-400"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

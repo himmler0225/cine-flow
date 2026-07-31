@@ -9,7 +9,6 @@ interface Props {
 
 export function MovieRowError({ title, message, onRetry }: Props) {
   const { t } = useTranslation();
-
   return (
     <section className="py-4">
       <div className="mb-3 flex items-center justify-between px-4 md:px-12">

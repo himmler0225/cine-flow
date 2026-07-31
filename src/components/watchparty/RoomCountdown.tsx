@@ -21,6 +21,7 @@ export function RoomCountdown({ expiresAt }: { expiresAt: string }) {
 function diff(iso: string) {
   return Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 1000));
 }
+
 function fmt(s: number) {
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);

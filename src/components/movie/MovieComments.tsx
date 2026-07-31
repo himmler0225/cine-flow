@@ -10,7 +10,6 @@ import { getUserInitial } from "@/lib/userDisplay";
 interface MovieCommentsProps {
   slug: string;
   movieName: string;
-  /** Khi set — chỉ hiện & gửi bình luận cho tập này */
   episodeName?: string | null;
   episodeOptions?: string[];
   className?: string;
@@ -26,8 +25,8 @@ export function MovieComments({
   const { t, i18n } = useTranslation();
   const [content, setContent] = useState("");
   const [spoiler, setSpoiler] = useState(false);
+  const [revealedSpoilers, setRevealedSpoilers] = useState<Set<string>>(() => new Set());
   const [episodeFilter, setEpisodeFilter] = useState<string | null>(episodeName ?? null);
-
   const activeEpisode = episodeName ?? episodeFilter;
   const {
     data: allComments = [],
@@ -37,7 +36,6 @@ export function MovieComments({
   } = useComments(slug, {
     episodeName: activeEpisode,
   });
-
   const comments = useMemo(() => {
     if (!activeEpisode) return allComments;
     if (episodeName) {
@@ -45,11 +43,9 @@ export function MovieComments({
     }
     return allComments.filter((c) => !c.episode_name || c.episode_name === activeEpisode);
   }, [allComments, activeEpisode, episodeName]);
-
   const placeholder = activeEpisode
     ? t("movie.commentPlaceholderEpisode", { episode: activeEpisode, movie: movieName })
     : t("movie.commentPlaceholderMovie", { movie: movieName });
-
   const submit = async () => {
     const text = content.trim();
     if (text.length < 2) {
@@ -66,7 +62,6 @@ export function MovieComments({
       toast.error((e as Error).message || t("toast.commentFailed"));
     }
   };
-
   return (
     <div className={cn("space-y-4", className)}>
       {episodeOptions && episodeOptions.length > 0 && !episodeName && (
@@ -175,14 +170,28 @@ export function MovieComments({
                       </span>
                     )}
                   </div>
-                  <p
-                    className={cn(
-                      "mt-1 text-sm text-netflix-text/90",
-                      c.is_spoiler && "blur-sm transition-[filter] hover:blur-none",
-                    )}
-                  >
-                    {c.content}
-                  </p>
+                  {c.is_spoiler && !revealedSpoilers.has(c.id) ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setRevealedSpoilers((prev) => {
+                          const next = new Set(prev);
+                          next.add(c.id);
+                          return next;
+                        })
+                      }
+                      className="group relative mt-1 w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-netflix-red"
+                    >
+                      <p className="select-none text-sm text-netflix-text/90 blur-sm" aria-hidden>
+                        {c.content}
+                      </p>
+                      <span className="absolute inset-0 flex items-center justify-center rounded-md bg-black/40 text-xs font-medium text-white backdrop-blur-[1px] transition-colors group-hover:bg-black/50">
+                        {t("movie.revealSpoiler")}
+                      </span>
+                    </button>
+                  ) : (
+                    <p className="mt-1 text-sm text-netflix-text/90">{c.content}</p>
+                  )}
                 </div>
               </div>
             </li>

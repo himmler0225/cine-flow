@@ -13,12 +13,11 @@ type Props = {
 
 export function WatchPartyMobileChat({ open, onOpenChange, messageCount, chatPanel }: Props) {
   const { t } = useTranslation();
-
   return (
     <>
       <Button
         onClick={() => onOpenChange(true)}
-        className="fixed bottom-5 right-5 z-40 rounded-full bg-netflix-red px-4 py-3 shadow-xl shadow-netflix-red/40 lg:hidden"
+        className="fixed bottom-5 left-5 z-40 rounded-full bg-netflix-red px-4 py-3 shadow-xl shadow-netflix-red/40 lg:hidden"
       >
         <MessageSquare className="h-4 w-4" /> {t("watchparty.chat")}
         {messageCount > 0 && (

@@ -21,12 +21,10 @@ export function useSyncedVideoEvents(
 ) {
   const { lastSyncRef, seekingFromSyncRef } = refs;
   const { onPlay, onPause, onSeek } = handlers;
-
   useEffect(() => {
     if (useIframe) return;
     const v = videoRef.current;
     if (!v) return;
-
     const handlePlay = () => {
       if (seekingFromSyncRef.current) return;
       onPlay?.(v.currentTime);
@@ -42,7 +40,6 @@ export function useSyncedVideoEvents(
       lastSyncRef.current = now;
       onSeek?.(v.currentTime);
     };
-
     v.addEventListener("play", handlePlay);
     v.addEventListener("pause", handlePause);
     v.addEventListener("seeked", handleSeeked);
@@ -57,7 +54,10 @@ export function useSyncedVideoEvents(
 export function useSyncedIframeEvents(
   iframeRef: React.RefObject<HTMLIFrameElement | null>,
   useIframe: boolean,
-  iframeInfo: { provider: IframeProvider; supportsAuto: boolean } | null,
+  iframeInfo: {
+    provider: IframeProvider;
+    supportsAuto: boolean;
+  } | null,
   refs: SyncRefs,
   handlers: {
     onPlay?: (t: number) => void;
@@ -67,7 +67,6 @@ export function useSyncedIframeEvents(
 ) {
   const { lastSyncRef, lastIframeTimeRef, iframePausedRef } = refs;
   const { onPlay, onPause, onSeek } = handlers;
-
   useEffect(() => {
     if (!useIframe || !iframeInfo || !iframeInfo.supportsAuto) return;
     const unsub = subscribeEvents(iframeRef.current, iframeInfo.provider, {
@@ -110,7 +109,10 @@ export function useSyncedIframeEvents(
 }
 
 export function useSyncedProviderReady(
-  iframeInfo: { provider: IframeProvider; supportsAuto: boolean } | null,
+  iframeInfo: {
+    provider: IframeProvider;
+    supportsAuto: boolean;
+  } | null,
   onProviderReady?: SyncedPlayerProps["onProviderReady"],
 ) {
   useEffect(() => {
@@ -133,7 +135,10 @@ export function playVideoElement(video: HTMLVideoElement | null) {
 
 export function createSyncedPlayerHandle(opts: {
   useIframe: boolean;
-  iframeInfo: { provider: IframeProvider; supportsAuto: boolean } | null;
+  iframeInfo: {
+    provider: IframeProvider;
+    supportsAuto: boolean;
+  } | null;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
   refs: SyncRefs;
@@ -141,7 +146,6 @@ export function createSyncedPlayerHandle(opts: {
   const { useIframe, iframeInfo, videoRef, iframeRef, refs } = opts;
   const { seekingFromSyncRef, lastIframeTimeRef, iframePausedRef } = refs;
   const provider = iframeInfo?.provider ?? "generic";
-
   return {
     play: () => {
       if (useIframe) {

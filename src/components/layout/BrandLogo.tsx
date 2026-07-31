@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 
 const BRAND_NAME = "Cine-Flow";
 
-/** Icon: khối phim bo tròn đỏ + lỗ phim + nút play trắng */
 function BrandMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 48 48" role="img" aria-hidden className={cn("w-auto shrink-0", className)}>
@@ -26,13 +25,9 @@ function BrandMark({ className }: { className?: string }) {
 
 type BrandLogoProps = {
   className?: string;
-  /** Chiều cao icon, vd h-7 / h-9 / h-12 */
   imgClassName?: string;
-  /** Cỡ chữ wordmark, vd text-xl / text-3xl */
   textClassName?: string;
-  /** Bọc trong Link về trang chủ (mặc định true) */
   linked?: boolean;
-  /** Nhãn accessibility */
   alt?: string;
 };
 
@@ -57,9 +52,7 @@ export function BrandLogo({
       </span>
     </span>
   );
-
   if (!linked) return content;
-
   return (
     <Link to="/" className="min-w-0 shrink" aria-label={alt}>
       {content}

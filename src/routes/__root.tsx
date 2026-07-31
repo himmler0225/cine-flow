@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  defaultShouldDehydrateQuery,
+} from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -14,22 +18,23 @@ import {
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Toaster } from "sonner";
-
 import appCss from "../styles.css?url";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { TopProgress } from "@/components/layout/TopProgress";
 import { ContinueWatchingBar } from "@/components/movie/ContinueWatchingBar";
-import { AiAssistantModal } from "@/features/ai-chat/ui/AiAssistantModal";
 import { useWatchlistSync } from "@/hooks/useWatchlistSync";
 import { I18nProvider } from "@/components/common/I18nProvider";
 import { registerAuthNavigator } from "@/lib/auth/authNavigation";
-import { buildLoginRedirect, isPublicAuthPath } from "@/lib/auth/authRoutes";
+import { buildLoginRedirect, isPublicAuthPath, isPublicPath } from "@/lib/auth/authRoutes";
 import { useAuthStore } from "@/store/authStore";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import i18n, { t } from "@/lib/i18n";
 import { EXTERNAL_URLS, MOVIE_IMAGE_ORIGINS } from "@/constants/urls";
 import { CACHE_TTL } from "@/constants/timing";
+import { STORAGE_KEYS } from "@/constants/storage";
+import { setAppQueryClient } from "@/lib/queryClientHolder";
+import { analyticsApi, pageTypeFromPath } from "@/services/platform/analytics.service";
 
 function NotFoundComponent() {
   const { t } = useTranslation();
@@ -81,7 +86,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -91,7 +98,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "YKYsmUTsp9tDWb_awzoJ_SItaHdMmtEMtJ5c6mu8PyA",
       },
       { title: t("seo.defaultTitle") },
-
       {
         name: "description",
         content: t("seo.defaultDescription"),
@@ -161,13 +167,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function LangShell({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState(() => (i18n.language?.startsWith("en") ? "en" : "vi"));
-
   useEffect(() => {
     const onChange = (lng: string) => setLang(lng.startsWith("en") ? "en" : "vi");
     i18n.on("languageChanged", onChange);
     return () => i18n.off("languageChanged", onChange);
   }, []);
-
   return (
     <html lang={lang}>
       <head>
@@ -190,11 +194,12 @@ function RootComponent() {
   const initialize = useAuthStore((state) => state.initialize);
   const authLoading = useAuthStore((state) => state.isLoading);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
+  useEffect(() => {
+    setAppQueryClient(queryClient);
+  }, [queryClient]);
   useEffect(() => {
     void import("@/lib/envCheck").then((m) => m.runStartupEnvCheck());
     void initialize();
-    // Persist React Query cache vào localStorage để lần sau mở app có data ngay
     let cleanup: (() => void) | undefined;
     (async () => {
       if (typeof window === "undefined") return;
@@ -204,14 +209,19 @@ function RootComponent() {
       ]);
       const persister = createSyncStoragePersister({
         storage: window.localStorage,
-        key: "kkflix-rq-cache",
+        key: STORAGE_KEYS.reactQueryCache,
         throttleTime: 1000,
       });
       const [unsub] = persistQueryClient({
         queryClient,
         persister,
         maxAge: CACHE_TTL.day,
-        buster: "v2",
+        buster: "v4",
+        dehydrateOptions: {
+          shouldDehydrateQuery: (query) =>
+            defaultShouldDehydrateQuery(query) &&
+            !(query.queryKey[0] === "favorites" && query.queryKey[1] === "slugs"),
+        },
       });
       cleanup = unsub;
     })();
@@ -223,19 +233,21 @@ function RootComponent() {
   const navigate = useNavigate();
   const isAdmin = location.pathname.startsWith("/admin");
   const isAuthRoute = isPublicAuthPath(location.pathname);
-  const authBlocked = !isAuthRoute && authLoading;
-  const needsLogin = !isAuthRoute && !authLoading && !isAuthenticated;
+  const isPublic = isPublicPath(location.pathname);
+  const authBlocked = !isPublic && authLoading;
+  const needsLogin = !isPublic && !authLoading && !isAuthenticated;
   const hideProtectedShell = authBlocked || needsLogin;
   const loginRedirect = needsLogin
     ? buildLoginRedirect(location.pathname, location.searchStr)
     : undefined;
-
   useEffect(() => {
     registerAuthNavigator((opts) => {
       navigate({ to: opts.to, search: opts.search });
     });
   }, [navigate]);
-
+  useEffect(() => {
+    void analyticsApi.trackPageView(pageTypeFromPath(location.pathname));
+  }, [location.pathname]);
   useWatchlistSync();
   return (
     <QueryClientProvider client={queryClient}>
@@ -256,7 +268,6 @@ function RootComponent() {
           )}
         </main>
         {!isAdmin && !isAuthRoute && !hideProtectedShell && <ContinueWatchingBar />}
-        {!isAdmin && !isAuthRoute && !hideProtectedShell && <AiAssistantModal />}
         {!isAdmin && !isAuthRoute && !hideProtectedShell && <Footer />}
 
         <Toaster position="bottom-right" richColors theme="dark" duration={3000} />

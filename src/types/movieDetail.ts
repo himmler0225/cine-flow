@@ -7,7 +7,6 @@ export interface MovieDetailTabsProps {
   episodes: DetailResponse["episodes"];
   related?: MovieListItem[];
   relatedLoading?: boolean;
-  /** Tiến độ từng tập — dùng để hiện progress/check trên EpisodeList */
   progressByEpisode?: Record<string, EpisodeProgressInfo>;
 }
 

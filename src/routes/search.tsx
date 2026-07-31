@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Search as SearchIcon } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { useSearch } from "@/hooks/useSearch";
+import { ListingEmpty } from "@/components/movie/ListingEmpty";
 import { MovieGrid } from "@/components/movie/MovieGrid";
 
 const schema = z.object({ q: fallback(z.string(), "").default("") });
@@ -24,7 +25,6 @@ function SearchPage() {
   const navigate = useNavigate();
   const [input, setInput] = useState(q);
   const { data, fetchNextPage, hasNextPage, isFetching, debounced } = useSearch(input);
-
   useEffect(() => {
     if (debounced !== q) {
       navigate({
@@ -34,7 +34,6 @@ function SearchPage() {
       });
     }
   }, [debounced, q, navigate]);
-
   const sentinel = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinel.current;
@@ -50,9 +49,7 @@ function SearchPage() {
     obs.observe(el);
     return () => obs.disconnect();
   }, [hasNextPage, isFetching, fetchNextPage]);
-
   const items = data?.pages.flatMap((p) => p.items ?? []) ?? [];
-
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <div className="px-4 md:px-12">
@@ -69,10 +66,23 @@ function SearchPage() {
       </div>
 
       {debounced.length < 2 ? (
-        <p className="px-4 text-netflix-muted md:px-12">{tr("common.minChars")}</p>
+        <ListingEmpty
+          title={tr("common.minChars")}
+          description={tr("search.placeholderShort")}
+          showGenreChips
+        />
       ) : (
         <>
-          <MovieGrid movies={items} isLoading={isFetching && items.length === 0} />
+          <MovieGrid
+            movies={items}
+            isLoading={isFetching && items.length === 0}
+            empty={
+              <ListingEmpty
+                title={tr("search.noResults", { q: debounced })}
+                description={tr("listing.emptyDescription")}
+              />
+            }
+          />
           <div ref={sentinel} className="h-12" />
           {isFetching && items.length > 0 && (
             <p className="text-center text-sm text-netflix-muted">{tr("common.loading")}</p>

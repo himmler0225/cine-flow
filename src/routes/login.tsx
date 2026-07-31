@@ -6,6 +6,7 @@ import { useAuthFormStore } from "@/components/auth/store/authFormStore";
 import {
   AuthBrand,
   AuthCard,
+  AuthCinematicFrame,
   AuthCheckboxField,
   AuthDivider,
   AuthError,
@@ -43,7 +44,6 @@ function LoginPage() {
   const navigate = useNavigate();
   const { t: tr } = useTranslation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
   const tab = useAuthFormStore((state) => state.tab);
   const loading = useAuthFormStore((state) => state.loading);
   const apiError = useAuthFormStore((state) => state.apiError);
@@ -60,18 +60,15 @@ function LoginPage() {
   const submitRegister = useAuthFormStore((state) => state.submitRegister);
   const submitGoogle = useAuthFormStore((state) => state.submitGoogle);
   const backToLoginAfterSignup = useAuthFormStore((state) => state.backToLoginAfterSignup);
-
   useEffect(() => {
     syncTab(searchTab ?? "login");
     resetTransient();
   }, [resetTransient, searchTab, syncTab]);
-
   useEffect(() => {
     if (!isAuthenticated) return;
     const target = redirect?.startsWith("/") ? redirect : "/";
     void navigate({ to: target, replace: true });
   }, [isAuthenticated, navigate, redirect]);
-
   const switchTab = (next: "login" | "register") => {
     setTab(next);
     navigate({
@@ -83,14 +80,9 @@ function LoginPage() {
       replace: true,
     });
   };
-
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-netflix-black px-4 py-12">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(229,9,20,0.16),transparent_48%)]"
-        aria-hidden
-      />
-      <AuthCard className="relative z-10 bg-netflix-dark/95">
+    <AuthCinematicFrame>
+      <AuthCard>
         <AuthBrand />
 
         <div
@@ -107,9 +99,7 @@ function LoginPage() {
               onClick={() => switchTab(value)}
               className={cn(
                 "rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-netflix-red",
-                tab === value
-                  ? "bg-netflix-red text-white"
-                  : "text-muted-foreground hover:text-white",
+                tab === value ? "bg-netflix-red text-white" : "text-netflix-muted hover:text-white",
               )}
             >
               {tr(`auth.${value}`)}
@@ -249,7 +239,7 @@ function LoginPage() {
           </form>
         )}
       </AuthCard>
-    </div>
+    </AuthCinematicFrame>
   );
 }
 
@@ -258,7 +248,7 @@ function SignupSuccess({ email, onBack }: { email: string; onBack: () => void })
   return (
     <div className="space-y-4 text-center">
       <h1 className="text-xl font-semibold text-white">{tr("auth.checkEmail")}</h1>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-netflix-muted">
         {tr("auth.checkEmailDesc")} <strong className="text-white">{email}</strong>
       </p>
       <button

@@ -7,7 +7,6 @@ import {
 } from "@/constants/patterns";
 import { MOVIE_IMAGE_URLS } from "@/constants/urls";
 
-/** Kiểm tra chuỗi có phải URL/path ảnh hợp lệ (không phải tên phim). */
 export const isLikelyImageUrl = (url?: string | null): boolean => {
   if (!url?.trim()) return false;
   const u = url.trim();
@@ -18,7 +17,6 @@ export const isLikelyImageUrl = (url?: string | null): boolean => {
   return u.includes("/");
 };
 
-/** BE trả absolute URL; giữ fallback cho dữ liệu legacy (favorites cũ). */
 export const getImageUrl = (url?: string): string => {
   if (!url?.trim()) return "";
   const u = url.trim();
@@ -31,7 +29,6 @@ export const getImageUrl = (url?: string): string => {
   return MOVIE_IMAGE_URLS.kkphim + clean;
 };
 
-/** WebP proxy qua movie-aggregator-api (chỉ phimimg.com). */
 export const getImageWebp = (url?: string): string => {
   const abs = getImageUrl(url);
   if (!abs) return "";
@@ -41,10 +38,11 @@ export const getImageWebp = (url?: string): string => {
   return proxy.toString();
 };
 
-/** Ordered WebP → original candidates for a single raw image URL. */
 export const getImageCandidates = (
   url?: string | null,
-  options: { skipWebp?: boolean } = {},
+  options: {
+    skipWebp?: boolean;
+  } = {},
 ): string[] => {
   const orig = getImageUrl(url ?? undefined);
   if (!orig) return [];

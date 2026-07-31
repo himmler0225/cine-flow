@@ -22,12 +22,10 @@ export type ApiMutationResult<T = unknown> = {
   error: ApiErrorPayload | null;
 };
 
-type PlatformFetchOptions = RequestInit & { auth?: boolean };
+type PlatformFetchOptions = RequestInit & {
+  auth?: boolean;
+};
 
-/**
- * Authenticated JSON client for movie-aggregator platform routes (`/api/...`).
- * Preserves the previous fetch-based contract (method/body/auth/204/empty).
- */
 export async function platformFetch<T>(path: string, options?: PlatformFetchOptions): Promise<T> {
   const headers: Record<string, string> = {};
   if (options?.headers) {
@@ -36,11 +34,9 @@ export async function platformFetch<T>(path: string, options?: PlatformFetchOpti
       headers[key] = value;
     });
   }
-
   if (options?.body && !headers["Content-Type"] && !headers["content-type"]) {
     headers["Content-Type"] = "application/json";
   }
-
   try {
     const response = await movieApiClient.request<T>({
       url: path,
@@ -50,7 +46,6 @@ export async function platformFetch<T>(path: string, options?: PlatformFetchOpti
       signal: options?.signal ?? undefined,
       skipAuth: options?.auth === false,
     });
-
     if (response.status === 204) return undefined as T;
     if (response.data === "" || response.data === null || response.data === undefined) {
       return undefined as T;
@@ -67,9 +62,6 @@ export async function platformFetch<T>(path: string, options?: PlatformFetchOpti
   }
 }
 
-/**
- * Mutation helper for UI that still expects `{ error }` instead of thrown `PlatformApiError`.
- */
 export async function platformMutate(
   path: string,
   options?: PlatformFetchOptions,

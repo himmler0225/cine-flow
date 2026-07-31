@@ -9,25 +9,71 @@ export type PlayerUiState = {
   showSpeed: boolean;
   hasError: boolean;
   useEmbed: boolean;
+  forceEmbed: boolean;
   skipAds: boolean;
   adsSkipped: number;
 };
 
 export type PlayerUiAction =
-  | { type: "reset"; useEmbed: boolean }
-  | { type: "setPlaying"; playing: boolean }
-  | { type: "setMuted"; muted: boolean }
-  | { type: "setVolume"; volume: number }
-  | { type: "setProgress"; progress: number }
-  | { type: "setBuffered"; buffered: number }
-  | { type: "setDuration"; duration: number }
-  | { type: "setSpeed"; speed: number }
-  | { type: "toggleShowSpeed" }
-  | { type: "setShowSpeed"; showSpeed: boolean }
-  | { type: "setHasError"; hasError: boolean }
-  | { type: "setUseEmbed"; useEmbed: boolean }
-  | { type: "setSkipAds"; skipAds: boolean }
-  | { type: "incrementAdsSkipped"; count?: number };
+  | {
+      type: "reset";
+      useEmbed: boolean;
+    }
+  | {
+      type: "setPlaying";
+      playing: boolean;
+    }
+  | {
+      type: "setMuted";
+      muted: boolean;
+    }
+  | {
+      type: "setVolume";
+      volume: number;
+    }
+  | {
+      type: "setProgress";
+      progress: number;
+    }
+  | {
+      type: "setBuffered";
+      buffered: number;
+    }
+  | {
+      type: "setDuration";
+      duration: number;
+    }
+  | {
+      type: "setSpeed";
+      speed: number;
+    }
+  | {
+      type: "toggleShowSpeed";
+    }
+  | {
+      type: "setShowSpeed";
+      showSpeed: boolean;
+    }
+  | {
+      type: "setHasError";
+      hasError: boolean;
+    }
+  | {
+      type: "setUseEmbed";
+      useEmbed: boolean;
+    }
+  | {
+      type: "setForceEmbed";
+      forceEmbed: boolean;
+    }
+  | {
+      type: "setSkipAds";
+      skipAds: boolean;
+    }
+  | {
+      type: "incrementAdsSkipped";
+      count?: number;
+    };
 
 export function createInitialPlayerUi(useEmbed: boolean, skipAds: boolean): PlayerUiState {
   return {
@@ -41,6 +87,7 @@ export function createInitialPlayerUi(useEmbed: boolean, skipAds: boolean): Play
     showSpeed: false,
     hasError: false,
     useEmbed,
+    forceEmbed: false,
     skipAds,
     adsSkipped: 0,
   };
@@ -53,6 +100,7 @@ export function playerUiReducer(state: PlayerUiState, action: PlayerUiAction): P
         ...state,
         hasError: false,
         useEmbed: action.useEmbed,
+        forceEmbed: action.useEmbed ? state.forceEmbed : false,
         progress: 0,
         buffered: 0,
         duration: 0,
@@ -81,6 +129,13 @@ export function playerUiReducer(state: PlayerUiState, action: PlayerUiAction): P
       return { ...state, hasError: action.hasError };
     case "setUseEmbed":
       return { ...state, useEmbed: action.useEmbed };
+    case "setForceEmbed":
+      return {
+        ...state,
+        forceEmbed: action.forceEmbed,
+        useEmbed: action.forceEmbed ? true : state.useEmbed,
+        hasError: false,
+      };
     case "setSkipAds":
       return { ...state, skipAds: action.skipAds };
     case "incrementAdsSkipped":

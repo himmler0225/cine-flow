@@ -50,9 +50,7 @@ export function ConfirmModal({
       >
         <div className="mb-3 flex items-center gap-3">
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-full ${
-              danger ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"
-            }`}
+            className={`flex h-10 w-10 items-center justify-center rounded-full ${danger ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}
           >
             <AlertTriangle className="h-5 w-5" />
           </div>
@@ -71,9 +69,7 @@ export function ConfirmModal({
             ref={btnRef}
             onClick={onConfirm}
             disabled={loading}
-            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50 ${
-              danger ? "bg-red-600 hover:bg-red-500" : "bg-netflix-red hover:bg-netflix-red-hover"
-            }`}
+            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50 ${danger ? "bg-red-600 hover:bg-red-500" : "bg-netflix-red hover:bg-netflix-red-hover"}`}
           >
             {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {resolvedConfirm}

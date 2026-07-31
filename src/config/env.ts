@@ -16,9 +16,9 @@ const clientEnvSchema = z.object({
 });
 
 const rawMovieApiUrl = import.meta.env.VITE_MOVIE_API_URL?.trim();
+
 const rawSiteUrl = import.meta.env.VITE_SITE_URL?.trim();
 
-/** Client-safe Vite configuration; never add server secrets to this module. */
 export const clientEnv = Object.freeze({
   movieApiUrl: rawMovieApiUrl || DEFAULT_URLS.movieApi,
   siteUrl: rawSiteUrl || DEFAULT_URLS.site,
@@ -28,7 +28,6 @@ export const clientEnv = Object.freeze({
   isProduction: import.meta.env.PROD,
 });
 
-/** Validation result is exposed so the existing startup warning UI can report bad config. */
 export const clientEnvValidation = clientEnvSchema.safeParse({
   VITE_MOVIE_API_URL: rawMovieApiUrl,
   VITE_SITE_URL: rawSiteUrl,

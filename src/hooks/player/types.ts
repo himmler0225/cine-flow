@@ -5,6 +5,7 @@ export interface UseVideoPlayerOptions {
   onEnded?: () => void;
   onError?: () => void;
   onProgress?: (currentSec: number, durationSec: number) => void;
+  onLiveTime?: (currentSec: number, durationSec: number) => void;
   onResumeApplied?: (sec: number) => void;
   onNextEpisode?: () => void;
 }

@@ -12,7 +12,6 @@ export const Route = createFileRoute("/watchlist")({
 
 function WatchlistPage() {
   const { t } = useTranslation();
-
   return (
     <div className="bg-netflix-black pt-24 pb-4 md:pb-8">
       <div className="mx-auto max-w-6xl px-4 md:px-8">

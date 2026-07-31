@@ -7,4 +7,5 @@ export const chartTooltipStyle = {
 };
 
 export const chartGridStroke = "#27272a";
+
 export const chartAxisStroke = "#71717a";

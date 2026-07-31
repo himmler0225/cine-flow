@@ -21,12 +21,10 @@ export function ProfileOverviewTab() {
   const { history } = useWatchHistory();
   const userId = useAuthStore((s) => s.user?.id);
   const { data: favsAll = [] } = useFavoritesList(userId);
-
   const favs = useMemo<FavoriteRow[]>(
     () => [...favsAll].sort(compareFavoritesNewest).slice(0, 6),
     [favsAll],
   );
-
   const recent = useMemo(() => {
     const seen = new Set<string>();
     return history
@@ -37,7 +35,6 @@ export function ProfileOverviewTab() {
       })
       .slice(0, 6);
   }, [history]);
-
   return (
     <div className="space-y-10">
       <section>

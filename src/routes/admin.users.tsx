@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { getIntlLocale } from "@/lib/i18n";
 import { getTotalPages } from "@/utils/pagination";
 import { queryKeys } from "@/constants/queryKeys";
-import { updateUserRole } from "@/services/platform/admin/users.admin";
+import { adminUsersApi } from "@/services/platform/admin/users.admin";
 import { useAdminUserDetail, useAdminUsers } from "@/hooks/admin/useAdminUsers";
 import type { AdminProfileRow } from "@/types/admin";
 import { Section, SectionEmpty, SectionLoader } from "@/components/admin/Section";
@@ -15,6 +15,9 @@ import { AdminSelect } from "@/components/admin/AdminSelect";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
 import { SlidePanel } from "@/components/admin/SlidePanel";
 import { getUserInitial } from "@/lib/userDisplay";
+import { ROLE, isAdminRole, type AdminUserFilter } from "@/constants/roles";
+import { isPremiumPlan } from "@/constants/premium";
+import { ADMIN_PAGE_SIZE } from "@/constants/pagination";
 
 export const Route = createFileRoute("/admin/users")({
   component: UsersPage,
@@ -22,15 +25,13 @@ export const Route = createFileRoute("/admin/users")({
 
 type ProfileRow = AdminProfileRow;
 
-const PAGE_SIZE = 20;
-
 function UsersPage() {
   const { t, i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);
   const qc = useQueryClient();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"new" | "name">("new");
-  const [filter, setFilter] = useState<"all" | "free" | "premium" | "admin">("all");
+  const [filter, setFilter] = useState<AdminUserFilter>("all");
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [openUser, setOpenUser] = useState<ProfileRow | null>(null);
@@ -38,15 +39,13 @@ function UsersPage() {
     user: ProfileRow;
     action: "make-admin" | "remove-admin";
   } | null>(null);
-
   const { data, isLoading } = useAdminUsers({
     query,
     sort,
     filter,
     page,
-    pageSize: PAGE_SIZE,
+    pageSize: ADMIN_PAGE_SIZE,
   });
-
   const toggleAll = (checked: boolean) => {
     if (!data) return;
     setSelected(checked ? new Set(data.rows.map((r) => r.id)) : new Set());
@@ -57,7 +56,6 @@ function UsersPage() {
     else s.add(id);
     setSelected(s);
   };
-
   const exportCsv = () => {
     if (!data) return;
     const rows = data.rows.filter((r) => selected.has(r.id));
@@ -75,9 +73,7 @@ function UsersPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
-
-  const totalPages = getTotalPages(data?.total ?? 0, PAGE_SIZE);
-
+  const totalPages = getTotalPages(data?.total ?? 0, ADMIN_PAGE_SIZE);
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.users")}</h1>
@@ -114,8 +110,8 @@ function UsersPage() {
               options={[
                 { value: "all", label: t("admin.common.filterAll") },
                 { value: "free", label: t("admin.common.filterFree") },
-                { value: "premium", label: t("admin.common.filterPremium") },
-                { value: "admin", label: t("admin.common.filterAdmin") },
+                { value: ROLE.PREMIUM, label: t("admin.common.filterPremium") },
+                { value: ROLE.ADMIN, label: t("admin.common.filterAdmin") },
               ]}
             />
           </div>
@@ -157,7 +153,7 @@ function UsersPage() {
                       onAdminToggle={() =>
                         setConfirm({
                           user: u,
-                          action: u.role === "admin" ? "remove-admin" : "make-admin",
+                          action: isAdminRole(u.role) ? "remove-admin" : "make-admin",
                         })
                       }
                     />
@@ -220,9 +216,9 @@ function UsersPage() {
         onClose={() => setConfirm(null)}
         onConfirm={async () => {
           if (!confirm) return;
-          const { error } = await updateUserRole(
+          const { error } = await adminUsersApi.updateRole(
             confirm.user.id,
-            confirm.action === "make-admin" ? "admin" : "user",
+            confirm.action === "make-admin" ? ROLE.ADMIN : ROLE.USER,
           );
           if (error) toast.error(t("toast.adminUpdateFailed"), { description: error.message });
           else {
@@ -254,7 +250,7 @@ function UserRow({
   const { t, i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);
   const [menu, setMenu] = useState(false);
-  const isAdmin = user.role === "admin";
+  const isAdmin = isAdminRole(user.role);
   return (
     <tr className="border-b border-white/5 hover:bg-white/5">
       <td className="py-2.5">
@@ -291,7 +287,7 @@ function UserRow({
         )}
       </td>
       <td>
-        {user.plan === "premium" ? (
+        {isPremiumPlan(user.plan) ? (
           <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
             {t("admin.common.premium")}
           </span>
@@ -354,9 +350,7 @@ function UserDetail({ user, onClose }: { user: ProfileRow | null; onClose: () =>
   const locale = getIntlLocale(i18n.language);
   const [tab, setTab] = useState<"history" | "favorites" | "stats">("history");
   const userId = user?.id ?? "";
-
   const { history, favorites } = useAdminUserDetail(userId, tab);
-
   const stats = useMemo(() => {
     if (!history.data) return null;
     const unique = new Set(history.data.map((h) => h.movie_slug));
@@ -367,13 +361,11 @@ function UserDetail({ user, onClose }: { user: ProfileRow | null; onClose: () =>
       hours: Math.round((totalSec / 3600) * 10) / 10,
     };
   }, [history.data]);
-
   const tabs = [
     ["history", t("admin.users.tabHistory")] as const,
     ["favorites", t("admin.users.tabFavorites")] as const,
     ["stats", t("admin.users.tabStats")] as const,
   ];
-
   return (
     <SlidePanel
       open={!!user}

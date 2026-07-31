@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useGenres } from "@/hooks/useGenres";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/genre/")({
   head: () => ({
@@ -25,21 +26,31 @@ function AllGenres() {
           {tr("listing.allGenres")}
         </h1>
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="h-12 animate-pulse rounded-lg bg-gray-800/60" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {Array.from({ length: 15 }).map((_, i) => (
+              <div key={i} className="aspect-[16/10] animate-pulse rounded-xl bg-netflix-surface" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {(genres ?? []).map((g) => (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {(genres ?? []).map((g, i) => (
               <Link
                 key={g.slug}
                 to="/genre/$slug"
                 params={{ slug: g.slug }}
-                className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-center text-sm text-white transition-colors hover:border-netflix-red hover:bg-netflix-red/10"
+                className={cn(
+                  "group relative flex aspect-[16/10] items-end overflow-hidden rounded-xl border border-white/10 p-4 transition-transform hover:-translate-y-0.5",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-netflix-red",
+                  TILE_TONES[i % TILE_TONES.length],
+                )}
               >
-                {g.name}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
+                />
+                <span className="relative z-10 text-sm font-semibold text-white md:text-base">
+                  {g.name}
+                </span>
               </Link>
             ))}
           </div>
@@ -48,3 +59,12 @@ function AllGenres() {
     </div>
   );
 }
+
+const TILE_TONES = [
+  "bg-gradient-to-br from-netflix-red/40 to-netflix-surface",
+  "bg-gradient-to-br from-amber-700/35 to-netflix-surface",
+  "bg-gradient-to-br from-sky-800/40 to-netflix-surface",
+  "bg-gradient-to-br from-emerald-800/35 to-netflix-surface",
+  "bg-gradient-to-br from-rose-900/40 to-netflix-surface",
+  "bg-gradient-to-br from-stone-700/45 to-netflix-surface",
+] as const;

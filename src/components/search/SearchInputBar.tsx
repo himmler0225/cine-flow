@@ -12,7 +12,6 @@ export function SearchInputBar({ isFetching, onClose }: Props) {
   const { t } = useTranslation();
   const q = useSearchModalStore((s) => s.q);
   const setQ = useSearchModalStore((s) => s.setQ);
-
   return (
     <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
       <Search

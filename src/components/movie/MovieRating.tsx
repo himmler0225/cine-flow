@@ -16,9 +16,7 @@ export function MovieRating({ slug, compact }: MovieRatingProps) {
   const { average, count, userScore, rate, isSubmitting } = useMovieRating(slug);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [hover, setHover] = useState(0);
-
   const display = hover || userScore || 0;
-
   const handleRate = async (score: number) => {
     try {
       await rate(score);
@@ -29,7 +27,6 @@ export function MovieRating({ slug, compact }: MovieRatingProps) {
       }
     }
   };
-
   if (!isAuthenticated) {
     const rounded = Math.round(average);
     return (
@@ -53,7 +50,6 @@ export function MovieRating({ slug, compact }: MovieRatingProps) {
       </div>
     );
   }
-
   return (
     <div className={cn("flex flex-wrap items-center gap-2", compact && "gap-1.5")}>
       <div

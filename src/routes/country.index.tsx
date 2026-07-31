@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useCountries } from "@/hooks/useGenres";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/country/")({
   head: () => ({
@@ -27,21 +28,31 @@ function AllCountries() {
           {tr("listing.allCountries")}
         </h1>
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="h-12 animate-pulse rounded-lg bg-gray-800/60" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {Array.from({ length: 15 }).map((_, i) => (
+              <div key={i} className="aspect-[16/10] animate-pulse rounded-xl bg-netflix-surface" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {(countries ?? []).map((c) => (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {(countries ?? []).map((c, i) => (
               <Link
                 key={c.slug}
                 to="/country/$slug"
                 params={{ slug: c.slug }}
-                className="flex items-center justify-center rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white transition-colors hover:border-netflix-red hover:bg-netflix-red/10"
+                className={cn(
+                  "group relative flex aspect-[16/10] items-end overflow-hidden rounded-xl border border-white/10 p-4 transition-transform hover:-translate-y-0.5",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-netflix-red",
+                  TILE_TONES[i % TILE_TONES.length],
+                )}
               >
-                <span className="truncate">{c.name}</span>
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
+                />
+                <span className="relative z-10 truncate text-sm font-semibold text-white md:text-base">
+                  {c.name}
+                </span>
               </Link>
             ))}
           </div>
@@ -50,3 +61,12 @@ function AllCountries() {
     </div>
   );
 }
+
+const TILE_TONES = [
+  "bg-gradient-to-br from-netflix-red/35 to-netflix-surface",
+  "bg-gradient-to-br from-cyan-900/40 to-netflix-surface",
+  "bg-gradient-to-br from-orange-900/35 to-netflix-surface",
+  "bg-gradient-to-br from-teal-900/40 to-netflix-surface",
+  "bg-gradient-to-br from-lime-900/30 to-netflix-surface",
+  "bg-gradient-to-br from-stone-700/45 to-netflix-surface",
+] as const;

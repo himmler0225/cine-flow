@@ -14,7 +14,6 @@ export function usePlayerKeyboard(
     if (document.fullscreenElement) document.exitFullscreen();
     else el.requestFullscreen();
   };
-
   useEffect(() => {
     if (useEmbed) return;
     const onKey = (e: KeyboardEvent) => {
@@ -50,6 +49,5 @@ export function usePlayerKeyboard(
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [useEmbed, onNextEpisode, videoRef, dispatch]);
-
   return { toggleFullscreen };
 }

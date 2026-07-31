@@ -7,7 +7,6 @@ type Props = {
 
 export function WatchPartyClosedOverlay({ onBack }: Props) {
   const { t } = useTranslation();
-
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4">
       <div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#1a1a1a] p-6 text-center">

@@ -1,5 +1,3 @@
-/** Supabase row types shared across services and UI. */
-
 export interface Profile {
   id: string;
   username: string | null;

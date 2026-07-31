@@ -19,13 +19,10 @@ const LEGAL_LINKS = [
 
 export function Footer() {
   const { t } = useTranslation();
-
   return (
     <footer className="mt-8 border-t border-white/[0.06] bg-[#0a0a0a] md:mt-12">
       <div className="mx-auto max-w-7xl px-4 md:px-8 lg:px-12">
-        {/* Main grid */}
         <div className="grid gap-10 py-12 md:grid-cols-[2fr_1fr_1fr]">
-          {/* Brand column */}
           <div className="space-y-4">
             <BrandLogo imgClassName="h-9" textClassName="text-xl" />
             <p className="max-w-xs text-sm leading-relaxed text-white/50">
@@ -53,7 +50,6 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Navigation */}
           <div>
             <h4 className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/40">
               {t("footer.explore")}
@@ -72,7 +68,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Legal / Resources */}
           <div>
             <h4 className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/40">
               {t("footer.info")}
@@ -96,7 +91,6 @@ export function Footer() {
 
         <Separator className="bg-white/[0.06]" />
 
-        {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-3 py-5 text-xs text-white/30 md:flex-row">
           <p>{t("footer.copyright", { year: new Date().getFullYear() })}</p>
           <p className="flex items-center gap-1.5">

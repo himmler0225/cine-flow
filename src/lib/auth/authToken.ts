@@ -1,12 +1,36 @@
-const KEY = "kkflix_access_token";
+import { readStorageKey, writeStorageKey } from "@/constants/storage";
+
+let memoryAccessToken: string | null = null;
 
 export function getAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(KEY);
+  return memoryAccessToken;
 }
 
 export function setAccessToken(token: string | null): void {
-  if (typeof window === "undefined") return;
-  if (token) localStorage.setItem(KEY, token);
-  else localStorage.removeItem(KEY);
+  memoryAccessToken = token;
+  writeStorageKey("accessToken", null);
+}
+
+export function getRefreshToken(): string | null {
+  return readStorageKey("refreshToken");
+}
+
+export function setRefreshToken(token: string | null): void {
+  writeStorageKey("refreshToken", token);
+}
+
+export function clearAuthTokens(): void {
+  memoryAccessToken = null;
+  writeStorageKey("accessToken", null);
+  writeStorageKey("refreshToken", null);
+}
+
+export function applySessionTokens(session: {
+  access_token: string;
+  refresh_token?: string;
+}): void {
+  setAccessToken(session.access_token);
+  if (session.refresh_token) {
+    setRefreshToken(session.refresh_token);
+  }
 }

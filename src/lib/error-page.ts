@@ -5,7 +5,6 @@ export function renderErrorPage(): string {
   const message = t("errors.page.message");
   const retry = t("errors.page.retry");
   const goHome = t("errors.page.goHome");
-
   return `<!doctype html>
 <html lang="en">
   <head>

@@ -16,7 +16,6 @@ export function buildMovieDetailHead(slug: string, movie: MovieDetail | null | u
       links: [{ rel: "canonical", href: url }],
     };
   }
-
   const yearPart = movie.year ? ` (${movie.year})` : "";
   const title = t("seo.detailTitle", {
     name: movie.name,
@@ -31,7 +30,6 @@ export function buildMovieDetailHead(slug: string, movie: MovieDetail | null | u
       lang: movie.lang ?? "Vietsub",
     });
   const image = getImageUrl(movie.thumb_url || movie.poster_url);
-
   const primaryGenre = movie.category?.[0];
   const breadcrumb = {
     "@context": EXTERNAL_URLS.schemaContext,
@@ -51,7 +49,6 @@ export function buildMovieDetailHead(slug: string, movie: MovieDetail | null | u
         : [{ "@type": "ListItem", position: 2, name: movie.name, item: url }]),
     ],
   };
-
   const movieLd: Record<string, unknown> = {
     "@context": EXTERNAL_URLS.schemaContext,
     "@type": "Movie",
@@ -73,7 +70,6 @@ export function buildMovieDetailHead(slug: string, movie: MovieDetail | null | u
     },
     url,
   };
-
   return {
     meta: [
       { title },

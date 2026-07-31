@@ -1,10 +1,5 @@
--- =========================================================
--- PROFILES AUTO-CREATE TRIGGER
--- Chạy file này trong Supabase SQL Editor một lần duy nhất
--- Tự động tạo profile khi có user mới (Google, Email, v.v.)
--- =========================================================
 
--- 1. Đảm bảo bảng profiles tồn tại
+
 create table if not exists public.profiles (
   id uuid references auth.users(id) on delete cascade primary key,
   username text,
@@ -15,7 +10,6 @@ create table if not exists public.profiles (
   updated_at timestamptz default now()
 );
 
--- 2. Function tạo profile khi user mới đăng ký
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
@@ -40,13 +34,11 @@ begin
 end;
 $$ language plpgsql security definer;
 
--- 3. Gắn trigger vào auth.users
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
--- 4. RLS cho profiles
 alter table public.profiles enable row level security;
 
 drop policy if exists "profiles_select_own" on public.profiles;

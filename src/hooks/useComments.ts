@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isMissingColumnError } from "@/lib/schemaFlags";
-import { fetchCommentsByMovie, insertComment } from "@/services/platform/comments.service";
+import { commentsApi } from "@/services/platform/comments.service";
 import { queryKeys } from "@/constants/queryKeys";
 import { useAuthStore } from "@/store/authStore";
 import { CACHE_TTL } from "@/constants/timing";
@@ -14,23 +14,20 @@ export function useComments(slug: string, options: UseCommentsOptions = {}) {
   const user = useAuthStore((s) => s.user);
   const requestAuth = useAuthStore((s) => s.requestAuth);
   const qc = useQueryClient();
-
   const queryKey = queryKeys.comments.byMovie(slug);
-
   const query = useQuery({
     queryKey,
-    queryFn: () => fetchCommentsByMovie(slug),
+    queryFn: () => commentsApi.fetchByMovie(slug),
     staleTime: CACHE_TTL.minute,
     retry: (count, err) => !isMissingColumnError(err) && count < 1,
   });
-
   const mutation = useMutation({
     mutationFn: async (input: { content: string; isSpoiler: boolean }) => {
       if (!user) {
         requestAuth("login");
         throw new Error("AUTH_REQUIRED");
       }
-      await insertComment({
+      await commentsApi.insert({
         userId: user.id,
         movieSlug: slug,
         content: input.content,
@@ -42,6 +39,5 @@ export function useComments(slug: string, options: UseCommentsOptions = {}) {
       void qc.invalidateQueries({ queryKey });
     },
   });
-
   return { ...query, submitComment: mutation.mutateAsync, isSubmitting: mutation.isPending };
 }

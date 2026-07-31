@@ -17,9 +17,8 @@ interface ProfileTabBarProps {
 
 export function ProfileTabBar({ active, onChange }: ProfileTabBarProps) {
   const { t } = useTranslation();
-
   return (
-    <div className="mt-6 flex gap-1 overflow-x-auto border-b border-gray-800">
+    <div className="mt-6 flex gap-1 overflow-x-auto border-b border-white/10">
       {TABS.map((tab) => {
         const Icon = tab.icon;
         const isActive = active === tab.id;
@@ -29,7 +28,7 @@ export function ProfileTabBar({ active, onChange }: ProfileTabBarProps) {
             onClick={() => onChange(tab.id)}
             className={cn(
               "relative flex shrink-0 items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
-              isActive ? "text-white" : "text-gray-400 hover:text-gray-200",
+              isActive ? "text-white" : "text-netflix-muted hover:text-white",
             )}
           >
             <Icon className="h-4 w-4" />

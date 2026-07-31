@@ -9,14 +9,17 @@ type MovieWatchEvent = {
   avatar_url: string | null;
 };
 
-export async function fetchMovieAggregates(from: string): Promise<MovieAgg[]> {
-  return platformFetch<MovieAgg[]>(
-    `/api/admin/dashboard/top-movies?from=${encodeURIComponent(from)}`,
-  );
+class AdminMoviesApi {
+  fetchAggregates(from: string): Promise<MovieAgg[]> {
+    return platformFetch<MovieAgg[]>(
+      `/api/admin/dashboard/top-movies?from=${encodeURIComponent(from)}`,
+    );
+  }
+  fetchWatchEvents(slug: string, from: string) {
+    return platformFetch<MovieWatchEvent[]>(
+      `/api/admin/movies/${encodeURIComponent(slug)}/events?from=${encodeURIComponent(from)}`,
+    );
+  }
 }
 
-export async function fetchMovieWatchEvents(slug: string, from: string) {
-  return platformFetch<MovieWatchEvent[]>(
-    `/api/admin/movies/${encodeURIComponent(slug)}/events?from=${encodeURIComponent(from)}`,
-  ).catch(() => []);
-}
+export const adminMoviesApi = new AdminMoviesApi();

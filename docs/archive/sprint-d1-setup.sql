@@ -1,7 +1,4 @@
--- =========================================================
--- Sprint D1: đồng bộ watchlist lên Supabase
--- Chạy file này trong Supabase SQL Editor
--- =========================================================
+
 
 CREATE TABLE IF NOT EXISTS public.user_watchlists (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,

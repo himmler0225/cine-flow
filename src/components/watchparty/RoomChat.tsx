@@ -23,19 +23,22 @@ export function RoomChat({ messages, meId, onSend, onReact, disabled }: Props) {
   const { t, i18n } = useTranslation();
   const [text, setText] = useState("");
   const viewportRef = useRef<HTMLDivElement>(null);
-  const [floats, setFloats] = useState<{ id: number; emoji: string; x: number }[]>([]);
-
+  const [floats, setFloats] = useState<
+    {
+      id: number;
+      emoji: string;
+      x: number;
+    }[]
+  >([]);
   useEffect(() => {
     const el = viewportRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages]);
-
   const send = () => {
     if (!text.trim() || disabled) return;
     onSend(text);
     setText("");
   };
-
   const react = (emoji: string) => {
     if (disabled) return;
     onReact(emoji);
@@ -47,9 +50,7 @@ export function RoomChat({ messages, meId, onSend, onReact, disabled }: Props) {
       UI_DELAY_MS.chatFloat,
     );
   };
-
   const timeLocale = getIntlLocale(i18n.language);
-
   return (
     <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
       <div className="shrink-0 border-b border-white/10 px-3 py-2.5">
@@ -86,14 +87,12 @@ export function RoomChat({ messages, meId, onSend, onReact, disabled }: Props) {
                   </div>
                 );
               }
-
               const mine = m.user_id === meId;
               const time = new Date(m.created_at).toLocaleTimeString(timeLocale, {
                 hour: "2-digit",
                 minute: "2-digit",
               });
               const displayName = m.username || t("watchparty.guest");
-
               return (
                 <div key={m.id} className={cn("flex gap-2", mine && "flex-row-reverse")}>
                   <Avatar className="mt-0.5 h-6 w-6 shrink-0">

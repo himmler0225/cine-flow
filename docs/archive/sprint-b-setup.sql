@@ -1,16 +1,11 @@
--- =========================================================
--- Sprint B: đánh giá sao + bình luận theo tập
--- Chạy file này trong Supabase SQL Editor
--- =========================================================
 
--- Bình luận theo tập (nullable = bình luận chung phim)
+
 ALTER TABLE public.comments
   ADD COLUMN IF NOT EXISTS episode_name text;
 
 CREATE INDEX IF NOT EXISTS comments_movie_episode_idx
   ON public.comments (movie_slug, episode_name);
 
--- Đánh giá sao 1–5
 CREATE TABLE IF NOT EXISTS public.movie_ratings (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

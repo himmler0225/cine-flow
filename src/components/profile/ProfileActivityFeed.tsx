@@ -15,7 +15,6 @@ interface ProfileActivityFeedProps {
 
 export function ProfileActivityFeed({ history, favs }: ProfileActivityFeedProps) {
   const { t, i18n } = useTranslation();
-
   const events = useMemo(() => {
     const items: {
       kind: "watch" | "fav";
@@ -47,17 +46,15 @@ export function ProfileActivityFeed({ history, favs }: ProfileActivityFeedProps)
     );
     return items.sort((a, b) => b.ts - a.ts).slice(0, 10);
   }, [history, favs, t]);
-
   if (events.length === 0) {
     return <ProfileEmptyHint icon={<Clock className="h-8 w-8" />} text={t("profile.noActivity")} />;
   }
-
   return (
     <ul className="space-y-2">
       {events.map((e, i) => (
         <li
           key={i}
-          className="flex items-center gap-3 rounded-lg border border-gray-800 bg-black/30 p-3"
+          className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/30 p-3"
         >
           <Link to="/movie/$slug" params={{ slug: e.slug }} className="shrink-0">
             <MoviePosterImg
@@ -69,12 +66,12 @@ export function ProfileActivityFeed({ history, favs }: ProfileActivityFeedProps)
           </Link>
           <div className="min-w-0 flex-1">
             <p className="line-clamp-1 text-sm text-white">{e.title}</p>
-            <p className="text-xs text-gray-400">{formatRelativeTime(e.ts, i18n.language)}</p>
+            <p className="text-xs text-netflix-muted">{formatRelativeTime(e.ts, i18n.language)}</p>
           </div>
           {e.kind === "fav" ? (
             <Heart className="h-4 w-4 text-netflix-red" />
           ) : (
-            <Play className="h-4 w-4 text-gray-400" />
+            <Play className="h-4 w-4 text-netflix-muted" />
           )}
         </li>
       ))}

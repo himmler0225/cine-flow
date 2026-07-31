@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { Film } from "lucide-react";
 import { getImageCandidates } from "@/lib/movie/movieImages";
 import { cn } from "@/lib/utils";
-
 import { useSettingsStore } from "@/store/settingsStore";
 
 function buildPosterCandidates(poster?: string, thumb?: string, dataSaver = false): string[] {
@@ -43,7 +42,6 @@ export function DetailPoster({
   );
   const [idx, setIdx] = useState(0);
   const src = candidates[idx] ?? "";
-
   if (!src) {
     return (
       <div
@@ -57,7 +55,6 @@ export function DetailPoster({
       </div>
     );
   }
-
   return (
     <img
       key={src}

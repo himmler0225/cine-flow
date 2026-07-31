@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ROOM_CODE_INVALID_PATTERN } from "@/constants/patterns";
-import { fetchRoomByCode } from "@/services/platform/watchParty.service";
+import { watchPartyApi } from "@/services/platform/watchParty.service";
 
 interface JoinRoomModalProps {
   open: boolean;
@@ -26,19 +26,17 @@ export function JoinRoomModal({ open, onClose }: JoinRoomModalProps) {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const handleClose = () => {
     if (!loading) {
       setCode("");
       onClose();
     }
   };
-
   const join = async () => {
     const c = code.trim().toUpperCase();
     if (c.length !== 6) return toast.error(t("watchparty.roomCodeHint"));
     setLoading(true);
-    const { data, error } = await fetchRoomByCode(c);
+    const { data, error } = await watchPartyApi.fetchRoomPreview(c);
     setLoading(false);
     if (error) {
       return toast.error(t("watchparty.joinFailed"), {
@@ -59,7 +57,6 @@ export function JoinRoomModal({ open, onClose }: JoinRoomModalProps) {
     handleClose();
     navigate({ to: "/watch-party/$code", params: { code: c } });
   };
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent className="max-w-sm border-white/10 bg-[#1a1a1a] text-white">
@@ -75,12 +72,19 @@ export function JoinRoomModal({ open, onClose }: JoinRoomModalProps) {
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium uppercase tracking-wider text-netflix-muted">
+            <Label
+              htmlFor="watchparty-join-code"
+              className="text-xs font-medium uppercase tracking-wider text-netflix-muted"
+            >
               {t("watchparty.roomCode")}
             </Label>
             <div className="relative">
-              <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-netflix-muted" />
+              <Hash
+                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-netflix-muted"
+                aria-hidden="true"
+              />
               <Input
+                id="watchparty-join-code"
                 value={code}
                 onChange={(e) =>
                   setCode(
@@ -91,6 +95,7 @@ export function JoinRoomModal({ open, onClose }: JoinRoomModalProps) {
                 placeholder="XXXXXX"
                 disabled={loading}
                 autoFocus
+                aria-label={t("watchparty.roomCode")}
                 className="border-white/15 bg-black/40 pl-9 text-center text-xl font-bold tracking-[0.5em] text-white placeholder:text-white/20 focus-visible:border-netflix-red focus-visible:ring-0 disabled:opacity-60"
               />
             </div>

@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Clock, Heart, Search, TrendingUp } from "lucide-react";
 import { SearchThumb } from "@/components/search/SearchThumb";
 import { SOURCE_KEYS } from "@/components/search/constants";
+import { qualityBadgeClass } from "@/components/movie/MetaBadges";
+import { cn } from "@/lib/utils";
 import type { MovieListItem } from "@/types/movie";
 
 const SOURCE_ICONS = {
@@ -20,6 +22,7 @@ export function SearchSuggestionItem({
   year,
   quality,
   source,
+  active,
   onClose,
 }: {
   slug: string;
@@ -29,18 +32,21 @@ export function SearchSuggestionItem({
   year?: number;
   quality?: string;
   source: keyof typeof SOURCE_KEYS;
+  active?: boolean;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const Icon = SOURCE_ICONS[source];
-
   return (
     <li>
       <Link
         to="/movie/$slug"
         params={{ slug }}
         onClick={onClose}
-        className="flex items-center gap-3 rounded px-3 py-2 transition-colors hover:bg-white/5"
+        className={cn(
+          "flex items-center gap-3 rounded px-3 py-2 transition-colors",
+          active ? "bg-white/10 ring-1 ring-netflix-red/40" : "hover:bg-white/5",
+        )}
       >
         <SearchThumb src={thumb} />
         <div className="min-w-0 flex-1">
@@ -53,7 +59,12 @@ export function SearchSuggestionItem({
           <Icon className="h-3 w-3" /> {t(SOURCE_KEYS[source])}
         </span>
         {quality && (
-          <span className="rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-black">
+          <span
+            className={cn(
+              "rounded px-1.5 py-0.5 text-[10px] font-bold",
+              qualityBadgeClass(quality),
+            )}
+          >
             {quality}
           </span>
         )}
@@ -66,10 +77,12 @@ export function SearchResultItem({
   movie,
   onClose,
   eager,
+  active,
 }: {
   movie: MovieListItem;
   onClose: () => void;
   eager: boolean;
+  active?: boolean;
 }) {
   return (
     <li>
@@ -77,7 +90,10 @@ export function SearchResultItem({
         to="/movie/$slug"
         params={{ slug: movie.slug }}
         onClick={onClose}
-        className="flex items-center gap-3 rounded px-3 py-2 transition-colors hover:bg-white/5"
+        className={cn(
+          "flex items-center gap-3 rounded px-3 py-2 transition-colors",
+          active ? "bg-white/10 ring-1 ring-netflix-red/40" : "hover:bg-white/5",
+        )}
       >
         <SearchThumb src={movie.thumb_url || movie.poster_url} eager={eager} />
         <div className="min-w-0 flex-1">
@@ -87,7 +103,12 @@ export function SearchResultItem({
           </p>
         </div>
         {movie.quality && (
-          <span className="rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-black">
+          <span
+            className={cn(
+              "rounded px-1.5 py-0.5 text-[10px] font-bold",
+              qualityBadgeClass(movie.quality),
+            )}
+          >
             {movie.quality}
           </span>
         )}

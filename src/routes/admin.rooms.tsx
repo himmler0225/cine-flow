@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { getIntlLocale } from "@/lib/i18n";
 import { queryKeys } from "@/constants/queryKeys";
-import { deleteWatchRoomById } from "@/services/platform/admin/rooms.admin";
+import { adminRoomsApi } from "@/services/platform/admin/rooms.admin";
 import { useAdminRoomDetail, useAdminRooms } from "@/hooks/admin/useAdminRooms";
 import type { AdminRoomRow } from "@/types/admin";
 import { StatCard } from "@/components/admin/StatCard";
@@ -36,13 +36,10 @@ function RoomsPage() {
   const [openRoom, setOpenRoom] = useState<RoomRow | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<RoomRow | null>(null);
   const [showHistory, setShowHistory] = useState(false);
-
   const { stats, rooms, counts } = useAdminRooms(showHistory);
-
   const now = Date.now();
   const active = rooms.data?.filter((r) => new Date(r.expires_at).getTime() > now) ?? [];
   const expired = rooms.data?.filter((r) => new Date(r.expires_at).getTime() <= now) ?? [];
-
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.rooms")}</h1>
@@ -120,7 +117,7 @@ function RoomsPage() {
         onClose={() => setConfirmDelete(null)}
         onConfirm={async () => {
           if (!confirmDelete) return;
-          const { error } = await deleteWatchRoomById(confirmDelete.id);
+          const { error } = await adminRoomsApi.deleteById(confirmDelete.id);
           if (error) toast.error(t("toast.adminDeleteFailed"), { description: error.message });
           else {
             toast.success(t("toast.adminRoomDeleted"));
@@ -143,14 +140,16 @@ function RoomTable({
   onDelete,
 }: {
   rooms: RoomRow[];
-  counts?: { memberCount: Record<string, number>; msgCount: Record<string, number> };
+  counts?: {
+    memberCount: Record<string, number>;
+    msgCount: Record<string, number>;
+  };
   expiredMode?: boolean;
   onOpen: (r: RoomRow) => void;
   onDelete: (r: RoomRow) => void;
 }) {
   const { t, i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);
-
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] text-left text-sm">
@@ -219,14 +218,11 @@ function RoomDetail({ room, onClose }: { room: RoomRow | null; onClose: () => vo
   const locale = getIntlLocale(i18n.language);
   const [tab, setTab] = useState<"members" | "messages">("members");
   const roomId = room?.id ?? "";
-
   const { members, messages } = useAdminRoomDetail(roomId, tab);
-
   const tabs = [
     ["members", t("admin.common.members")] as const,
     ["messages", t("admin.common.messages")] as const,
   ];
-
   return (
     <SlidePanel
       open={!!room}
@@ -269,7 +265,7 @@ function RoomDetail({ room, onClose }: { room: RoomRow | null; onClose: () => vo
             ) : (
               <ul className="divide-y divide-white/5">
                 {members.data?.map((m) => (
-                  <li key={m.id} className="flex items-center gap-2 py-2 text-sm">
+                  <li key={m.user_id} className="flex items-center gap-2 py-2 text-sm">
                     <div className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-netflix-red text-[11px] font-bold text-white">
                       {m.avatar_url ? (
                         <img src={m.avatar_url} alt="" className="h-full w-full object-cover" />

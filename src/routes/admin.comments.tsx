@@ -7,19 +7,18 @@ import { toast } from "sonner";
 import { getIntlLocale } from "@/lib/i18n";
 import { getTotalPages } from "@/utils/pagination";
 import { queryKeys } from "@/constants/queryKeys";
-import { deleteCommentsByIds } from "@/services/platform/admin/comments.admin";
+import { adminCommentsApi } from "@/services/platform/admin/comments.admin";
 import { useAdminCommentsList, useAdminCommentStats } from "@/hooks/admin/useAdminComments";
 import { StatCard } from "@/components/admin/StatCard";
 import { Section, SectionEmpty, SectionLoader } from "@/components/admin/Section";
 import { AdminSelect } from "@/components/admin/AdminSelect";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
 import { getUserInitial } from "@/lib/userDisplay";
+import { ADMIN_PAGE_SIZE } from "@/constants/pagination";
 
 export const Route = createFileRoute("/admin/comments")({
   component: CommentsPage,
 });
-
-const PAGE_SIZE = 20;
 
 function CommentsPage() {
   const { t, i18n } = useTranslation();
@@ -30,13 +29,13 @@ function CommentsPage() {
   const [sort, setSort] = useState<"new" | "likes">("new");
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [confirm, setConfirm] = useState<{ ids: string[]; label: string } | null>(null);
-
+  const [confirm, setConfirm] = useState<{
+    ids: string[];
+    label: string;
+  } | null>(null);
   const stats = useAdminCommentStats();
-  const list = useAdminCommentsList({ query, movie, sort, page, pageSize: PAGE_SIZE });
-
-  const totalPages = getTotalPages(list.data?.total ?? 0, PAGE_SIZE);
-
+  const list = useAdminCommentsList({ query, movie, sort, page, pageSize: ADMIN_PAGE_SIZE });
+  const totalPages = getTotalPages(list.data?.total ?? 0, ADMIN_PAGE_SIZE);
   const toggleAll = (checked: boolean) => {
     if (!list.data) return;
     setSelected(checked ? new Set(list.data.rows.map((r) => r.id)) : new Set());
@@ -47,7 +46,6 @@ function CommentsPage() {
     else s.add(id);
     setSelected(s);
   };
-
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.comments")}</h1>
@@ -251,7 +249,7 @@ function CommentsPage() {
         onClose={() => setConfirm(null)}
         onConfirm={async () => {
           if (!confirm) return;
-          const { error } = await deleteCommentsByIds(confirm.ids);
+          const { error } = await adminCommentsApi.deleteByIds(confirm.ids);
           if (error) toast.error(t("toast.adminDeleteFailed"), { description: error.message });
           else {
             toast.success(t("toast.adminDeleteSuccess", { label: confirm.label }));

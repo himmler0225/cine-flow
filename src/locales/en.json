@@ -3,10 +3,7 @@
     "viewAll": "View all",
     "close": "Close",
     "cancel": "Cancel",
-    "confirm": "Confirm",
     "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
     "loading": "Loading...",
     "retry": "Try again",
     "back": "Back",
@@ -14,16 +11,9 @@
     "or": "or",
     "on": "On",
     "off": "Off",
-    "yes": "Yes",
-    "no": "No",
     "all": "All",
-    "user": "User",
-    "explore": "Explore",
-    "info": "Info",
-    "noResults": "No results",
     "endOfResults": "End of results",
-    "minChars": "Enter at least 2 characters to search.",
-    "language": "Language"
+    "minChars": "Enter at least 2 characters to search."
   },
   "nav": {
     "home": "Home",
@@ -45,7 +35,6 @@
     "favorites": "Favorites",
     "login": "Sign In",
     "watchParty": "Watch Party",
-    "joinWatchParty": "Join Watch Party",
     "historyProfile": "History & Profile",
     "searchPage": "Search",
     "genresPage": "Genres",
@@ -140,14 +129,8 @@
     "seeMore": "See more",
     "showLess": "Show less",
     "addFavorite": "Add to favorites",
-    "removeFavorite": "Remove from favorites",
-    "addWatchlist": "Add to watchlist",
-    "rating": "Rating",
-    "notFound": "Movie not found",
-    "notFoundDesc": "This movie doesn't exist or has been removed.",
     "backHome": "Back to home",
     "continueWatching": "Continue watching",
-    "newUpdates": "Recently Updated",
     "topRanking": "Top 10 Today",
     "loadError": "Could not load {{title}} right now",
     "favoritesTitle": "Favorite movies",
@@ -156,22 +139,15 @@
     "noFavorites": "You haven't added any favorites yet.",
     "exploreMovies": "Explore movies →",
     "watchlistTitle": "Watchlist",
-    "noWatchlist": "No movies in your watchlist.",
     "createList": "Create new list",
-    "listName": "List name",
-    "commentPlaceholder": "Write a comment...",
-    "commentTooShort": "Comment is too short",
     "sendComment": "Send",
-    "noComments": "No comments yet.",
-    "episode": "Episode {{name}}",
     "server": "Server {{index}}",
-    "selectServer": "Select server",
-    "selectEpisode": "Select episode",
     "commentPlaceholderEpisode": "Comment on {{episode}} — {{movie}}...",
     "commentPlaceholderMovie": "Comment on {{movie}}...",
     "filterByEpisode": "Filter by episode:",
     "containsSpoiler": "Contains spoiler",
     "spoiler": "Spoiler",
+    "revealSpoiler": "Tap to reveal spoiler",
     "noCommentsEpisode": "No comments for {{episode}} yet.",
     "noCommentsFirst": "No comments yet. Be the first!",
     "rateMovieAria": "Rate movie",
@@ -182,14 +158,11 @@
     "newListNamePlaceholder": "New list name...",
     "hideContinueWatching": "Hide continue watching",
     "resumeWatching": "Resume ({{time}})",
-    "resumeEpisodeAt": "Resume {{episode}} ({{time}})",
     "startFromBeginning": "Start from beginning",
-    "favorited": "Favorited",
     "viewDetailAria": "View details for {{title}}",
     "posterAlt": "Poster for {{title}}",
     "loadErrorDefault": "Could not load content right now.",
     "removeFromContinue": "Remove from continue watching",
-    "top10Movies": "Movies",
     "top10Subtitle": "Hot movie rankings this week",
     "topRankAria": "Top {{rank}}: {{name}}",
     "notFound404": "404 · Not found",
@@ -204,14 +177,14 @@
     "watchlistLocalDesc": "Stored on device — separate from favorites",
     "exploreMoviesBack": "← Explore movies",
     "trailerTitle": "Trailer {{name}}",
-    "newBadge": "NEW",
     "episodeNotFound": "Episode not found",
     "episodeNotFoundDesc": "This episode is not available or has been removed. Try another episode.",
     "commentsFor": "Comments — {{episode}}",
     "episodeTileLabel": "Ep",
     "watchProgress": "Watch progress",
     "episodesWatchedProgress": "Watched {{watched}}/{{total}} episodes",
-    "recommendedForYou": "Recommended for you"
+    "recommendedForYou": "Recommended for you",
+    "watchTrailer": "Watch Trailer"
   },
   "movieLists": {
     "phim-bo": "TV Series",
@@ -242,24 +215,13 @@
     "phim-long-tieng": "Voice-over"
   },
   "player": {
-    "play": "Play",
-    "pause": "Pause",
     "mute": "Mute",
     "unmute": "Unmute",
     "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit fullscreen",
     "pip": "Picture in picture",
     "speed": "Speed",
     "quality": "Quality",
     "subtitles": "Subtitles",
-    "nextEpisode": "Next episode",
-    "prevEpisode": "Previous episode",
-    "autoNext": "Auto-play next episode",
-    "loading": "Loading video...",
-    "error": "Cannot play video",
-    "switchServer": "Switch server",
-    "resumePrompt": "Resume from {{time}}?",
-    "resume": "Resume",
     "startOver": "Start over",
     "playPauseAria": "Play/Pause",
     "disableSkipAds": "Disable ad skip",
@@ -270,7 +232,16 @@
     "loadErrorTryServer": "Failed to load video, try another server",
     "adsSkipped": "Skipped {{count}} ad segments",
     "keyboardHints": "Space · ←/→ 10s · M · F{{next}}",
-    "nowPlaying": " (now playing)"
+    "nowPlaying": " (now playing)",
+    "skipAdsPremiumOnly": "Ad skip is a Premium feature",
+    "skipAdNow": "Skip ad",
+    "useBackupPlayer": "Use backup player",
+    "qualityAuto": "Auto",
+    "subtitlesOff": "Off",
+    "seekAria": "Seek",
+    "volumeAria": "Volume",
+    "nextEpisodeIn": "Next episode in {{seconds}}s",
+    "playNextNow": "Play now"
   },
   "hero": {
     "goToSlide": "Go to slide {{index}}"
@@ -281,14 +252,9 @@
     "clear": "Clear",
     "recent": "Recent searches",
     "clearRecent": "Clear history",
-    "trending": "Trending",
     "noResults": "No results for \"{{q}}\"",
-    "suggestions": "Suggestions",
     "filters": {
-      "all": "All",
-      "series": "TV series",
-      "movies": "Movies",
-      "animation": "Animation"
+      "all": "All"
     },
     "source": {
       "history": "Watched",
@@ -297,9 +263,11 @@
       "recent": "Recent"
     },
     "title": "Search",
-    "viewAllResults": "View all {{count}}+ results →",
+    "viewAllResults": "View all {{count}} results →",
     "noResultsWithFilter": "No results with this filter",
-    "suggestionsForYou": "Suggestions for you"
+    "suggestionsForYou": "Suggestions for you",
+    "browseGenres": "Browse by genre",
+    "keyboardHint": "↑↓ select · Enter open · Esc close"
   },
   "listing": {
     "genre": "Genre: {{name}}",
@@ -308,18 +276,13 @@
     "allGenres": "All genres",
     "allCountries": "All countries",
     "itemListGenre": "{{name}} movies",
-    "itemListCountry": "{{name}} movies"
-  },
-  "actor": {
-    "breadcrumb": "Actors",
-    "title": "Movies with {{name}}",
-    "subtitle": "Results by actor name (OPhim source).",
-    "loadError": "Could not load data.",
-    "noResults": "No movies found for actor \"{{name}}\".",
-    "searchKeyword": "Search by keyword \"{{name}}\""
+    "itemListCountry": "{{name}} movies",
+    "emptyTitle": "No movies found",
+    "emptyDescription": "Try different filters or browse another genre.",
+    "emptyFilteredTitle": "No results with these filters",
+    "emptyFilteredDesc": "Clear filters or pick another genre to continue."
   },
   "profile": {
-    "title": "My profile",
     "tabs": {
       "overview": "Overview",
       "history": "History",
@@ -327,17 +290,13 @@
       "watchlists": "Watchlists"
     },
     "stats": {
-      "watched": "Watched",
       "favorites": "Favorites",
-      "hours": "Watch hours",
-      "comments": "Comments",
       "movies": "Movies watched",
       "episodes": "Episodes watched",
       "hoursWatched": "Hours watched"
     },
     "editName": "Edit name",
     "changeAvatar": "Change photo",
-    "clearHistory": "Clear history",
     "clearHistoryConfirm": "Clear all watch history?",
     "clearHistoryIrreversible": "This action cannot be undone.",
     "clearAll": "Clear all",
@@ -352,7 +311,6 @@
     "noListsDesc": "Add movies from the detail page using the Watchlist button",
     "createWatchlist": "Create watchlist",
     "deleteWatchlist": "Delete watchlist",
-    "deleteWatchlistConfirm": "Delete list \"{{name}}\"?",
     "activity": "Recent activity",
     "noActivity": "No activity yet",
     "activityWatched": "Watched \"{{episode}} - {{movie}}\"",
@@ -389,31 +347,19 @@
     }
   },
   "watchparty": {
-    "title": "Watch Party",
     "create": "Create room",
-    "join": "Join room",
-    "joinTitle": "Join Watch Party",
     "roomCode": "Room code",
     "roomCodeHint": "Room code is 6 characters",
-    "pin": "PIN code",
-    "enterPin": "Enter PIN",
     "createRoom": "Create watch party",
     "loginRequired": "Please sign in to create a watch party",
-    "inviteLink": "Invite link",
     "copyInvite": "Copy invite link",
-    "members": "Members ({{count}})",
     "host": "Host",
     "you": "You",
     "chat": "Chat",
     "chatPlaceholder": "Type a message...",
     "closeRoom": "Close room",
     "leaveRoom": "Leave room",
-    "expiresIn": "Expires in {{time}}",
-    "waitingHost": "Waiting for host to play video...",
-    "synced": "Synced",
-    "reactions": "Reactions",
     "privateRoom": "Private room",
-    "publicRoom": "Public room",
     "joinedRoom": "👋 {{username}} joined the room",
     "leftRoom": "👋 {{username}} left the room",
     "guest": "Guest",
@@ -459,6 +405,8 @@
     "manualSyncJoiner": "Video syncs with the host automatically — no action needed.",
     "broadcastPlay": "Broadcast Play",
     "broadcastPause": "Broadcast Pause",
+    "seekBack10": "Seek back 10 seconds",
+    "seekForward10": "Seek forward 10 seconds",
     "countdown321": "⏱ Countdown 3-2-1",
     "liveChat": "💬 Live Chat",
     "roomClosedTitle": "Room closed",
@@ -517,8 +465,6 @@
     }
   },
   "premium": {
-    "title": "Upgrade to Premium",
-    "subtitle": "A better streaming experience",
     "free": "Free",
     "premium": "Premium",
     "upgrade": "Upgrade now",
@@ -537,28 +483,21 @@
       "watchParty12h": "Watch Party rooms up to 12 hours (vs 6 hours)",
       "privatePin": "Private rooms with PIN",
       "badge": "Premium badge on profile",
-      "noAds": "Priority viewing (ad-free — coming soon)",
+      "skipAds": "Skip ad segments in HLS streams",
       "unlimited": "Unlimited movie streaming",
       "watchParty6h": "Watch Party 6 hours",
-      "favoritesHistory": "Favorites & watch history",
-      "aiKira": "AI & mood-based movie picks"
+      "favoritesHistory": "Favorites & watch history"
     }
-  },
-  "ai": {
-    "forYou": "✨ For You"
   },
   "filters": {
     "sort": "Sort",
     "year": "Year",
     "country": "Country",
     "genre": "Genre",
-    "quality": "Quality",
     "language": "Language",
-    "status": "Status",
-    "page": "Page {{page}}",
+    "sortOrder": "Order",
     "prev": "Previous",
     "next": "Next",
-    "actor": "Actor",
     "allGenres": "All genres",
     "allCountries": "All countries",
     "allYears": "All years",
@@ -575,17 +514,9 @@
     "voiceOver": "Voice-over",
     "pagination": "Pagination",
     "prevPage": "Previous page",
-    "nextPage": "Next page",
-    "actorPlaceholder": "Actor name...",
-    "actorSearching": "Searching...",
-    "actorFindMovies": "Find movies starring \"{{name}}\"",
-    "actorExample": "e.g. {{sample}}"
+    "nextPage": "Next page"
   },
   "notifications": {
-    "title": "Notifications",
-    "empty": "No new notifications",
-    "newEpisode": "New episode: {{name}}",
-    "markAllRead": "Mark all as read",
     "bellAria": "New episode notifications",
     "closeAria": "Close notifications",
     "newEpisodes": "New episodes",
@@ -606,7 +537,6 @@
     },
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "pageTitle": "Admin Panel — Cine-Flow",
     "common": {
       "noName": "No name",
       "guest": "Guest",
@@ -782,12 +712,12 @@
     "countryDescription": "Explore {{name}} movies in Vietsub and dubbed HD/FHD on Cine-Flow.",
     "yearTitle": "Movies from {{year}} — Cine-Flow",
     "yearDescription": "Movies released in {{year}} in Vietsub and dubbed HD on Cine-Flow.",
+    "newUpdatesTitle": "Recently updated movies — Cine-Flow",
+    "newUpdatesDescription": "Browse the latest updated movies in Vietsub and dubbed HD on Cine-Flow.",
     "allGenresTitle": "All movie genres — Cine-Flow",
     "allGenresDescription": "Explore all movie genres on Cine-Flow.",
     "allCountriesTitle": "All countries — Cine-Flow",
     "allCountriesDescription": "Explore movies from all countries on Cine-Flow.",
-    "actorTitle": "Movies starring {{name}} — Cine-Flow",
-    "actorDescription": "List of movies featuring actor {{name}}.",
     "shareMovieText": "Watch \"{{movie}}\" on Cine-Flow: {{url}}"
   },
   "toast": {
@@ -825,9 +755,9 @@
     "noServers": "No servers available for this episode",
     "switchedServer": "Switched to {{server}}",
     "noAlternateServer": "No alternate server found",
-    "fallbackSource": "Using fallback source",
     "roomClosed": "Room closed",
     "roomCloseFailed": "Could not close room",
+    "roomJoinFailed": "Could not join the room",
     "hostLeft": "⏸ Host left — Video paused",
     "hostReturned": "✅ Host is back!",
     "adminUpdateFailed": "Update failed",
@@ -850,19 +780,11 @@
       "retry": "Try again",
       "goHome": "Go home"
     },
-    "source": {
-      "usingFallback": "Using source {{source}}",
-      "primaryDown": "{{primary}} is experiencing issues"
-    },
     "dataLoadFailed": "Could not load data. Please try again later."
   },
   "home": {
     "rows": {
-      "newUpdates": "Recently Updated",
-      "series": "TV Series",
-      "movies": "Movies",
-      "tvShows": "TV Shows",
-      "animation": "Animation"
+      "newUpdates": "Recently Updated"
     }
   }
 }

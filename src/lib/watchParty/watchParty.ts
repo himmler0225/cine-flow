@@ -1,4 +1,3 @@
-// Helper: 6-char room code (no O/0/I/1) + share URL builder.
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 export function generateRoomCode(len = 6): string {
@@ -20,7 +19,28 @@ export function buildRoomUrl(code: string): string {
 export const ROOM_TTL_HOURS = 6;
 
 export type RoomBroadcast =
-  | { event: "PLAY"; payload: { currentTime: number } }
-  | { event: "PAUSE"; payload: { currentTime: number } }
-  | { event: "SEEK"; payload: { seekTo: number } }
-  | { event: "REACTION"; payload: { emoji: string; user: string } };
+  | {
+      event: "PLAY";
+      payload: {
+        currentTime: number;
+      };
+    }
+  | {
+      event: "PAUSE";
+      payload: {
+        currentTime: number;
+      };
+    }
+  | {
+      event: "SEEK";
+      payload: {
+        seekTo: number;
+      };
+    }
+  | {
+      event: "REACTION";
+      payload: {
+        emoji: string;
+        user: string;
+      };
+    };

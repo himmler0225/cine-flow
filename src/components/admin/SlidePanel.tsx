@@ -19,15 +19,11 @@ export function SlidePanel({ open, onClose, title, children, width = 480 }: Prop
   return (
     <>
       <div
-        className={`fixed inset-0 z-[60] bg-black/60 transition-opacity ${
-          open ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-[60] bg-black/60 transition-opacity ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={onClose}
       />
       <aside
-        className={`fixed inset-y-0 right-0 z-[61] flex w-full flex-col border-l border-white/10 bg-zinc-950 shadow-2xl transition-transform ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed inset-y-0 right-0 z-[61] flex w-full flex-col border-l border-white/10 bg-zinc-950 shadow-2xl transition-transform ${open ? "translate-x-0" : "translate-x-full"}`}
         style={{ maxWidth: width }}
       >
         <header className="flex items-center justify-between border-b border-white/10 p-4">

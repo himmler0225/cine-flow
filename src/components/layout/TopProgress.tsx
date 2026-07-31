@@ -6,7 +6,6 @@ export function TopProgress() {
   const isLoading = status === "pending";
   const [visible, setVisible] = useState(false);
   const [width, setWidth] = useState(0);
-
   useEffect(() => {
     let raf: number;
     let hideT: number;
@@ -29,9 +28,7 @@ export function TopProgress() {
       if (raf) cancelAnimationFrame(raf);
       if (hideT) clearTimeout(hideT);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
-
   if (!visible) return null;
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-0.5 bg-transparent">

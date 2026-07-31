@@ -33,14 +33,11 @@ export function ReactionOverlay({ reactions }: ReactionOverlayProps) {
 
 function ReactionBubble({ reaction }: { reaction: FloatingReaction }) {
   const [visible, setVisible] = useState(true);
-
   useEffect(() => {
     const t = window.setTimeout(() => setVisible(false), UI_DELAY_MS.reaction);
     return () => window.clearTimeout(t);
   }, []);
-
   if (!visible) return null;
-
   return (
     <div
       className={cn("absolute bottom-8 flex flex-col items-center")}

@@ -25,11 +25,9 @@ export function NavDropdown({
   const closeTimer = useRef<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const path = useRouterState({ select: (s) => s.location.pathname });
-
   useEffect(() => {
     setOpen(false);
   }, [path]);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
@@ -43,7 +41,6 @@ export function NavDropdown({
       window.removeEventListener("mousedown", onClick);
     };
   }, [open]);
-
   const scheduleOpen = () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
     openTimer.current = window.setTimeout(() => setOpen(true), UI_DELAY_MS.navbarOpen);
@@ -52,7 +49,6 @@ export function NavDropdown({
     if (openTimer.current) window.clearTimeout(openTimer.current);
     closeTimer.current = window.setTimeout(() => setOpen(false), UI_DELAY_MS.navbarClose);
   };
-
   return (
     <div
       ref={wrapperRef}
@@ -83,7 +79,7 @@ export function NavDropdown({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "absolute top-full z-50 mt-2 rounded-xl border border-gray-700/60 bg-gray-900/95 p-4 shadow-2xl shadow-black/50 backdrop-blur-sm",
+              "absolute top-full z-50 mt-2 rounded-xl border border-white/10 bg-netflix-dark/95 p-4 shadow-2xl shadow-black/50 backdrop-blur-sm",
               width,
               align === "right" ? "right-0" : "left-0",
             )}

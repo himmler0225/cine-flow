@@ -11,11 +11,9 @@ export function useSyncedHlsSource(
     if (useIframe) return;
     const v = videoRef.current;
     if (!v || !src) return;
-
     let hls: Hls | null = null;
     const onNativeError = () => onHlsFailed();
     v.addEventListener("error", onNativeError);
-
     if (v.canPlayType("application/vnd.apple.mpegurl")) {
       v.src = src;
     } else if (Hls.isSupported()) {
@@ -28,7 +26,6 @@ export function useSyncedHlsSource(
     } else {
       v.src = src;
     }
-
     return () => {
       v.removeEventListener("error", onNativeError);
       hls?.destroy();

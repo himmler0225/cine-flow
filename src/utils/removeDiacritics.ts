@@ -4,7 +4,6 @@ import {
   UPPERCASE_D_STROKE_PATTERN,
 } from "@/constants/patterns";
 
-/** Remove Vietnamese diacritics from a string. */
 export function removeDiacritics(str: string): string {
   if (!str) return "";
   return str

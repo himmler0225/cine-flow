@@ -16,6 +16,9 @@ export interface SyncedPlayerProps {
   onPause?: (t: number) => void;
   onSeek?: (t: number) => void;
   onProviderReady?: (
-    info: { provider: import("@/lib/iframeSync").IframeProvider; supportsAuto: boolean } | null,
+    info: {
+      provider: import("@/lib/iframeSync").IframeProvider;
+      supportsAuto: boolean;
+    } | null,
   ) => void;
 }

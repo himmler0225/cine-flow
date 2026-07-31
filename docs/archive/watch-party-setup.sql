@@ -1,6 +1,4 @@
--- =========================================================
--- WATCH PARTY: chạy file này trong Supabase SQL Editor
--- =========================================================
+
 
 create table if not exists public.watch_rooms (
   id uuid default gen_random_uuid() primary key,
@@ -35,7 +33,7 @@ create table if not exists public.room_messages (
   username text,
   avatar_url text,
   content text not null,
-  type text default 'message',  -- 'message' | 'system' | 'reaction'
+  type text default 'message',  
   created_at timestamptz default now()
 );
 
@@ -43,7 +41,6 @@ create index if not exists idx_room_messages_room on public.room_messages(room_i
 create index if not exists idx_room_members_room on public.room_members(room_id);
 create index if not exists idx_watch_rooms_code on public.watch_rooms(code);
 
--- RLS
 alter table public.watch_rooms enable row level security;
 alter table public.room_members enable row level security;
 alter table public.room_messages enable row level security;
@@ -68,15 +65,6 @@ create policy "members_delete" on public.room_members for delete using (auth.uid
 create policy "messages_select" on public.room_messages for select using (true);
 create policy "messages_insert" on public.room_messages for insert with check (auth.uid() = user_id);
 
--- Realtime publication
 alter publication supabase_realtime add table public.room_messages;
 alter publication supabase_realtime add table public.watch_rooms;
 
--- =========================================================
--- MIGRATION: nếu bạn đã chạy SQL cũ có cột playback_seconds
--- Chạy đoạn này để đổi tên cột (bỏ qua nếu bảng chưa tồn tại)
--- =========================================================
--- alter table public.watch_rooms rename column playback_seconds to playback_time;
--- alter table public.watch_rooms drop column if exists episode_index;
--- alter table public.watch_rooms drop column if exists src_m3u8;
--- alter table public.watch_rooms drop column if exists src_embed;

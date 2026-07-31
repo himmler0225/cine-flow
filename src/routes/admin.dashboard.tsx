@@ -2,7 +2,7 @@ import { lazy } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { Users, Eye, Film, PartyPopper, Trash2 } from "lucide-react";
-import { deleteCommentById } from "@/services/platform/admin/comments.admin";
+import { adminCommentsApi } from "@/services/platform/admin/comments.admin";
 import { useAdminDashboard } from "@/hooks/admin/useAdminDashboard";
 import { getIntlLocale } from "@/lib/i18n";
 import { useAdminStore } from "@/store/adminStore";
@@ -10,8 +10,10 @@ import { StatCard } from "@/components/admin/StatCard";
 import { Section, SectionEmpty, SectionLoader } from "@/components/admin/Section";
 import { ChartSuspense } from "@/components/admin/charts/ChartSuspense";
 import { getUserInitial } from "@/lib/userDisplay";
+import { isPremiumPlan } from "@/constants/premium";
 
 const DashboardTrafficChart = lazy(() => import("@/components/admin/charts/DashboardTrafficChart"));
+
 const DashboardPageTypeChart = lazy(
   () => import("@/components/admin/charts/DashboardPageTypeChart"),
 );
@@ -26,10 +28,8 @@ function DashboardPage() {
   const { dateRange, getDateFrom, getPrevDateFrom } = useAdminStore();
   const from = getDateFrom();
   const prevFrom = getPrevDateFrom();
-
   const { stats, lineData, pieData, topMovies, topKeywords, recentUsers, recentComments } =
     useAdminDashboard(dateRange, from, prevFrom, useAdminStore.getState().getRangeDays());
-
   return (
     <div className="space-y-5">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.dashboard")}</h1>
@@ -187,7 +187,7 @@ function DashboardPage() {
                       {new Date(u.created_at).toLocaleString(locale)}
                     </p>
                   </div>
-                  {u.plan === "premium" && (
+                  {isPremiumPlan(u.plan) && (
                     <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-300">
                       {t("admin.common.premium")}
                     </span>
@@ -239,7 +239,7 @@ function DashboardPage() {
                   </div>
                   <button
                     onClick={async () => {
-                      await deleteCommentById(c.id);
+                      await adminCommentsApi.deleteById(c.id);
                       recentComments.refetch();
                     }}
                     className="rounded p-1 text-zinc-500 hover:bg-red-500/10 hover:text-red-400"

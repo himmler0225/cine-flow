@@ -1,8 +1,6 @@
-// Cache thời điểm refetch watch-history cuối cùng theo movie slug.
-// Dùng để debounce việc đồng bộ progress khi chuyển nhanh giữa các trang phim.
 const cache = new Map<string, number>();
 
-export const HISTORY_REFETCH_TTL_MS = 15_000;
+export const HISTORY_REFETCH_TTL_MS = 15000;
 
 export function getHistoryRefetchedAt(slug: string): number | undefined {
   return cache.get(slug);

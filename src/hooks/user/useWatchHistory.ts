@@ -1,18 +1,13 @@
 import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  clearWatchHistory,
-  deleteWatchHistoryItem,
-  fetchWatchHistory,
-  upsertWatchProgress,
-} from "@/services/platform/watchHistory.service";
-export { migrateLocalHistoryToSupabase } from "@/services/platform/watchHistory.service";
+import { watchHistoryApi } from "@/services/platform/watchHistory.service";
 import { useAuthStore } from "@/store/authStore";
 import { queryKeys } from "@/constants/queryKeys";
 import { CACHE_TTL } from "@/constants/timing";
 import {
   type WatchHistoryItem,
   getLocalHistory,
+  mergeWatchProgress,
   saveLocalHistory,
   removeLocalHistoryItem,
   clearLocalHistory,
@@ -39,7 +34,7 @@ export function useWatchHistory() {
     queryKey: key,
     queryFn: async () => {
       if (isAuthenticated && user) {
-        return fetchWatchHistory(user.id);
+        return watchHistoryApi.fetch();
       }
       return getLocalHistory();
     },
@@ -59,45 +54,74 @@ export function useWatchHistory() {
 
   const saveProgress = useCallback(
     async (item: WatchHistoryItem) => {
-      const normalizedItem = {
+      const previous = queryClient
+        .getQueryData<WatchHistoryItem[]>(key)
+        ?.find((h) => h.movie_slug === item.movie_slug && h.episode_name === item.episode_name);
+      const normalizedItem = mergeWatchProgress(previous, {
         ...item,
         completed: isWatchFinished(item.progress_sec, item.duration_sec),
-      };
+      });
+
+      if (
+        normalizedItem.progress_sec < 5 &&
+        !normalizedItem.completed &&
+        (previous?.progress_sec ?? 0) < 5
+      ) {
+        return;
+      }
+
       saveLocalHistory(normalizedItem);
-      // Mốc Continue cho phim này vừa thay đổi -> bỏ cache debounce
       invalidateHistoryRefetchCache(item.movie_slug);
+
+      queryClient.setQueryData<WatchHistoryItem[]>(key, (old = []) => {
+        const idx = old.findIndex(
+          (h) =>
+            h.movie_slug === normalizedItem.movie_slug &&
+            h.episode_name === normalizedItem.episode_name,
+        );
+        if (idx >= 0) {
+          const next = [...old];
+          next[idx] = { ...old[idx], ...normalizedItem };
+          const [hit] = next.splice(idx, 1);
+          next.unshift(hit);
+          return next;
+        }
+        return [normalizedItem, ...old].slice(0, 50);
+      });
+
       if (isAuthenticated && user) {
         try {
-          await upsertWatchProgress(user.id, normalizedItem);
-          void invalidate();
-        } catch {
-          /* ignore sync errors */
+          await watchHistoryApi.upsertProgress(normalizedItem);
+        } catch (error) {
+          console.error("[watch-history] upsert failed", error);
         }
-      } else {
-        void invalidate();
       }
     },
-    [isAuthenticated, user, invalidate],
+    [isAuthenticated, user, key, queryClient],
   );
 
   const deleteItem = useCallback(
     async (movieSlug: string, episodeName: string) => {
       removeLocalHistoryItem(movieSlug, episodeName);
+      queryClient.setQueryData<WatchHistoryItem[]>(key, (old = []) =>
+        old.filter((h) => !(h.movie_slug === movieSlug && h.episode_name === episodeName)),
+      );
       if (isAuthenticated && user) {
-        await deleteWatchHistoryItem(user.id, movieSlug, episodeName);
+        await watchHistoryApi.deleteItem(movieSlug, episodeName);
       }
       void invalidate();
     },
-    [isAuthenticated, user, invalidate],
+    [isAuthenticated, user, invalidate, key, queryClient],
   );
 
   const clearAll = useCallback(async () => {
     clearLocalHistory();
+    queryClient.setQueryData<WatchHistoryItem[]>(key, []);
     if (isAuthenticated && user) {
-      await clearWatchHistory(user.id);
+      await watchHistoryApi.clear();
     }
     void invalidate();
-  }, [isAuthenticated, user, invalidate]);
+  }, [isAuthenticated, user, invalidate, key, queryClient]);
 
   const getProgress = useCallback(
     (movieSlug: string, episodeName: string) => {

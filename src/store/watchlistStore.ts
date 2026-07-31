@@ -1,6 +1,18 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { t } from "@/lib/i18n";
+import { STORAGE_KEYS, LEGACY_STORAGE_KEYS } from "@/constants/storage";
+
+function migratePersistName(next: string, legacy: string | null) {
+  if (typeof window === "undefined" || !legacy) return;
+  if (localStorage.getItem(next) != null) return;
+  const old = localStorage.getItem(legacy);
+  if (old == null) return;
+  localStorage.setItem(next, old);
+  localStorage.removeItem(legacy);
+}
+
+migratePersistName(STORAGE_KEYS.watchlists, LEGACY_STORAGE_KEYS.watchlists);
 
 export interface Watchlist {
   id: string;
@@ -26,7 +38,6 @@ export const useWatchlistStore = create<WatchlistState>()(
         { id: "default", name: t("watchlist.defaultWeekend"), slugs: [], createdAt: Date.now() },
         { id: "watchlater", name: t("watchlist.watchLater"), slugs: [], createdAt: Date.now() },
       ],
-
       createList: (name) => {
         const id = crypto.randomUUID();
         set((s) => ({
@@ -34,12 +45,10 @@ export const useWatchlistStore = create<WatchlistState>()(
         }));
         return id;
       },
-
       deleteList: (id) => {
         if (id === "default" || id === "watchlater") return;
         set((s) => ({ lists: s.lists.filter((l) => l.id !== id) }));
       },
-
       addToList: (listId, slug) => {
         set((s) => ({
           lists: s.lists.map((l) =>
@@ -47,7 +56,6 @@ export const useWatchlistStore = create<WatchlistState>()(
           ),
         }));
       },
-
       removeFromList: (listId, slug) => {
         set((s) => ({
           lists: s.lists.map((l) =>
@@ -55,14 +63,12 @@ export const useWatchlistStore = create<WatchlistState>()(
           ),
         }));
       },
-
       isInList: (listId, slug) => {
         const list = get().lists.find((l) => l.id === listId);
         return list?.slugs.includes(slug) ?? false;
       },
-
       replaceLists: (lists) => set({ lists }),
     }),
-    { name: "kkflix-watchlists" },
+    { name: STORAGE_KEYS.watchlists },
   ),
 );

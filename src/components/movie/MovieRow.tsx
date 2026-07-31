@@ -12,7 +12,10 @@ interface Props {
   title?: string;
   movies?: MovieListItem[];
   isLoading?: boolean;
-  href?: { to: string; params?: Record<string, string> };
+  href?: {
+    to: string;
+    params?: Record<string, string>;
+  };
 }
 
 const arrowBtnClass =
@@ -32,7 +35,6 @@ export function MovieRow({ title, movies, isLoading, href }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [canGoPrev, setCanGoPrev] = useState(false);
   const [canGoNext, setCanGoNext] = useState(false);
-
   const syncScrollEdges = useCallback(() => {
     const el = ref.current;
     if (!el) return;
@@ -40,29 +42,23 @@ export function MovieRow({ title, movies, isLoading, href }: Props) {
     setCanGoPrev(prev);
     setCanGoNext(next);
   }, []);
-
   const scroll = (dir: 1 | -1) => {
     const el = ref.current;
     if (!el) return;
     el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: "smooth" });
   };
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
     syncScrollEdges();
     el.addEventListener("scroll", syncScrollEdges, { passive: true });
     const ro = new ResizeObserver(syncScrollEdges);
     ro.observe(el);
-
     return () => {
       el.removeEventListener("scroll", syncScrollEdges);
       ro.disconnect();
     };
   }, [movies, isLoading, syncScrollEdges]);
-
-  // Warm browser image cache cho 8 card đầu khi data sẵn sàng
   useEffect(() => {
     if (!movies || movies.length === 0) return;
     const run = () => {
@@ -83,11 +79,19 @@ export function MovieRow({ title, movies, isLoading, href }: Props) {
       setTimeout(run, UI_DELAY_MS.deferredRowWork);
     }
   }, [movies]);
-
   return (
     <section className="group/row relative py-4">
-      <div className="mb-3 flex items-center justify-between px-4 md:px-12">
-        {title ? (
+      <div className="mb-3 flex items-end justify-between gap-3 px-4 md:px-12">
+        {href && title ? (
+          <Link
+            to={href.to}
+            params={href.params}
+            className="group/title flex min-w-0 items-center gap-1.5 text-lg font-semibold tracking-tight text-white transition-colors hover:text-white/90 md:text-xl"
+          >
+            <span className="truncate">{title}</span>
+            <ChevronRight className="h-5 w-5 shrink-0 opacity-0 transition-opacity group-hover/title:opacity-100 group-focus-visible/title:opacity-100" />
+          </Link>
+        ) : title ? (
           <h2 className="text-lg font-semibold tracking-tight text-white md:text-xl">{title}</h2>
         ) : (
           <span />
@@ -96,7 +100,7 @@ export function MovieRow({ title, movies, isLoading, href }: Props) {
           <Link
             to={href.to}
             params={href.params}
-            className="text-sm font-medium text-netflix-muted transition-colors hover:text-white"
+            className="shrink-0 text-sm font-medium text-netflix-muted transition-colors hover:text-white"
           >
             {t("common.viewAll")}
           </Link>

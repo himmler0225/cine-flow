@@ -29,7 +29,7 @@ export interface MovieListItem {
 }
 
 export interface EpisodeServerData {
-  name: string; // e.g. "Tập 1"
+  name: string;
   slug: string;
   filename?: string;
   link_embed: string;
@@ -53,7 +53,9 @@ export interface MovieDetail extends MovieListItem {
   showtimes?: string;
   view?: number;
   notify?: string;
-  modified?: { time: string };
+  modified?: {
+    time: string;
+  };
 }
 
 export interface PaginationMeta {
@@ -63,7 +65,6 @@ export interface PaginationMeta {
   totalPages: number;
 }
 
-/** Uniform shape for every paginated movie list endpoint. */
 export interface MovieListResult {
   items: MovieListItem[];
   pagination?: PaginationMeta;

@@ -23,7 +23,6 @@ export function ManualSyncBar({
   onStartCountdown,
 }: ManualSyncBarProps) {
   const { t } = useTranslation();
-
   return (
     <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 p-3">
       <p className="text-xs text-amber-200/90">{t("watchparty.manualSyncHint")}</p>
@@ -41,8 +40,9 @@ export function ManualSyncBar({
               variant="outline"
               className="h-8 border-white/15 bg-transparent text-white"
               onClick={() => onAdjustTime(-10)}
+              aria-label={t("watchparty.seekBack10")}
             >
-              <Minus className="h-3.5 w-3.5" /> 10s
+              <Minus className="h-3.5 w-3.5" aria-hidden="true" /> 10s
             </Button>
             <Button
               type="button"
@@ -50,8 +50,9 @@ export function ManualSyncBar({
               variant="outline"
               className="h-8 border-white/15 bg-transparent text-white"
               onClick={() => onAdjustTime(10)}
+              aria-label={t("watchparty.seekForward10")}
             >
-              <Plus className="h-3.5 w-3.5" /> 10s
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" /> 10s
             </Button>
             <Button
               type="button"

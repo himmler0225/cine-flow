@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMovieDetail } from "@/hooks/useMovieDetail";
 import { useFavorites } from "@/hooks/useFavorites";
-import { movieService } from "@/services/movies";
+import { moviesApi } from "@/services/movies";
 import { useMoviesByType } from "@/hooks/useMovies";
 import { MovieNotFound } from "@/components/common/MovieNotFound";
 import { queryKeys } from "@/constants/queryKeys";
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/movie/$slug")({
     try {
       const data = await context.queryClient.ensureQueryData({
         queryKey: queryKeys.movies.detail(params.slug),
-        queryFn: () => movieService.getMovieDetail(params.slug),
+        queryFn: () => moviesApi.getMovieDetail(params.slug),
         staleTime: CACHE_TTL.fiveMinutes,
       });
       return { movie: data?.movie ?? null };
@@ -35,9 +35,7 @@ export const Route = createFileRoute("/movie/$slug")({
       return { movie: null };
     }
   },
-
   head: ({ params, loaderData }) => buildMovieDetailHead(params.slug, loaderData?.movie),
-
   component: MovieDetailPage,
 });
 
@@ -50,13 +48,9 @@ function MovieDetailPage() {
   const isFav = isFavorite(slug);
   const { history, getLastEpisode, refetch: refetchHistory } = useWatchHistory();
   const last = getLastEpisode(slug);
-
-  // Đồng bộ lại progress từ backend mỗi khi mở trang phim
-  // Có debounce + cache theo slug để tránh refetch khi user chuyển trang nhanh
   useEffect(() => {
     const last = getHistoryRefetchedAt(slug);
     if (last && Date.now() - last < HISTORY_REFETCH_TTL_MS) return;
-
     const timer = setTimeout(() => {
       markHistoryRefetched(slug);
       void refetchHistory();
@@ -65,7 +59,6 @@ function MovieDetailPage() {
   }, [slug, refetchHistory]);
   const relatedType = RELATED_TYPE_MAP[movie?.type ?? ""] ?? "phim-bo";
   const related = useMoviesByType(relatedType, 1);
-
   const canResume =
     !!last &&
     last.progress_sec >= 30 &&
@@ -84,15 +77,12 @@ function MovieDetailPage() {
     return out;
   }, [history, slug]);
   const watchedEpisodeCount = Object.values(progressByEpisode).filter((p) => p.finished).length;
-
   if (isLoading) {
     return <DetailSkeleton />;
   }
-
   if (error || !movie) {
     return <MovieNotFound slug={slug} />;
   }
-
   return (
     <div className="bg-netflix-black">
       <MovieDetailHero

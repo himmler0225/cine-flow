@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/queryKeys";
-import {
-  fetchAdminCommentsList,
-  fetchCommentStats,
-} from "@/services/platform/admin/comments.admin";
+import { adminCommentsApi } from "@/services/platform/admin/comments.admin";
 
 export interface AdminCommentsQuery {
   query: string;
@@ -16,13 +13,13 @@ export interface AdminCommentsQuery {
 export function useAdminCommentStats() {
   return useQuery({
     queryKey: queryKeys.admin.commentStats(),
-    queryFn: fetchCommentStats,
+    queryFn: () => adminCommentsApi.fetchStats(),
   });
 }
 
 export function useAdminCommentsList(params: AdminCommentsQuery) {
   return useQuery({
     queryKey: queryKeys.admin.comments(params.query, params.movie, params.sort, params.page),
-    queryFn: () => fetchAdminCommentsList(params),
+    queryFn: () => adminCommentsApi.fetchList(params),
   });
 }

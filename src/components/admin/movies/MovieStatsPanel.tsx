@@ -10,7 +10,9 @@ import { ChartSuspense } from "@/components/admin/charts/ChartSuspense";
 import { getUserInitial } from "@/lib/userDisplay";
 
 const MovieViewsBarChart = lazy(() => import("@/components/admin/charts/MovieViewsBarChart"));
+
 const MovieEpisodesBarChart = lazy(() => import("@/components/admin/charts/MovieEpisodesBarChart"));
+
 const MovieServerPieChart = lazy(() => import("@/components/admin/charts/MovieServerPieChart"));
 
 interface MovieStatsPanelProps {
@@ -23,8 +25,10 @@ export function MovieStatsPanel({ movie, onClose }: MovieStatsPanelProps) {
   const { getDateFrom, dateRange } = useAdminStore();
   const locale = getIntlLocale(i18n.language);
   const data = useAdminMovieStats(movie?.slug ?? "", dateRange, getDateFrom(), !!movie);
-
-  const byDay: { date: string; views: number }[] = [];
+  const byDay: {
+    date: string;
+    views: number;
+  }[] = [];
   const byEp = new Map<string, number>();
   const byServer = new Map<string, number>();
   data.data?.forEach((r) => {
@@ -41,7 +45,6 @@ export function MovieStatsPanel({ movie, onClose }: MovieStatsPanelProps) {
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
   const serverData = [...byServer.entries()].map(([name, value]) => ({ name, value }));
-
   return (
     <SlidePanel
       open={!!movie}

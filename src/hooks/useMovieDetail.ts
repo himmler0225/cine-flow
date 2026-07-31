@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { CACHE_TTL } from "@/constants/timing";
-import { movieService } from "@/services/movies";
+import { moviesApi } from "@/services/movies";
 import { queryKeys } from "@/constants/queryKeys";
 
-type MovieDetailData = Awaited<ReturnType<typeof movieService.getMovieDetail>>;
+type MovieDetailData = Awaited<ReturnType<typeof moviesApi.getMovieDetail>>;
 
 interface MovieDetailOptions<TData> {
   enabled?: boolean;
@@ -17,7 +17,7 @@ export const useMovieDetail = <TData = MovieDetailData>(
 ) =>
   useQuery({
     queryKey: queryKeys.movies.detail(slug),
-    queryFn: () => movieService.getMovieDetail(slug),
+    queryFn: () => moviesApi.getMovieDetail(slug),
     enabled: options.enabled ?? !!slug,
     staleTime: options.staleTime ?? CACHE_TTL.tenMinutes,
     select: options.select,

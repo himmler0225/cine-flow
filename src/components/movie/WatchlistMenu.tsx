@@ -11,9 +11,10 @@ import { movieActionButtonVariants } from "@/components/movie/movieActionButton"
 interface WatchlistMenuProps {
   slug: string;
   movieName: string;
+  iconOnly?: boolean;
 }
 
-export function WatchlistMenu({ slug, movieName }: WatchlistMenuProps) {
+export function WatchlistMenu({ slug, movieName, iconOnly = false }: WatchlistMenuProps) {
   const { t } = useTranslation();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [open, setOpen] = useState(false);
@@ -23,9 +24,7 @@ export function WatchlistMenu({ slug, movieName }: WatchlistMenuProps) {
   const isInList = useWatchlistStore((s) => s.isInList);
   const createList = useWatchlistStore((s) => s.createList);
   const [newListName, setNewListName] = useState("");
-
   const inAny = lists.some((l) => isInList(l.id, slug));
-
   const handleCreate = () => {
     const name = newListName.trim();
     if (!name) return;
@@ -33,26 +32,44 @@ export function WatchlistMenu({ slug, movieName }: WatchlistMenuProps) {
     setNewListName("");
     toast.success(t("toast.listCreated"));
   };
-
   if (!isAuthenticated) return null;
-
   return (
-    <div className="w-full md:w-auto">
+    <div className={iconOnly ? "shrink-0" : "w-full md:w-auto"}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button
-            type="button"
-            className={movieActionButtonVariants({
-              intent: inAny ? "solid" : "secondary",
-              className: open ? "ring-2 ring-white/20" : undefined,
-            })}
-          >
-            <ListPlus className="h-4 w-4" />
-            {t("movie.watchlistBtn")}
-            <ChevronDown
-              className={cn("h-3.5 w-3.5 transition-transform duration-200", open && "rotate-180")}
-            />
-          </button>
+          {iconOnly ? (
+            <button
+              type="button"
+              className={cn(
+                "inline-flex h-11 w-11 items-center justify-center rounded-full ring-1 transition-colors",
+                inAny
+                  ? "bg-netflix-red text-white ring-netflix-red"
+                  : "bg-white/5 text-white ring-white/15 hover:bg-white/10",
+                open && "ring-white/30",
+              )}
+              aria-label={t("movie.watchlistBtn")}
+              title={t("movie.watchlistBtn")}
+            >
+              <ListPlus className="h-4 w-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={movieActionButtonVariants({
+                intent: inAny ? "solid" : "secondary",
+                className: open ? "ring-2 ring-white/20" : undefined,
+              })}
+            >
+              <ListPlus className="h-4 w-4" />
+              {t("movie.watchlistBtn")}
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-200",
+                  open && "rotate-180",
+                )}
+              />
+            </button>
+          )}
         </PopoverTrigger>
 
         <PopoverContent

@@ -32,15 +32,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { profile, user, signOut } = useAuthStore();
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  // Đóng drawer khi chuyển trang
   useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
-
   const avatar = profile?.avatar_url ?? "";
   const initial = (profile?.username ?? user?.email ?? "A").charAt(0).toUpperCase();
-
   const sidebarContent = (
     <>
       <div className="border-b border-white/10 px-4 py-4">
@@ -115,32 +111,24 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </div>
     </>
   );
-
   return (
     <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Sidebar desktop */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-white/10 bg-zinc-950 lg:flex">
         {sidebarContent}
       </aside>
 
-      {/* Drawer mobile */}
       <div
-        className={`fixed inset-0 z-40 bg-black/60 transition-opacity lg:hidden ${
-          drawerOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-40 bg-black/60 transition-opacity lg:hidden ${drawerOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={() => setDrawerOpen(false)}
         aria-hidden
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 max-w-[85vw] flex-col border-r border-white/10 bg-zinc-950 transition-transform lg:hidden ${
-          drawerOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 max-w-[85vw] flex-col border-r border-white/10 bg-zinc-950 transition-transform lg:hidden ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {sidebarContent}
       </aside>
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col lg:ml-60">
-        {/* Topbar mobile */}
         <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur lg:hidden">
           <button
             onClick={() => setDrawerOpen(true)}

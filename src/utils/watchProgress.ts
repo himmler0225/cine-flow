@@ -2,7 +2,6 @@ interface WatchProgressPercentOptions {
   clamp?: boolean;
 }
 
-/** Treat progress at/above this ratio as finished. */
 export const WATCH_COMPLETION_RATIO = 0.95;
 
 export function getWatchProgressPercent(

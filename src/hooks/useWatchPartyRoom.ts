@@ -4,17 +4,11 @@ import { toast } from "sonner";
 import { t as i18nT } from "@/lib/i18n";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/queryKeys";
-import {
-  deleteWatchRoom,
-  fetchRoomMembers,
-  fetchWatchRoomFull,
-  joinRoomAsGuest,
-  removeRoomMember,
-  updateRoomPlayback,
-} from "@/services/platform/watchParty.service";
+import { watchPartyApi } from "@/services/platform/watchParty.service";
+import { PlatformApiError } from "@/lib/platformApi";
 import { formatTime } from "@/utils/formatTime";
 import { useAuthStore } from "@/store/authStore";
-import { movieService } from "@/services/movies";
+import { moviesApi } from "@/services/movies";
 import { useWatchParty } from "@/hooks/useWatchParty";
 import type { SyncedPlayerHandle } from "@/components/watchparty/SyncedPlayer";
 import type { FloatingReaction } from "@/components/watchparty/ReactionOverlay";
@@ -28,6 +22,7 @@ import {
 } from "@/lib/watchParty/watchPartyState";
 import type { IframeProvider } from "@/lib/iframeSync";
 import type { RoomMemberRow, WatchRoom } from "@/types/watchParty";
+import { WATCH_PARTY_MS } from "@/constants/timing";
 
 export function useWatchPartyRoom(code: string) {
   const navigate = useNavigate();
@@ -43,43 +38,39 @@ export function useWatchPartyRoom(code: string) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [closing, setClosing] = useState(false);
   const [reactions, setReactions] = useState<FloatingReaction[]>([]);
-
   const {
     data: room,
     isLoading,
     refetch,
   } = useQuery<WatchRoom | null>({
     queryKey: queryKeys.watchParty.room(code),
-    queryFn: () => fetchWatchRoomFull(code),
+    queryFn: () => watchPartyApi.fetchRoomFull(code),
     refetchOnWindowFocus: true,
-    refetchInterval: 3000,
+    refetchInterval: WATCH_PARTY_MS.syncTick,
     refetchIntervalInBackground: false,
   });
-
   const isHost = !!user && !!room && user.id === room.host_id;
   const expired = room && new Date(room.expires_at).getTime() < Date.now();
-
   const { data: detail } = useQuery({
     queryKey: queryKeys.watchParty.detail(room?.movie_slug ?? ""),
-    queryFn: () => movieService.getMovieDetail(room!.movie_slug),
+    queryFn: () => moviesApi.getMovieDetail(room!.movie_slug),
     enabled: !!room,
   });
-
   const playable = useMemo(
     () => pickWatchPartyPlayable(detail?.episodes, room ?? null),
     [room, detail],
   );
-
   const autoSyncActive =
     (!iframeInfo && playable.usesHls) || (iframeInfo != null && iframeInfo.supportsAuto);
   const manualSync = !autoSyncActive;
-
+  const [joinStatus, setJoinStatus] = useState<"idle" | "joining" | "joined" | "need-pin">("idle");
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pinSubmitting, setPinSubmitting] = useState(false);
   const { data: dbMembers = [], refetch: refetchMembers } = useQuery<RoomMemberRow[]>({
     queryKey: queryKeys.watchParty.members(room?.id ?? ""),
-    queryFn: () => (room?.id ? fetchRoomMembers(room.id) : []),
-    enabled: !!room?.id,
+    queryFn: () => (room?.id ? watchPartyApi.fetchMembers(room.id) : []),
+    enabled: joinStatus === "joined",
   });
-
   const me = useMemo(
     () =>
       user
@@ -96,27 +87,41 @@ export function useWatchPartyRoom(code: string) {
         : null,
     [user, profile],
   );
-
-  const joinedRef = useRef(false);
+  const attemptJoin = useCallback(
+    async (pin?: string) => {
+      if (!room?.id || !me) return;
+      if (pin) setPinSubmitting(true);
+      else setJoinStatus("joining");
+      try {
+        const joined = await watchPartyApi.join(room.id, me.username, me.avatar_url, pin);
+        setJoinStatus("joined");
+        setPinError(null);
+        if (joined) void refetchMembers();
+      } catch (e) {
+        if (e instanceof PlatformApiError && e.status === 403) {
+          setJoinStatus("need-pin");
+          setPinError(pin ? e.message : null);
+          return;
+        }
+        setJoinStatus("idle");
+        toast.error(i18nT("toast.roomJoinFailed"), {
+          description: e instanceof Error ? e.message : undefined,
+        });
+      } finally {
+        if (pin) setPinSubmitting(false);
+      }
+    },
+    [room?.id, me, refetchMembers],
+  );
+  const joinAttemptedRef = useRef(false);
   useEffect(() => {
-    if (joinedRef.current || !room?.id || !user || !me) return;
-    joinedRef.current = true;
-    (async () => {
-      const joined = await joinRoomAsGuest(
-        room.id,
-        user.id,
-        me.username,
-        me.avatar_url,
-        room.host_id,
-      );
-      if (joined) void refetchMembers();
-    })();
-  }, [room?.id, room?.host_id, user, me, refetchMembers]);
-
+    if (joinAttemptedRef.current || !room?.id || !user || !me) return;
+    joinAttemptedRef.current = true;
+    void attemptJoin();
+  }, [room?.id, user, me, attemptJoin]);
   const onBroadcast = useCallback(
     (ev: string, payload: Record<string, unknown>) => {
       if (ev === "STATE") {
-        // Guest applies host's room state immediately (no need to wait for DB poll).
         if (isHost) return;
         queryClient.setQueryData<WatchRoom | null>(queryKeys.watchParty.room(code), (prev) => {
           if (!prev) return prev;
@@ -132,7 +137,6 @@ export function useWatchPartyRoom(code: string) {
               typeof payload.isPlaying === "boolean" ? payload.isPlaying : prev.is_playing,
           };
         });
-        // Apply directly to player so guest follows host's seek/play immediately.
         const p = playerRef.current;
         if (p) {
           const t = Number(payload.playbackTime ?? 0);
@@ -150,7 +154,7 @@ export function useWatchPartyRoom(code: string) {
         setReactions((prev) => [...prev, { id, emoji, user: userName, x }]);
         window.setTimeout(() => {
           setReactions((prev) => prev.filter((r) => r.id !== id));
-        }, 3000);
+        }, WATCH_PARTY_MS.reactionTtl);
         return;
       }
       if (ev === "COUNTDOWN") {
@@ -191,14 +195,9 @@ export function useWatchPartyRoom(code: string) {
     },
     [isHost, room?.playback_time, code, queryClient],
   );
-
   const onPresenceChange = useCallback(() => {
-    // When presence sync fires (someone joined/left), refresh DB member list so
-    // the host (and everyone) sees the participant count update in real time
-    // even if postgres_changes replication isn't enabled on room_members.
     void refetchMembers();
   }, [refetchMembers]);
-
   const {
     members: presenceMembers,
     messages,
@@ -206,18 +205,14 @@ export function useWatchPartyRoom(code: string) {
     sendMessage,
     sendSystemMessage,
   } = useWatchParty({
-    room: room ?? null,
+    room: joinStatus === "joined" ? (room ?? null) : null,
     me,
     isHost,
     onBroadcast,
     onPresenceChange,
     onRoomClosed: () => setRoomClosed(true),
   });
-
   const onlineIds = useMemo(() => new Set(presenceMembers.map((p) => p.userId)), [presenceMembers]);
-
-  // Merge DB members with presence-only entries so the list updates instantly
-  // when guests join, even before the DB insert replicates back.
   const mergedMembers = useMemo<RoomMemberRow[]>(() => {
     if (!room) return dbMembers;
     const map = new Map<string, RoomMemberRow>();
@@ -233,13 +228,11 @@ export function useWatchPartyRoom(code: string) {
     }
     return Array.from(map.values());
   }, [dbMembers, presenceMembers, room]);
-
   const hostHasJoined = useMemo(
     () => !!room && mergedMembers.some((m) => m.user_id === room.host_id),
     [room, mergedMembers],
   );
   const hostIsOnline = !!room && onlineIds.has(room.host_id);
-
   const prevHostOnlineRef = useRef<boolean | null>(null);
   useEffect(() => {
     if (!room || isHost) return;
@@ -258,7 +251,6 @@ export function useWatchPartyRoom(code: string) {
     }
     prevHostOnlineRef.current = hostIsOnline;
   }, [hostIsOnline, room, isHost, sendSystemMessage]);
-
   const lastEpRef = useRef<string | null>(null);
   useEffect(() => {
     if (!isHost || !room?.episode_name) return;
@@ -273,7 +265,6 @@ export function useWatchPartyRoom(code: string) {
       );
     }
   }, [isHost, room?.episode_name, sendSystemMessage]);
-
   useEffect(() => {
     if (!isHost || !room?.id) return;
     const tick = window.setInterval(() => {
@@ -285,14 +276,11 @@ export function useWatchPartyRoom(code: string) {
         episodeName: room.episode_name ?? i18nT("watchparty.episodeDefault"),
         serverIndex: room.server_index,
       };
-      void updateRoomPlayback(room.id, state);
-      // Push state to every guest immediately via broadcast (works even if
-      // Supabase postgres_changes realtime isn't enabled on watch_rooms).
+      void watchPartyApi.updatePlayback(room.id, state);
       broadcast("STATE", state as unknown as Record<string, unknown>);
-    }, 3000);
+    }, WATCH_PARTY_MS.syncTick);
     return () => window.clearInterval(tick);
   }, [isHost, room?.id, room?.episode_name, room?.server_index, broadcast]);
-
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
     if (hydrated || !room) return;
@@ -301,7 +289,6 @@ export function useWatchPartyRoom(code: string) {
       return;
     }
     if (!playable.src && !playable.embed) return;
-
     const t = window.setTimeout(() => {
       const p = playerRef.current;
       if (!p) {
@@ -325,7 +312,6 @@ export function useWatchPartyRoom(code: string) {
     }, 800);
     return () => window.clearTimeout(t);
   }, [hydrated, room, playable.src, playable.embed, isHost, code]);
-
   useEffect(() => {
     if (isHost || !hydrated || !room) return;
     const p = playerRef.current;
@@ -344,7 +330,6 @@ export function useWatchPartyRoom(code: string) {
     room?.server_index,
     room,
   ]);
-
   useEffect(() => {
     if (!room) return;
     saveRoomState(code, {
@@ -354,12 +339,10 @@ export function useWatchPartyRoom(code: string) {
       is_playing: room.is_playing,
     });
   }, [code, room?.episode_name, room?.server_index, room?.playback_time, room?.is_playing, room]);
-
   useEffect(() => {
     if (!iframeInfo) return;
     saveRoomState(code, { sync_mode: iframeInfo.supportsAuto ? "auto" : "manual" });
   }, [code, iframeInfo]);
-
   const syncPlayback = useCallback(
     (playbackTime: number, isPlaying: boolean) => {
       if (!room?.id) return;
@@ -369,12 +352,11 @@ export function useWatchPartyRoom(code: string) {
         episodeName: room.episode_name ?? i18nT("watchparty.episodeDefault"),
         serverIndex: room.server_index,
       };
-      void updateRoomPlayback(room.id, state);
+      void watchPartyApi.updatePlayback(room.id, state);
       broadcast("STATE", state as unknown as Record<string, unknown>);
     },
     [room?.id, room?.episode_name, room?.server_index, broadcast],
   );
-
   const hostPlay = useCallback(
     (t: number) => {
       if (!isHost) return;
@@ -387,7 +369,6 @@ export function useWatchPartyRoom(code: string) {
     },
     [isHost, broadcast, code, syncPlayback, sendSystemMessage, me?.username],
   );
-
   const hostPause = useCallback(
     (t: number) => {
       if (!isHost) return;
@@ -400,7 +381,6 @@ export function useWatchPartyRoom(code: string) {
     },
     [isHost, broadcast, code, syncPlayback, sendSystemMessage, me?.username],
   );
-
   const hostSeek = useCallback(
     (t: number) => {
       if (!isHost) return;
@@ -417,21 +397,19 @@ export function useWatchPartyRoom(code: string) {
     },
     [isHost, broadcast, code, syncPlayback, sendSystemMessage, me?.username],
   );
-
   const leave = async () => {
     if (room?.id && user?.id) {
       if (me) await sendSystemMessage(i18nT("watchparty.system.userLeft", { user: me.username }));
-      await removeRoomMember(room.id, user.id);
+      await watchPartyApi.removeMember(room.id);
     }
     navigate({ to: "/" });
   };
-
   const closeRoom = async () => {
     if (!isHost || !room?.id) return;
     if (!window.confirm(i18nT("watchparty.closeRoomConfirm"))) return;
     setClosing(true);
     await sendSystemMessage(i18nT("watchparty.system.roomClosed"));
-    const { error } = await deleteWatchRoom(room.id);
+    const { error } = await watchPartyApi.deleteRoom(room.id);
     setClosing(false);
     if (error) {
       toast.error(i18nT("toast.roomCloseFailed"), { description: error.message });
@@ -445,7 +423,6 @@ export function useWatchPartyRoom(code: string) {
       search: { tap: 1, server: 0 },
     });
   };
-
   const copyInvite = async () => {
     try {
       await navigator.clipboard.writeText(
@@ -459,7 +436,6 @@ export function useWatchPartyRoom(code: string) {
       toast.error(i18nT("toast.copyFailedShort"));
     }
   };
-
   const adjustManualTime = useCallback(
     (delta: number) => {
       if (!isHost || !room) return;
@@ -470,7 +446,6 @@ export function useWatchPartyRoom(code: string) {
     },
     [isHost, room, syncPlayback, code, broadcast],
   );
-
   const startCountdown = useCallback(() => {
     const fromPlayer = playerRef.current?.currentTime() ?? 0;
     const t = fromPlayer > 0.5 ? fromPlayer : (room?.playback_time ?? 0);
@@ -479,7 +454,6 @@ export function useWatchPartyRoom(code: string) {
     void sendSystemMessage(
       i18nT("watchparty.system.countdown", { user: me?.username ?? i18nT("watchparty.host") }),
     );
-
     let n = 3;
     setCountdown(n);
     const id = window.setInterval(() => {
@@ -493,7 +467,6 @@ export function useWatchPartyRoom(code: string) {
       setCountdown(n);
     }, 1000);
   }, [room?.playback_time, syncPlayback, broadcast, sendSystemMessage, me?.username, hostPlay]);
-
   return {
     code,
     user,
@@ -506,6 +479,10 @@ export function useWatchPartyRoom(code: string) {
     isHost,
     expired,
     playable,
+    joinStatus,
+    pinError,
+    pinSubmitting,
+    submitPin: attemptJoin,
     dbMembers: mergedMembers,
     onlineIds,
     hostHasJoined,

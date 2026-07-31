@@ -1,15 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/queryKeys";
-import {
-  fetchAdminUsersList,
-  fetchUserFavorites,
-  fetchUserWatchHistory,
-} from "@/services/platform/admin/users.admin";
+import { adminUsersApi } from "@/services/platform/admin/users.admin";
+import type { AdminUserFilter } from "@/constants/roles";
 
 export interface AdminUsersQuery {
   query: string;
   sort: "new" | "name";
-  filter: "all" | "free" | "premium" | "admin";
+  filter: AdminUserFilter;
   page: number;
   pageSize: number;
 }
@@ -17,7 +14,7 @@ export interface AdminUsersQuery {
 export function useAdminUsers(params: AdminUsersQuery) {
   return useQuery({
     queryKey: queryKeys.admin.users(params.query, params.sort, params.filter, params.page),
-    queryFn: () => fetchAdminUsersList(params),
+    queryFn: () => adminUsersApi.fetchList(params),
   });
 }
 
@@ -25,14 +22,12 @@ export function useAdminUserDetail(userId: string, tab: "history" | "favorites" 
   const history = useQuery({
     queryKey: queryKeys.admin.userHistory(userId),
     enabled: !!userId,
-    queryFn: () => fetchUserWatchHistory(userId),
+    queryFn: () => adminUsersApi.fetchUserWatchHistory(userId),
   });
-
   const favorites = useQuery({
     queryKey: queryKeys.admin.userFavorites(userId),
     enabled: !!userId && tab === "favorites",
-    queryFn: () => fetchUserFavorites(userId),
+    queryFn: () => adminUsersApi.fetchUserFavorites(userId),
   });
-
   return { history, favorites };
 }

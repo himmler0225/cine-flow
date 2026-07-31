@@ -64,7 +64,6 @@ export const useAuthFormStore = create<AuthFormState>((set, get) => ({
   fieldErrors: {},
   login: emptyLogin(),
   register: emptyRegister(),
-
   syncTab: (tab) => set({ tab }),
   setTab: (tab) => set({ tab, apiError: "", fieldErrors: {} }),
   resetTransient: () =>
@@ -76,13 +75,11 @@ export const useAuthFormStore = create<AuthFormState>((set, get) => ({
     }),
   patchLogin: (patch) => set((state) => ({ login: { ...state.login, ...patch } })),
   patchRegister: (patch) => set((state) => ({ register: { ...state.register, ...patch } })),
-
   submitLogin: async () => {
     const { login } = get();
     const fieldErrors = validateLogin(login, t);
     set({ apiError: "", fieldErrors });
     if (Object.keys(fieldErrors).length) return;
-
     set({ loading: true });
     try {
       await useAuthStore.getState().signInWithEmail(login.email, login.password);
@@ -94,13 +91,11 @@ export const useAuthFormStore = create<AuthFormState>((set, get) => ({
       set({ loading: false });
     }
   },
-
   submitRegister: async () => {
     const { register } = get();
     const fieldErrors = validateRegister(register, t);
     set({ apiError: "", fieldErrors });
     if (Object.keys(fieldErrors).length) return;
-
     set({ loading: true });
     try {
       await useAuthStore
@@ -115,7 +110,6 @@ export const useAuthFormStore = create<AuthFormState>((set, get) => ({
       set({ loading: false });
     }
   },
-
   submitGoogle: async () => {
     set({ apiError: "", loading: true });
     try {
@@ -127,6 +121,5 @@ export const useAuthFormStore = create<AuthFormState>((set, get) => ({
       });
     }
   },
-
   backToLoginAfterSignup: () => set({ signupSuccess: null, tab: "login" }),
 }));

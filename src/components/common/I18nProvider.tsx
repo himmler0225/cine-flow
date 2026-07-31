@@ -15,6 +15,5 @@ export function I18nProvider({ children }: I18nProviderProps) {
     i18n.on("languageChanged", onChange);
     return () => i18n.off("languageChanged", onChange);
   }, []);
-
   return <I18nextProvider i18n={i18n}>{children}</I18nextProvider>;
 }

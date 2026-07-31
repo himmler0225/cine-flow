@@ -17,13 +17,13 @@ export function buildListingHead(opts: { title: string; description: string; pat
   };
 }
 
-/**
- * Build JSON-LD ItemList cho trang danh sách (thể loại / quốc gia / năm).
- * Giúp Google hiển thị rich result dạng carousel khi đủ điều kiện.
- */
 export const buildItemListJsonLd = (
   items: MovieListItem[],
-  opts: { name: string; url: string; max?: number },
+  opts: {
+    name: string;
+    url: string;
+    max?: number;
+  },
 ) => {
   const max = opts.max ?? 20;
   return {

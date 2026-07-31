@@ -3,7 +3,10 @@ import type { MovieListItem } from "@/types/movie";
 
 export type SearchQuickFilter = "all" | "vietsub" | "thuyetminh" | "longtieng" | "fhd";
 
-export const SEARCH_QUICK_FILTERS: { id: SearchQuickFilter; label: string }[] = [
+export const SEARCH_QUICK_FILTERS: {
+  id: SearchQuickFilter;
+  label: string;
+}[] = [
   { id: "all", label: "Tất cả" },
   { id: "vietsub", label: "Vietsub" },
   { id: "thuyetminh", label: "Thuyết minh" },
@@ -22,7 +25,6 @@ export function matchesQuickFilter(movie: MovieListItem, filter: SearchQuickFilt
   return true;
 }
 
-/** Lọc client-side: không dấu + quick filter */
 export function filterSearchResults(
   items: MovieListItem[],
   keyword: string,

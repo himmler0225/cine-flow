@@ -33,7 +33,6 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
   const { t } = useTranslation();
   const { data: genres } = useGenres();
   const { data: countries } = useCountries();
-
   const sortLangs = useMemo(
     () => [
       { value: "vietsub", label: t("filters.vietsub") },
@@ -42,7 +41,6 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
     ],
     [t],
   );
-
   const sortFields = useMemo(
     () => [
       { value: "modified.time", label: t("filters.sortUpdated") },
@@ -51,7 +49,6 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
     ],
     [t],
   );
-
   const sortTypes = useMemo(
     () => [
       { value: "desc", label: t("filters.sortDesc") },
@@ -59,15 +56,12 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
     ],
     [t],
   );
-
   const years = useMemo(() => {
     const now = new Date().getFullYear();
     return Array.from({ length: now - 1969 }, (_, i) => String(now - i));
   }, []);
-
   const set = <K extends keyof MovieFilters>(key: K, v: string) =>
     onChange({ ...value, [key]: v === ALL ? undefined : v });
-
   const hasAny =
     !!value.category ||
     !!value.country ||
@@ -75,12 +69,10 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
     !!value.sort_lang ||
     !!value.sort_field ||
     !!value.sort_type;
-
   const shouldShow = (k: keyof MovieFilters) => !hide.includes(k);
-
   return (
-    <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5">
-      <div className="grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+    <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:rounded-2xl sm:p-4 md:p-5">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-4 md:grid-cols-3 lg:grid-cols-6">
         {shouldShow("category") && (
           <FilterSelect
             label={t("filters.genre")}
@@ -123,7 +115,7 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
           options={sortFields}
         />
         <FilterSelect
-          label={t("filters.status")}
+          label={t("filters.sortOrder")}
           value={value.sort_type ?? ALL}
           onValueChange={(v) => set("sort_type", v)}
           placeholder={t("filters.default")}
@@ -131,7 +123,7 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
         />
       </div>
       {hasAny && (
-        <div className="mt-4 flex justify-end border-t border-white/5 pt-3">
+        <div className="mt-3 flex justify-end border-t border-white/5 pt-2.5 sm:mt-4 sm:pt-3">
           <Button
             size="sm"
             variant="ghost"
@@ -157,11 +149,13 @@ function FilterSelect({
   label: string;
   value: string;
   onValueChange: (v: string) => void;
-  options: Array<{ value: string; label: string }>;
+  options: Array<{
+    value: string;
+    label: string;
+  }>;
   placeholder: string;
 }) {
   const active = value !== ALL;
-
   return (
     <div className="min-w-0">
       <label
@@ -176,7 +170,7 @@ function FilterSelect({
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger
           className={cn(
-            "h-10 w-full rounded-full border px-4 text-sm transition-all",
+            "h-9 w-full rounded-lg border px-3 text-sm transition-all sm:h-10 sm:rounded-full sm:px-4",
             "focus:ring-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-netflix-red/50",
             "data-[state=open]:border-netflix-red/60",
             active

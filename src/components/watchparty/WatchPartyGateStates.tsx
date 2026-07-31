@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { Search, Home, PartyPopper, Film } from "lucide-react";
+import { Search, Home, PartyPopper, Film, Clock } from "lucide-react";
 
 interface WatchPartyAuthGateProps {
   code: string;
@@ -9,7 +9,6 @@ interface WatchPartyAuthGateProps {
 
 export function WatchPartyAuthGate({ code, onLogin }: WatchPartyAuthGateProps) {
   const { t } = useTranslation();
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4 pt-16">
       <div className="max-w-sm rounded-lg border border-white/10 bg-white/5 p-6 text-center">
@@ -18,6 +17,7 @@ export function WatchPartyAuthGate({ code, onLogin }: WatchPartyAuthGateProps) {
           {t("watchparty.loginToJoinDesc", { code })}
         </p>
         <button
+          type="button"
           onClick={onLogin}
           className="mt-4 w-full rounded bg-netflix-red py-2 font-semibold text-white hover:bg-netflix-red-hover"
         >
@@ -42,11 +42,12 @@ interface WatchPartyNotFoundProps {
 
 export function WatchPartyNotFound({ code }: WatchPartyNotFoundProps) {
   const { t } = useTranslation();
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4 pt-20">
       <div className="w-full max-w-md rounded-xl border border-white/10 bg-white/[0.04] p-6 text-center">
-        <div className="mx-auto mb-3 text-5xl">🔍</div>
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10">
+          <Search className="h-7 w-7 text-netflix-muted" />
+        </div>
         <h1 className="text-xl font-bold text-white">{t("watchparty.roomNotFound")}</h1>
         <p className="mt-1 text-sm text-netflix-muted">
           {t("watchparty.roomNotFoundDesc", { code })}
@@ -78,16 +79,22 @@ interface WatchPartyExpiredProps {
 
 export function WatchPartyExpired({ code, movieSlug, movieName }: WatchPartyExpiredProps) {
   const { t } = useTranslation();
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4 pt-20">
       <div className="w-full max-w-md rounded-xl border border-amber-400/30 bg-amber-400/[0.04] p-6 text-center">
-        <div className="mx-auto mb-3 text-5xl">⏰</div>
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-amber-400/10 ring-1 ring-amber-400/30">
+          <Clock className="h-7 w-7 text-amber-300" />
+        </div>
         <h1 className="text-xl font-bold text-white">{t("watchparty.roomExpiredTitle")}</h1>
         <p className="mt-1 text-sm text-netflix-muted">
           {t("watchparty.roomExpiredDesc", { code })}
         </p>
-        {movieName && <p className="mt-2 text-sm font-medium text-white">🎬 {movieName}</p>}
+        {movieName && (
+          <p className="mt-2 inline-flex items-center justify-center gap-1.5 text-sm font-medium text-white">
+            <Film className="h-4 w-4 text-netflix-muted" />
+            {movieName}
+          </p>
+        )}
         <div className="mt-5 flex flex-col gap-2">
           <Link
             to="/watch/$slug"

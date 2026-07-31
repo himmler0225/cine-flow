@@ -27,7 +27,13 @@ const DIRECT_LINKS = [
   },
 ] as const;
 
-function genreLabel(g: { slug: string; name?: string }, t: (key: string) => string): string {
+function genreLabel(
+  g: {
+    slug: string;
+    name?: string;
+  },
+  t: (key: string) => string,
+): string {
   return g.name ?? t(`genres.${g.slug}`);
 }
 
@@ -39,7 +45,6 @@ export function NavDesktopMenu({ path }: Props) {
   const { t } = useTranslation();
   const { data: genres } = useGenres();
   const { data: countries } = useCountries();
-
   const genreList = (genres && genres.length > 0 ? genres : FALLBACK_GENRES).slice(0, 18);
   const sortedCountries = (countries ?? []).slice().sort((a, b) => {
     const ai = POPULAR_COUNTRY_ORDER.indexOf(a.slug);
@@ -50,15 +55,13 @@ export function NavDesktopMenu({ path }: Props) {
     return ai - bi;
   });
   const countryList = sortedCountries.slice(0, 12);
-
   return (
     <nav className="hidden items-center gap-4 text-sm md:flex lg:gap-5">
       {DIRECT_LINKS.map((n) => (
         <Link
           key={n.labelKey}
           to={n.to as never}
-          // @ts-expect-error router params
-          params={n.params}
+          params={"params" in n ? (n.params as never) : undefined}
           className={cn(
             "relative whitespace-nowrap py-1 text-netflix-text/80 transition-colors hover:text-white",
             n.match(path) &&
@@ -72,7 +75,7 @@ export function NavDesktopMenu({ path }: Props) {
       <NavDropdown label={t("nav.genres")} active={path.startsWith("/genre")} width="min-w-[480px]">
         {(close) => (
           <>
-            <div className="mb-3 border-b border-gray-700/50 pb-2 text-xs uppercase tracking-wider text-gray-500">
+            <div className="mb-3 border-b border-white/10 pb-2 text-xs uppercase tracking-wider text-netflix-muted">
               {t("nav.genresTitle")}
             </div>
             <div className="grid grid-cols-3 gap-1">
@@ -83,7 +86,7 @@ export function NavDesktopMenu({ path }: Props) {
                   params={{ slug: g.slug }}
                   onClick={close}
                   className={cn(
-                    "rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-800 hover:text-white",
+                    "rounded-lg px-3 py-2 text-sm text-netflix-text transition-colors hover:bg-white/5 hover:text-white",
                     path === `/genre/${g.slug}` && "bg-red-950/30 text-red-400",
                   )}
                 >
@@ -91,11 +94,11 @@ export function NavDesktopMenu({ path }: Props) {
                 </Link>
               ))}
             </div>
-            <div className="mt-3 border-t border-gray-700/50 pt-2">
+            <div className="mt-3 border-t border-white/10 pt-2">
               <Link
                 to="/genre"
                 onClick={close}
-                className="block rounded-lg px-3 py-2 text-sm font-medium text-netflix-red hover:bg-gray-800"
+                className="block rounded-lg px-3 py-2 text-sm font-medium text-netflix-red hover:bg-white/5"
               >
                 {t("nav.viewAllGenres")}
               </Link>
@@ -111,13 +114,13 @@ export function NavDesktopMenu({ path }: Props) {
       >
         {(close) => (
           <>
-            <div className="mb-3 border-b border-gray-700/50 pb-2 text-xs uppercase tracking-wider text-gray-500">
+            <div className="mb-3 border-b border-white/10 pb-2 text-xs uppercase tracking-wider text-netflix-muted">
               {t("nav.countriesTitle")}
             </div>
             {countryList.length === 0 ? (
               <div className="grid grid-cols-3 gap-2">
                 {Array.from({ length: 9 }).map((_, i) => (
-                  <div key={i} className="h-9 animate-pulse rounded-lg bg-gray-800/60" />
+                  <div key={i} className="h-9 animate-pulse rounded-lg bg-netflix-surface" />
                 ))}
               </div>
             ) : (
@@ -129,7 +132,7 @@ export function NavDesktopMenu({ path }: Props) {
                     params={{ slug: c.slug }}
                     onClick={close}
                     className={cn(
-                      "rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-800 hover:text-white",
+                      "rounded-lg px-3 py-2 text-sm text-netflix-text transition-colors hover:bg-white/5 hover:text-white",
                       path === `/country/${c.slug}` && "bg-red-950/30 text-red-400",
                     )}
                   >
@@ -138,11 +141,11 @@ export function NavDesktopMenu({ path }: Props) {
                 ))}
               </div>
             )}
-            <div className="mt-3 border-t border-gray-700/50 pt-2">
+            <div className="mt-3 border-t border-white/10 pt-2">
               <Link
                 to="/country"
                 onClick={close}
-                className="block rounded-lg px-3 py-2 text-sm font-medium text-netflix-red hover:bg-gray-800"
+                className="block rounded-lg px-3 py-2 text-sm font-medium text-netflix-red hover:bg-white/5"
               >
                 {t("nav.viewAllCountries")}
               </Link>
@@ -160,17 +163,17 @@ export function NavDesktopMenu({ path }: Props) {
                 to="/catalog/$slug"
                 params={{ slug }}
                 onClick={close}
-                className="rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+                className="rounded-lg px-3 py-2 text-sm text-netflix-text hover:bg-white/5 hover:text-white"
               >
                 {t(`otherLinks.${slug}`)}
               </Link>
             ))}
-            <div className="my-1 border-t border-gray-700/50" />
+            <div className="my-1 border-t border-white/10" />
             <Link
               to="/year/$year"
               params={{ year: "2025" }}
               onClick={close}
-              className="rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+              className="rounded-lg px-3 py-2 text-sm text-netflix-text hover:bg-white/5 hover:text-white"
             >
               {t("nav.releaseYear", { year: "2025" })}
             </Link>

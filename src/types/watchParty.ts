@@ -12,7 +12,7 @@ export interface WatchRoom {
   created_at: string;
   expires_at: string;
   is_private?: boolean;
-  pin?: string | null;
+  has_pin?: boolean;
 }
 
 export interface RoomMessage {
@@ -40,8 +40,3 @@ export interface RoomMemberRow {
   avatar_url: string | null;
   joined_at?: string;
 }
-
-export const WATCH_ROOM_BASE_COLUMNS =
-  "id, code, host_id, movie_slug, movie_name, thumb_url, episode_name, server_index, playback_time, is_playing, created_at, expires_at";
-
-export const WATCH_ROOM_COLUMNS = `${WATCH_ROOM_BASE_COLUMNS}, is_private, pin`;

@@ -4,15 +4,10 @@ import { PartyPopper, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import {
-  addRoomMember,
-  createWatchRoom,
-  insertRoomMessage,
-} from "@/services/platform/watchParty.service";
+import { watchPartyApi } from "@/services/platform/watchParty.service";
 import { useAuthStore } from "@/store/authStore";
 import { usePremium } from "@/hooks/usePremium";
 import { generateRoomCode } from "@/lib/watchParty/watchParty";
-import { markPinVerified } from "@/lib/watchParty/watchPartyPin";
 import { cn } from "@/lib/utils";
 import { CreateRoomModal } from "./CreateRoomModal";
 import { WatchPartySetupDialog } from "./WatchPartySetupDialog";
@@ -42,7 +37,6 @@ export function WatchPartyButton({
   const { isAuthenticated, user, profile, requestAuth } = useAuthStore();
   const { partyHours } = usePremium();
   const navigate = useNavigate();
-
   const openSetup = () => {
     if (!isAuthenticated || !user) {
       toast.info(t("watchparty.loginRequired"));
@@ -51,7 +45,6 @@ export function WatchPartyButton({
     }
     setSetupOpen(true);
   };
-
   const create = async (opts: { isPrivate: boolean; pin: string | null }) => {
     if (!user) return;
     setLoading(true);
@@ -63,8 +56,7 @@ export function WatchPartyButton({
           (user.user_metadata?.full_name as string | undefined) ??
           user.email?.split("@")[0] ??
           t("watchparty.guest");
-
-        const { data: room, error } = await createWatchRoom({
+        const { data: room, error } = await watchPartyApi.createRoom({
           code: newCode,
           hostId: user.id,
           movieSlug,
@@ -76,17 +68,9 @@ export function WatchPartyButton({
           isPrivate: opts.isPrivate,
           pin: opts.pin,
         });
-
         if (!error && room) {
-          await addRoomMember({
-            roomId: room.id,
-            userId: user.id,
-            username,
-            avatarUrl: profile?.avatar_url ?? null,
-          });
-          await insertRoomMessage(
+          await watchPartyApi.insertMessage(
             room.id,
-            user.id,
             username,
             t("watchparty.roomCreatedMsg", {
               username,
@@ -94,13 +78,11 @@ export function WatchPartyButton({
             }),
             "system",
           );
-          if (opts.isPrivate) markPinVerified(newCode);
           setCode(newCode);
           setSetupOpen(false);
           setCreatedOpen(true);
           return;
         }
-
         if (error) {
           const isDup = error.message.toLowerCase().includes("duplicate") || error.code === "23505";
           if (!isDup) {
@@ -116,7 +98,10 @@ export function WatchPartyButton({
         description: t("watchparty.codeGenFailedDesc"),
       });
     } catch (e) {
-      const err = e as { message?: string; code?: string };
+      const err = e as {
+        message?: string;
+        code?: string;
+      };
       toast.error(t("watchparty.unknownError"), {
         description: err.message ?? String(e),
         duration: 8000,
@@ -125,12 +110,10 @@ export function WatchPartyButton({
       setLoading(false);
     }
   };
-
   const start = () => {
     setCreatedOpen(false);
     navigate({ to: "/watch-party/$code", params: { code } });
   };
-
   return (
     <>
       <Button

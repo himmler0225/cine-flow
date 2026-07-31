@@ -16,6 +16,7 @@ export function AuthField({
   trailing,
   id,
   autoComplete,
+  label,
 }: {
   icon: ReactNode;
   type?: string;
@@ -26,28 +27,45 @@ export function AuthField({
   trailing?: ReactNode;
   id?: string;
   autoComplete?: string;
+  label?: string;
 }) {
+  const fieldId = id ?? placeholder.replace(/\s+/g, "-").toLowerCase();
+  const errorId = `${fieldId}-error`;
   return (
     <div className="space-y-1">
+      {label ? (
+        <Label htmlFor={fieldId} className="sr-only">
+          {label}
+        </Label>
+      ) : null}
       <div
         className={cn(
           "flex items-center gap-2 rounded-lg border bg-black/40 px-3 py-1 focus-within:border-netflix-red",
           error ? "border-red-500" : "border-border",
         )}
       >
-        <span className="text-muted-foreground">{icon}</span>
+        <span className="text-muted-foreground" aria-hidden="true">
+          {icon}
+        </span>
         <Input
-          id={id}
+          id={fieldId}
           type={type}
           autoComplete={autoComplete}
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
+          aria-label={label ?? placeholder}
           className="h-10 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
         />
         {trailing}
       </div>
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && (
+        <p id={errorId} role="alert" className="text-xs text-red-400">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

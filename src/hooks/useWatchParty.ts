@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { Socket } from "socket.io-client";
-import { fetchRoomMessages, insertRoomMessage } from "@/services/platform/watchParty.service";
+import { watchPartyApi } from "@/services/platform/watchParty.service";
 import { getAccessToken } from "@/lib/auth/authToken";
 import {
   createWatchPartySocket,
@@ -16,7 +16,11 @@ type BroadcastHandler = (ev: WatchPartyBroadcastEvent, payload: Record<string, u
 
 interface Opts {
   room: WatchRoom | null;
-  me: { userId: string; username: string; avatar_url: string | null } | null;
+  me: {
+    userId: string;
+    username: string;
+    avatar_url: string | null;
+  } | null;
   isHost: boolean;
   onBroadcast?: BroadcastHandler;
   onPresenceChange?: (members: PresenceUser[]) => void;
@@ -37,33 +41,25 @@ export function useWatchParty({
   const handlerRef = useRef<BroadcastHandler | undefined>(onBroadcast);
   const presenceRef = useRef<((m: PresenceUser[]) => void) | undefined>(onPresenceChange);
   const roomClosedRef = useRef(onRoomClosed);
-
   useEffect(() => {
     handlerRef.current = onBroadcast;
   }, [onBroadcast]);
-
   useEffect(() => {
     presenceRef.current = onPresenceChange;
   }, [onPresenceChange]);
-
   useEffect(() => {
     roomClosedRef.current = onRoomClosed;
   }, [onRoomClosed]);
-
   useEffect(() => {
     if (!room?.id) return;
-    fetchRoomMessages(room.id).then(setMessages);
+    watchPartyApi.fetchMessages(room.id).then(setMessages);
   }, [room?.id]);
-
   useEffect(() => {
     if (!room?.code || !me) return;
-
     const token = getAccessToken();
     if (!token) return;
-
     const socket = createWatchPartySocket(token);
     socketRef.current = socket;
-
     const presence: WatchPartyPresence = {
       userId: me.userId,
       username: me.username,
@@ -71,16 +67,13 @@ export function useWatchParty({
       isHost,
       joinedAt: Date.now(),
     };
-
     socket.on("connect", () => {
       socket.emit("join", { roomCode: room.code, presence });
     });
-
     socket.on("presence:sync", (list: PresenceUser[]) => {
       setMembers(list);
       presenceRef.current?.(list);
     });
-
     socket.on("presence:join", (member: PresenceUser) => {
       setMembers((prev) => {
         if (prev.some((m) => m.userId === member.userId)) return prev;
@@ -89,7 +82,6 @@ export function useWatchParty({
         return next;
       });
     });
-
     socket.on("presence:leave", (payload: { userId?: string; username?: string }) => {
       if (!payload.userId || payload.userId === me.userId) return;
       setMembers((prev) => {
@@ -114,30 +106,24 @@ export function useWatchParty({
         ]);
       }
     });
-
     socket.on(
       "broadcast",
       (data: { event: WatchPartyBroadcastEvent; payload: Record<string, unknown> }) => {
         handlerRef.current?.(data.event, data.payload ?? {});
       },
     );
-
     socket.on("message:created", (msg: RoomMessage) => {
       setMessages((m) => (m.some((x) => x.id === msg.id) ? m : [...m, msg]));
     });
-
     socket.on("room:closed", () => {
       roomClosedRef.current?.();
     });
-
     socket.connect();
-
     return () => {
       socket.disconnect();
       socketRef.current = null;
     };
   }, [room?.id, room?.code, me?.userId, me?.username, me?.avatar_url, isHost, me]);
-
   const broadcast = useCallback(
     (event: WatchPartyBroadcastEvent, payload: Record<string, unknown>) => {
       if (!room?.code) return;
@@ -145,15 +131,13 @@ export function useWatchParty({
     },
     [room?.code],
   );
-
   const sendMessage = useCallback(
     async (content: string, type: RoomMessage["type"] = "message") => {
       if (!room?.id || !me) return;
       const trimmed = content.trim().slice(0, 200);
       if (!trimmed) return;
-      await insertRoomMessage(
+      await watchPartyApi.insertMessage(
         room.id,
-        me.userId,
         me.username,
         trimmed,
         type,
@@ -162,14 +146,12 @@ export function useWatchParty({
     },
     [room?.id, me],
   );
-
   const sendSystemMessage = useCallback(
     async (text: string) => {
       if (!room?.id || !me) return;
-      await insertRoomMessage(room.id, me.userId, me.username, text, "system");
+      await watchPartyApi.insertMessage(room.id, me.username, text, "system");
     },
     [room?.id, me],
   );
-
   return { members, messages, broadcast, sendMessage, sendSystemMessage, DRIFT };
 }

@@ -11,12 +11,15 @@ import { PartyPopper, Users, MessageSquare, Clock } from "lucide-react";
 const AnalyticsSearchBarChart = lazy(
   () => import("@/components/admin/charts/AnalyticsSearchBarChart"),
 );
+
 const AnalyticsHourlyBarChart = lazy(
   () => import("@/components/admin/charts/AnalyticsHourlyBarChart"),
 );
+
 const AnalyticsSimpleBarChart = lazy(
   () => import("@/components/admin/charts/AnalyticsSimpleBarChart"),
 );
+
 const AdminPieChart = lazy(() => import("@/components/admin/charts/AdminPieChart"));
 
 export const Route = createFileRoute("/admin/analytics")({
@@ -27,9 +30,7 @@ function AnalyticsPage() {
   const { t } = useTranslation();
   const { dateRange, getDateFrom } = useAdminStore();
   const from = getDateFrom();
-
   const { search, hourly, rooms, langQuality } = useAdminAnalytics(dateRange, from);
-
   return (
     <div className="space-y-5">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.analytics")}</h1>

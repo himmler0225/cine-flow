@@ -9,7 +9,6 @@ export function NotificationBell() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { notifications, unreadCount, markRead } = useEpisodeNotifications();
-
   return (
     <div className="relative">
       <button

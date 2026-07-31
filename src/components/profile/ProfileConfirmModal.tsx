@@ -20,7 +20,6 @@ export function ProfileConfirmModal({
   onCancel,
 }: ProfileConfirmModalProps) {
   const { t } = useTranslation();
-
   return (
     <AnimatePresence>
       {open && (
@@ -36,7 +35,7 @@ export function ProfileConfirmModal({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-xl border border-gray-700 bg-gray-900 p-6"
+            className="w-full max-w-sm rounded-xl border border-white/10 bg-netflix-dark p-6"
           >
             <div className="mb-3 flex items-start gap-3">
               <div className="rounded-full bg-red-500/20 p-2">
@@ -44,13 +43,13 @@ export function ProfileConfirmModal({
               </div>
               <div>
                 <h3 className="font-semibold text-white">{title}</h3>
-                <p className="mt-1 text-sm text-gray-400">{message}</p>
+                <p className="mt-1 text-sm text-netflix-muted">{message}</p>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={onCancel}
-                className="rounded-md border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-white/5"
+                className="rounded-md border border-white/10 px-4 py-2 text-sm text-netflix-text hover:bg-white/5"
               >
                 {t("common.cancel")}
               </button>
