@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Clapperboard } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useGenres } from "@/hooks/useGenres";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
@@ -39,16 +40,25 @@ function AllGenres() {
                 to="/genre/$slug"
                 params={{ slug: g.slug }}
                 className={cn(
-                  "group relative flex aspect-[16/10] items-end overflow-hidden rounded-xl border border-white/10 p-4 transition-transform hover:-translate-y-0.5",
+                  "group relative flex aspect-[16/10] items-end overflow-hidden rounded-xl border border-white/10 p-4 shadow-md shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:shadow-lg hover:shadow-black/30",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-netflix-red",
                   TILE_TONES[i % TILE_TONES.length],
                 )}
               >
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
+                  className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl transition-opacity duration-300 group-hover:opacity-80"
                 />
-                <span className="relative z-10 text-sm font-semibold text-white md:text-base">
+                <Clapperboard
+                  aria-hidden
+                  strokeWidth={1.25}
+                  className="pointer-events-none absolute -bottom-4 -right-4 h-20 w-20 text-white/10 transition-transform duration-300 group-hover:scale-110 group-hover:text-white/15"
+                />
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent"
+                />
+                <span className="relative z-10 text-sm font-semibold tracking-wide text-white md:text-base">
                   {g.name}
                 </span>
               </Link>

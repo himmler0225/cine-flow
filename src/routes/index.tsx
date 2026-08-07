@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { HeroBanner } from "@/components/hero/HeroBanner";
 import { MovieRow } from "@/components/movie/MovieRow";
 import { MovieRowError } from "@/components/movie/MovieRowError";
@@ -31,22 +32,24 @@ function HomePage() {
     trending.items.length > 0 ? trending.items.map((t) => t.m) : (newMovies.data?.items ?? []);
   const rows = getHomeRows().filter((r) => r.type);
   return (
-    <div>
-      <HeroBanner movies={heroItems} />
-      <div className="relative z-10 space-y-2 pb-12 md:-mt-16">
-        <ContinueWatchingRow />
-        <MovieRow
-          title={t("home.rows.newUpdates")}
-          movies={newMovies.data?.items}
-          isLoading={newMovies.isLoading}
-          href={{ to: "/new" }}
-        />{" "}
-        <TopRanking />
-        {rows.map((row, i) => (
-          <LazyTypedRow key={row.key} type={row.type!} titleKey={row.titleKey} eager={i < 2} />
-        ))}
+    <AuthGuard>
+      <div>
+        <HeroBanner movies={heroItems} />
+        <div className="relative z-10 space-y-2 pb-12 md:-mt-16">
+          <ContinueWatchingRow />
+          <MovieRow
+            title={t("home.rows.newUpdates")}
+            movies={newMovies.data?.items}
+            isLoading={newMovies.isLoading}
+            href={{ to: "/new" }}
+          />{" "}
+          <TopRanking />
+          {rows.map((row, i) => (
+            <LazyTypedRow key={row.key} type={row.type!} titleKey={row.titleKey} eager={i < 2} />
+          ))}
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }
 

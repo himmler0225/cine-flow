@@ -51,7 +51,6 @@
     "inVietnam": "in Vietnam"
   },
   "auth": {
-    "tagline": "Xem phim không giới hạn",
     "login": "Đăng Nhập",
     "register": "Đăng Ký",
     "loginBtn": "ĐĂNG NHẬP",
@@ -66,6 +65,8 @@
     "google": "Tiếp tục với Google",
     "checkEmail": "Kiểm tra email của bạn",
     "checkEmailDesc": "Chúng tôi đã gửi link xác nhận đến",
+    "pendingApproval": "Yêu cầu đăng ký đã được gửi",
+    "pendingApprovalDesc": "Tài khoản của bạn đang chờ quản trị viên duyệt. Vui lòng quay lại đăng nhập sau khi được duyệt:",
     "backToLogin": "← Quay lại đăng nhập",
     "agreeTerms": "Tôi đồng ý với",
     "terms": "Điều khoản sử dụng",
@@ -554,11 +555,14 @@
       "filterFree": "Miễn phí",
       "filterPremium": "Premium",
       "filterAdmin": "Admin",
+      "filterPending": "Chờ duyệt",
       "role": "Vai trò",
       "plan": "Gói",
       "user": "Người dùng",
       "adminRole": "Admin",
       "free": "Miễn phí",
+      "pending": "Chờ duyệt",
+      "rejected": "Đã từ chối",
       "registered": "Đăng ký",
       "users": "Người dùng",
       "movie": "Phim",
@@ -613,6 +617,10 @@
       "removeAdmin": "Xóa quyền Admin",
       "confirmMakeAdmin": "{{name}} sẽ có toàn quyền quản trị.",
       "confirmRemoveAdmin": "{{name}} sẽ mất quyền truy cập admin panel.",
+      "approve": "Duyệt",
+      "reject": "Từ chối",
+      "confirmApprove": "Duyệt tài khoản đăng ký của {{name}}?",
+      "confirmReject": "Từ chối yêu cầu đăng ký của {{name}}?",
       "thisUser": "Người dùng này",
       "userTitle": "Người dùng · {{name}}",
       "tabHistory": "Lịch sử",
@@ -785,6 +793,75 @@
   "home": {
     "rows": {
       "newUpdates": "Mới Cập Nhật"
+    }
+  },
+  "legal": {
+    "lastUpdated": "Cập nhật lần cuối",
+    "terms": {
+      "title": "Điều khoản sử dụng",
+      "sections": [
+        {
+          "heading": "1. Giới thiệu",
+          "body": "Cine-Flow là dự án phi lợi nhuận, được xây dựng cho mục đích học tập và trình diễn kỹ thuật. Dịch vụ không thu phí người dùng cuối và không đại diện cho bất kỳ đơn vị phát hành hay sở hữu bản quyền phim nào."
+        },
+        {
+          "heading": "2. Nội dung phim",
+          "body": "Nội dung phim hiển thị trên Cine-Flow được tổng hợp từ các nguồn công khai có sẵn trên Internet. Cine-Flow không lưu trữ file phim trên máy chủ của mình và không chịu trách nhiệm về tính hợp pháp hay bản quyền nội dung do bên thứ ba cung cấp."
+        },
+        {
+          "heading": "3. Tài khoản & đăng ký",
+          "body": "Sau khi gửi yêu cầu đăng ký, tài khoản của bạn cần được quản trị viên xét duyệt trước khi có thể đăng nhập và sử dụng. Bạn có trách nhiệm bảo mật thông tin đăng nhập và không chia sẻ tài khoản cho người khác."
+        },
+        {
+          "heading": "4. Quy tắc sử dụng",
+          "body": "Không sử dụng Cine-Flow để vi phạm pháp luật, phát tán nội dung độc hại, spam, hoặc gây ảnh hưởng đến hoạt động của hệ thống và trải nghiệm của người dùng khác (bao gồm trong bình luận và phòng xem chung)."
+        },
+        {
+          "heading": "5. Giới hạn trách nhiệm",
+          "body": "Dịch vụ được cung cấp theo hiện trạng (\"as is\"), không có bảo đảm về tính liên tục hay không có lỗi. Cine-Flow có thể tạm ngừng, thay đổi hoặc chấm dứt dịch vụ bất kỳ lúc nào mà không cần báo trước."
+        },
+        {
+          "heading": "6. Thay đổi điều khoản",
+          "body": "Điều khoản này có thể được cập nhật theo thời gian. Việc bạn tiếp tục sử dụng dịch vụ sau khi có thay đổi đồng nghĩa với việc bạn chấp nhận các điều khoản mới."
+        },
+        {
+          "heading": "7. Liên hệ",
+          "body": "Nếu có thắc mắc về điều khoản sử dụng, vui lòng liên hệ quản trị viên qua kênh hỗ trợ của Cine-Flow."
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Chính sách bảo mật",
+      "sections": [
+        {
+          "heading": "1. Thông tin thu thập",
+          "body": "Cine-Flow thu thập email, tên hiển thị, ảnh đại diện (khi đăng ký hoặc đăng nhập bằng Google), cùng với lịch sử xem, danh sách yêu thích, watchlist, bình luận/đánh giá và hoạt động phòng xem chung của bạn."
+        },
+        {
+          "heading": "2. Mục đích sử dụng dữ liệu",
+          "body": "Dữ liệu được dùng để vận hành các tính năng cá nhân hoá (tiếp tục xem, đề xuất phim...), xét duyệt yêu cầu đăng ký tài khoản, và cải thiện chất lượng dịch vụ."
+        },
+        {
+          "heading": "3. Chia sẻ với bên thứ ba",
+          "body": "Cine-Flow sử dụng Google OAuth để hỗ trợ đăng nhập và Supabase để lưu trữ dữ liệu, xác thực người dùng. Chúng tôi không bán hoặc chia sẻ dữ liệu cá nhân của bạn cho bên thứ ba vì mục đích quảng cáo."
+        },
+        {
+          "heading": "4. Cookie & lưu trữ cục bộ",
+          "body": "Cine-Flow sử dụng cookie và bộ nhớ cục bộ của trình duyệt (local storage) để duy trì phiên đăng nhập và ghi nhớ các tuỳ chọn hiển thị của bạn."
+        },
+        {
+          "heading": "5. Bảo mật dữ liệu",
+          "body": "Chúng tôi áp dụng các biện pháp hợp lý để bảo vệ dữ liệu của bạn, tuy nhiên không có hệ thống nào đảm bảo an toàn tuyệt đối 100%."
+        },
+        {
+          "heading": "6. Quyền của bạn",
+          "body": "Bạn có thể yêu cầu xoá tài khoản và dữ liệu cá nhân bất kỳ lúc nào bằng cách liên hệ quản trị viên qua kênh hỗ trợ của Cine-Flow."
+        },
+        {
+          "heading": "7. Thay đổi chính sách",
+          "body": "Chính sách bảo mật này có thể được cập nhật theo thời gian. Chúng tôi khuyến khích bạn xem lại trang này định kỳ để nắm các thay đổi mới nhất."
+        }
+      ]
     }
   }
 }

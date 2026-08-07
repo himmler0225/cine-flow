@@ -77,9 +77,6 @@ export function TopRanking() {
   const { items, isLoading } = useTop10();
   const queryClient = useQueryClient();
 
-  const maxScore = items[0]?.score ?? 0;
-  const barPercent = (score: number) => (maxScore > 0 ? Math.max(8, (score / maxScore) * 100) : 0);
-
   const prefetch = (slug: string) => {
     queryClient.prefetchQuery({
       queryKey: queryKeys.movies.detail(slug),
@@ -153,16 +150,8 @@ export function TopRanking() {
                   className="h-full w-full object-cover"
                   onError={(e) => handlePosterError(e, it.m)}
                 />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-2 pt-8">
-                  <div className="h-1 overflow-hidden rounded-full bg-white/15">
-                    <div
-                      className="h-full rounded-full bg-netflix-red"
-                      style={{ width: `${barPercent(it.score)}%` }}
-                    />
-                  </div>
-                  <p className="mt-1 text-[11px] font-bold tabular-nums text-amber-300">
-                    {it.score.toFixed(1)}
-                  </p>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2 pt-10">
+                  <MetaBadges quality={it.m.quality} year={it.m.year} size="sm" />
                 </div>
               </div>
               <p className="mt-1.5 line-clamp-1 text-xs font-semibold text-white md:text-sm">
@@ -203,18 +192,9 @@ export function TopRanking() {
                   <div className="min-w-0 flex-1">
                     <p className="line-clamp-1 text-sm font-medium text-white">{it.m.name}</p>
                     <div className="mt-1.5 flex items-center gap-2">
-                      <div className="h-1 max-w-[120px] flex-1 overflow-hidden rounded-full bg-white/10">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-netflix-red to-amber-400"
-                          style={{ width: `${barPercent(it.score)}%` }}
-                        />
-                      </div>
                       <MetaBadges quality={it.m.quality} year={it.m.year} size="sm" />
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs font-semibold tabular-nums text-netflix-muted">
-                    {it.score.toFixed(1)}
-                  </span>
                 </Link>
               </li>
             );

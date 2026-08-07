@@ -2,7 +2,16 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Search, MoreVertical, ShieldCheck, ShieldOff, Eye, Download } from "lucide-react";
+import {
+  Search,
+  MoreVertical,
+  ShieldCheck,
+  ShieldOff,
+  Eye,
+  Download,
+  Check,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { getIntlLocale } from "@/lib/i18n";
 import { getTotalPages } from "@/utils/pagination";
@@ -37,7 +46,7 @@ function UsersPage() {
   const [openUser, setOpenUser] = useState<ProfileRow | null>(null);
   const [confirm, setConfirm] = useState<{
     user: ProfileRow;
-    action: "make-admin" | "remove-admin";
+    action: "make-admin" | "remove-admin" | "approve" | "reject";
   } | null>(null);
   const { data, isLoading } = useAdminUsers({
     query,
@@ -109,6 +118,7 @@ function UsersPage() {
               }}
               options={[
                 { value: "all", label: t("admin.common.filterAll") },
+                { value: "pending", label: t("admin.common.filterPending") },
                 { value: "free", label: t("admin.common.filterFree") },
                 { value: ROLE.PREMIUM, label: t("admin.common.filterPremium") },
                 { value: ROLE.ADMIN, label: t("admin.common.filterAdmin") },
@@ -156,6 +166,8 @@ function UsersPage() {
                           action: isAdminRole(u.role) ? "remove-admin" : "make-admin",
                         })
                       }
+                      onApprove={() => setConfirm({ user: u, action: "approve" })}
+                      onReject={() => setConfirm({ user: u, action: "reject" })}
                     />
                   ))}
               </tbody>
@@ -205,21 +217,35 @@ function UsersPage() {
         title={
           confirm?.action === "make-admin"
             ? t("admin.users.makeAdmin")
-            : t("admin.users.removeAdmin")
+            : confirm?.action === "remove-admin"
+              ? t("admin.users.removeAdmin")
+              : confirm?.action === "approve"
+                ? t("admin.users.approve")
+                : t("admin.users.reject")
         }
         message={t(
           confirm?.action === "make-admin"
             ? "admin.users.confirmMakeAdmin"
-            : "admin.users.confirmRemoveAdmin",
+            : confirm?.action === "remove-admin"
+              ? "admin.users.confirmRemoveAdmin"
+              : confirm?.action === "approve"
+                ? "admin.users.confirmApprove"
+                : "admin.users.confirmReject",
           { name: confirm?.user.username ?? t("admin.users.thisUser") },
         )}
         onClose={() => setConfirm(null)}
         onConfirm={async () => {
           if (!confirm) return;
-          const { error } = await adminUsersApi.updateRole(
-            confirm.user.id,
-            confirm.action === "make-admin" ? ROLE.ADMIN : ROLE.USER,
-          );
+          const { error } =
+            confirm.action === "approve" || confirm.action === "reject"
+              ? await adminUsersApi.updateStatus(
+                  confirm.user.id,
+                  confirm.action === "approve" ? "approved" : "rejected",
+                )
+              : await adminUsersApi.updateRole(
+                  confirm.user.id,
+                  confirm.action === "make-admin" ? ROLE.ADMIN : ROLE.USER,
+                );
           if (error) toast.error(t("toast.adminUpdateFailed"), { description: error.message });
           else {
             toast.success(t("toast.adminUpdateSuccess"));
@@ -240,17 +266,23 @@ function UserRow({
   onToggle,
   onOpen,
   onAdminToggle,
+  onApprove,
+  onReject,
 }: {
   user: ProfileRow;
   selected: boolean;
   onToggle: () => void;
   onOpen: () => void;
   onAdminToggle: () => void;
+  onApprove: () => void;
+  onReject: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);
   const [menu, setMenu] = useState(false);
   const isAdmin = isAdminRole(user.role);
+  const isPending = user.status === "pending";
+  const isRejected = user.status === "rejected";
   return (
     <tr className="border-b border-white/5 hover:bg-white/5">
       <td className="py-2.5">
@@ -276,15 +308,27 @@ function UserRow({
         </div>
       </td>
       <td>
-        {isAdmin ? (
-          <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-red-400">
-            {t("admin.common.adminRole")}
-          </span>
-        ) : (
-          <span className="rounded bg-zinc-700/40 px-1.5 py-0.5 text-[10px] font-medium text-zinc-300">
-            {t("admin.common.user")}
-          </span>
-        )}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {isAdmin ? (
+            <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-red-400">
+              {t("admin.common.adminRole")}
+            </span>
+          ) : (
+            <span className="rounded bg-zinc-700/40 px-1.5 py-0.5 text-[10px] font-medium text-zinc-300">
+              {t("admin.common.user")}
+            </span>
+          )}
+          {isPending && (
+            <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+              {t("admin.common.pending")}
+            </span>
+          )}
+          {isRejected && (
+            <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-red-400">
+              {t("admin.common.rejected")}
+            </span>
+          )}
+        </div>
       </td>
       <td>
         {isPremiumPlan(user.plan) ? (
@@ -301,6 +345,24 @@ function UserRow({
         {new Date(user.created_at).toLocaleDateString(locale)}
       </td>
       <td className="relative text-right">
+        {isPending && (
+          <span className="mr-1 inline-flex items-center gap-1">
+            <button
+              onClick={onApprove}
+              title={t("admin.users.approve")}
+              className="rounded p-1 text-emerald-400 hover:bg-emerald-500/10"
+            >
+              <Check className="h-4 w-4" />
+            </button>
+            <button
+              onClick={onReject}
+              title={t("admin.users.reject")}
+              className="rounded p-1 text-red-400 hover:bg-red-500/10"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </span>
+        )}
         <button
           onClick={() => setMenu((v) => !v)}
           className="rounded p-1 text-zinc-400 hover:bg-white/10 hover:text-white"

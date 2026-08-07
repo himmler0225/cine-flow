@@ -13,8 +13,8 @@ const NAV_LINKS = [
 ] as const;
 
 const LEGAL_LINKS = [
-  { labelKey: "footer.terms", href: "#" },
-  { labelKey: "footer.privacy", href: "#" },
+  { labelKey: "footer.terms", to: "/terms" },
+  { labelKey: "footer.privacy", to: "/privacy" },
 ] as const;
 
 export function Footer() {
@@ -75,14 +75,12 @@ export function Footer() {
             <ul className="space-y-3">
               {LEGAL_LINKS.map((link) => (
                 <li key={link.labelKey}>
-                  <a
-                    href={link.href}
-                    target={link.href.startsWith("http") ? "_blank" : undefined}
-                    rel="noreferrer"
+                  <Link
+                    to={link.to}
                     className="text-sm text-white/60 transition-colors hover:text-white"
                   >
                     {t(link.labelKey)}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

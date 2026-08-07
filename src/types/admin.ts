@@ -3,6 +3,7 @@ export interface AdminProfileRow {
   username: string | null;
   avatar_url: string | null;
   role: string | null;
+  status?: string | null;
   plan: string | null;
   created_at: string;
   email?: string | null;

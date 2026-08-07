@@ -51,7 +51,6 @@
     "inVietnam": "in Vietnam"
   },
   "auth": {
-    "tagline": "Unlimited movie streaming",
     "login": "Sign In",
     "register": "Sign Up",
     "loginBtn": "SIGN IN",
@@ -66,6 +65,8 @@
     "google": "Continue with Google",
     "checkEmail": "Check your email",
     "checkEmailDesc": "We sent a confirmation link to",
+    "pendingApproval": "Registration request submitted",
+    "pendingApprovalDesc": "Your account is awaiting admin approval. Please come back and sign in once it's approved:",
     "backToLogin": "← Back to sign in",
     "agreeTerms": "I agree to the",
     "terms": "Terms of Service",
@@ -554,10 +555,13 @@
       "filterFree": "Free",
       "filterPremium": "Premium",
       "filterAdmin": "Admin",
+      "filterPending": "Pending",
       "role": "Role",
       "plan": "Plan",
       "user": "User",
       "adminRole": "Admin",
+      "pending": "Pending",
+      "rejected": "Rejected",
       "free": "Free",
       "registered": "Registered",
       "users": "Users",
@@ -613,6 +617,10 @@
       "removeAdmin": "Remove Admin",
       "confirmMakeAdmin": "{{name}} will have full admin access.",
       "confirmRemoveAdmin": "{{name}} will lose admin panel access.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirmApprove": "Approve {{name}}'s registration request?",
+      "confirmReject": "Reject {{name}}'s registration request?",
       "thisUser": "This user",
       "userTitle": "User · {{name}}",
       "tabHistory": "History",
@@ -785,6 +793,75 @@
   "home": {
     "rows": {
       "newUpdates": "Recently Updated"
+    }
+  },
+  "legal": {
+    "lastUpdated": "Last updated",
+    "terms": {
+      "title": "Terms of Service",
+      "sections": [
+        {
+          "heading": "1. Introduction",
+          "body": "Cine-Flow is a non-profit project built for learning and technical demonstration purposes. The service is free to end users and does not represent any movie studio, distributor, or rights holder."
+        },
+        {
+          "heading": "2. Movie content",
+          "body": "The movie content shown on Cine-Flow is aggregated from publicly available sources on the Internet. Cine-Flow does not host any video files on its own servers and is not responsible for the legality or copyright status of third-party content."
+        },
+        {
+          "heading": "3. Account & registration",
+          "body": "After you submit a registration request, your account must be reviewed and approved by an administrator before you can sign in and use the service. You are responsible for keeping your login credentials secure and not sharing your account with others."
+        },
+        {
+          "heading": "4. Acceptable use",
+          "body": "Do not use Cine-Flow to break the law, distribute harmful content, spam, or disrupt the platform or other users' experience (including in comments and shared watch parties)."
+        },
+        {
+          "heading": "5. Limitation of liability",
+          "body": "The service is provided \"as is\", with no guarantee of uninterrupted or error-free operation. Cine-Flow may suspend, change, or discontinue the service at any time without prior notice."
+        },
+        {
+          "heading": "6. Changes to these terms",
+          "body": "These terms may be updated from time to time. Continuing to use the service after changes are published means you accept the updated terms."
+        },
+        {
+          "heading": "7. Contact",
+          "body": "If you have questions about these terms, please reach out through Cine-Flow's support channel."
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "sections": [
+        {
+          "heading": "1. Information we collect",
+          "body": "Cine-Flow collects your email, display name, and avatar (when you register or sign in with Google), along with your watch history, favorites, watchlist, comments/ratings, and shared watch party activity."
+        },
+        {
+          "heading": "2. How we use your data",
+          "body": "Data is used to power personalization features (continue watching, recommendations...), to review account registration requests, and to improve the quality of the service."
+        },
+        {
+          "heading": "3. Sharing with third parties",
+          "body": "Cine-Flow uses Google OAuth for sign-in and Supabase for data storage and authentication. We do not sell or share your personal data with third parties for advertising purposes."
+        },
+        {
+          "heading": "4. Cookies & local storage",
+          "body": "Cine-Flow uses cookies and browser local storage to keep you signed in and remember your display preferences."
+        },
+        {
+          "heading": "5. Data security",
+          "body": "We take reasonable measures to protect your data, but no system can guarantee absolute security."
+        },
+        {
+          "heading": "6. Your rights",
+          "body": "You may request deletion of your account and personal data at any time by contacting an administrator through Cine-Flow's support channel."
+        },
+        {
+          "heading": "7. Changes to this policy",
+          "body": "This privacy policy may be updated from time to time. We encourage you to review this page periodically for the latest changes."
+        }
+      ]
     }
   }
 }

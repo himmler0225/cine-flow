@@ -229,7 +229,14 @@ function LoginPage() {
               id="terms"
               checked={register.agree}
               onCheckedChange={(agree) => patchRegister({ agree })}
-              label={`${tr("auth.agreeTerms")} ${tr("auth.terms")}`}
+              label={
+                <>
+                  {tr("auth.agreeTerms")}{" "}
+                  <Link to="/terms" className="text-netflix-red hover:underline">
+                    {tr("auth.terms")}
+                  </Link>
+                </>
+              }
               error={fieldErrors.agree}
             />
 
@@ -247,9 +254,9 @@ function SignupSuccess({ email, onBack }: { email: string; onBack: () => void })
   const { t: tr } = useTranslation();
   return (
     <div className="space-y-4 text-center">
-      <h1 className="text-xl font-semibold text-white">{tr("auth.checkEmail")}</h1>
+      <h1 className="text-xl font-semibold text-white">{tr("auth.pendingApproval")}</h1>
       <p className="text-sm text-netflix-muted">
-        {tr("auth.checkEmailDesc")} <strong className="text-white">{email}</strong>
+        {tr("auth.pendingApprovalDesc")} <strong className="text-white">{email}</strong>
       </p>
       <button
         type="button"

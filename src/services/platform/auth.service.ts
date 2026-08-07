@@ -131,19 +131,13 @@ class AuthApi {
     return { data: { user: session.user, session }, error: null };
   }
 
-  async signUp(
-    email: string,
-    password: string,
-    username: string,
-  ): Promise<AuthResult<{ user: User; session: Session }>> {
-    const session = await platformFetch<Session>("/api/auth/register", {
+  async signUp(email: string, password: string, username: string): Promise<AuthActionResult> {
+    await platformFetch<{ pending: true }>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password, username }),
       auth: false,
     });
-    applySessionTokens(session);
-    this.emitAuthChange("SIGNED_IN", session);
-    return { data: { user: session.user, session }, error: null };
+    return { error: null };
   }
 
   async signInWithGoogle(): Promise<AuthResult<null>> {

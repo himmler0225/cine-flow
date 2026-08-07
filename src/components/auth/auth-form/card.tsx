@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 
@@ -17,13 +16,11 @@ export function AuthCard({ children, className }: { children: ReactNode; classNa
 }
 
 export function AuthBrand() {
-  const { t } = useTranslation();
   return (
     <div className="mb-6 text-center">
       <div className="flex justify-center">
         <BrandLogo linked={false} imgClassName="h-11" textClassName="text-3xl" />
       </div>
-      <p className="mt-2 text-xs text-netflix-muted">{t("auth.tagline")}</p>
     </div>
   );
 }

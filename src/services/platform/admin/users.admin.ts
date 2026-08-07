@@ -30,6 +30,12 @@ class AdminUsersApi {
       body: JSON.stringify({ role }),
     });
   }
+  updateStatus(userId: string, status: "approved" | "rejected"): Promise<ApiMutationResult> {
+    return platformMutate(`/api/admin/users/${userId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  }
   fetchUserWatchHistory(userId: string, limit = 50) {
     return platformFetch<WatchHistoryItem[]>(
       `/api/admin/users/${userId}/watch-history?limit=${limit}`,
