@@ -36,6 +36,14 @@ A Netflix-style movie & series streaming site — browsing, an HLS video player 
 
 ---
 
+## Demo
+
+| Global search (`⌘K`) | Movie detail | Player |
+|---|---|---|
+| ![Search](docs/screenshots/search.png) | ![Movie detail](docs/screenshots/movie-detail.png) | ![Player](docs/screenshots/player.png) |
+
+---
+
 ## Tech stack
 
 **TanStack Start** (React 19, SSR + file-based `TanStack Router`) · **TanStack Query** (+ persisted cache) · **Zustand** · **Tailwind CSS 4** + shadcn/ui (Radix primitives) · **Framer Motion** · **HLS.js** · **Socket.IO client** · **i18next** · **Zod** · **Axios** · **Recharts** · **Vite**
