@@ -40,6 +40,7 @@ import { Route as AdminMoviesRouteImport } from './routes/admin.movies'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCommentsRouteImport } from './routes/admin.comments'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as ApiChatStreamRouteImport } from './routes/api.chat.stream'
 
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
@@ -196,6 +197,11 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiChatStreamRoute = ApiChatStreamRouteImport.update({
+  id: '/api/chat/stream',
+  path: '/api/chat/stream',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/country/': typeof CountryIndexRoute
   '/genre/': typeof GenreIndexRoute
+  '/api/chat/stream': typeof ApiChatStreamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -261,6 +268,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/country': typeof CountryIndexRoute
   '/genre': typeof GenreIndexRoute
+  '/api/chat/stream': typeof ApiChatStreamRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -295,6 +303,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/country/': typeof CountryIndexRoute
   '/genre/': typeof GenreIndexRoute
+  '/api/chat/stream': typeof ApiChatStreamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -330,6 +339,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/country/'
     | '/genre/'
+    | '/api/chat/stream'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/country'
     | '/genre'
+    | '/api/chat/stream'
   id:
     | '__root__'
     | '/'
@@ -395,6 +406,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/country/'
     | '/genre/'
+    | '/api/chat/stream'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -422,6 +434,7 @@ export interface RootRouteChildren {
   YearYearRoute: typeof YearYearRoute
   CountryIndexRoute: typeof CountryIndexRoute
   GenreIndexRoute: typeof GenreIndexRoute
+  ApiChatStreamRoute: typeof ApiChatStreamRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -643,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/chat/stream': {
+      id: '/api/chat/stream'
+      path: '/api/chat/stream'
+      fullPath: '/api/chat/stream'
+      preLoaderRoute: typeof ApiChatStreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -693,6 +713,7 @@ const rootRouteChildren: RootRouteChildren = {
   YearYearRoute: YearYearRoute,
   CountryIndexRoute: CountryIndexRoute,
   GenreIndexRoute: GenreIndexRoute,
+  ApiChatStreamRoute: ApiChatStreamRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

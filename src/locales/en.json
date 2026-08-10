@@ -863,5 +863,22 @@
         }
       ]
     }
+  },
+  "chat": {
+    "title": "AI Assistant",
+    "subtitle": "Ask about any movie",
+    "triggerAria": "Open AI assistant",
+    "closeAria": "Close",
+    "placeholder": "Ask about a movie, actor, or review...",
+    "send": "Send",
+    "stop": "Stop",
+    "newChat": "New chat",
+    "emptyTitle": "Ask me anything about movies",
+    "emptyHint": "Reviews, comparisons, recommendations — I'll search YouTube and TikTok for you.",
+    "loginRequired": "Please sign in to chat with the AI assistant",
+    "you": "You",
+    "assistant": "AI Assistant",
+    "genericError": "Something went wrong. Please try again.",
+    "rateLimited": "Too many messages — please wait a moment."
   }
 }

@@ -863,5 +863,22 @@
         }
       ]
     }
+  },
+  "chat": {
+    "title": "Trợ lý AI",
+    "subtitle": "Hỏi bất cứ điều gì về phim",
+    "triggerAria": "Mở trợ lý AI",
+    "closeAria": "Đóng",
+    "placeholder": "Hỏi về phim, diễn viên, đánh giá...",
+    "send": "Gửi",
+    "stop": "Dừng",
+    "newChat": "Cuộc trò chuyện mới",
+    "emptyTitle": "Hỏi mình bất cứ điều gì về phim",
+    "emptyHint": "Đánh giá, so sánh, gợi ý phim — mình sẽ tìm trên YouTube và TikTok giúp bạn.",
+    "loginRequired": "Vui lòng đăng nhập để trò chuyện với trợ lý AI",
+    "you": "Bạn",
+    "assistant": "Trợ lý AI",
+    "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+    "rateLimited": "Bạn gửi hơi nhanh — vui lòng chờ một chút."
   }
 }

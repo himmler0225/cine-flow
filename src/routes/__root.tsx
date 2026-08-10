@@ -23,6 +23,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { TopProgress } from "@/components/layout/TopProgress";
 import { ContinueWatchingBar } from "@/components/movie/ContinueWatchingBar";
+import { ChatModal } from "@/components/chat/ChatModal";
 import { useWatchlistSync } from "@/hooks/useWatchlistSync";
 import { I18nProvider } from "@/components/common/I18nProvider";
 import { registerAuthNavigator } from "@/lib/auth/authNavigation";
@@ -269,6 +270,7 @@ function RootComponent() {
         </main>
         {!isAdmin && !isAuthRoute && !hideProtectedShell && <ContinueWatchingBar />}
         {!isAdmin && !isAuthRoute && !hideProtectedShell && <Footer />}
+        {!isAdmin && !isAuthRoute && !hideProtectedShell && isAuthenticated && <ChatModal />}
 
         <Toaster position="bottom-right" richColors theme="dark" duration={3000} />
       </I18nProvider>
