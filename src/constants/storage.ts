@@ -30,27 +30,44 @@ export const LEGACY_STORAGE_KEYS: Record<keyof typeof STORAGE_KEYS, string | nul
 
 export function readStorageKey(key: keyof typeof STORAGE_KEYS): string | null {
   if (typeof window === "undefined") return null;
+
   const current = STORAGE_KEYS[key];
+
   const existing = localStorage.getItem(current);
+
   if (existing != null) return existing;
+
   const legacy = LEGACY_STORAGE_KEYS[key];
+
   if (!legacy) return null;
+
   const old = localStorage.getItem(legacy);
+
   if (old == null) return null;
+
   localStorage.setItem(current, old);
+
   localStorage.removeItem(legacy);
+
   return old;
 }
 
 export function writeStorageKey(key: keyof typeof STORAGE_KEYS, value: string | null): void {
   if (typeof window === "undefined") return;
+
   const current = STORAGE_KEYS[key];
+
   const legacy = LEGACY_STORAGE_KEYS[key];
+
   if (value == null) {
     localStorage.removeItem(current);
+
     if (legacy) localStorage.removeItem(legacy);
+
     return;
   }
+
   localStorage.setItem(current, value);
+
   if (legacy) localStorage.removeItem(legacy);
 }

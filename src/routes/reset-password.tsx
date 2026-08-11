@@ -27,34 +27,55 @@ export const Route = createFileRoute("/reset-password")({
 
 function ResetPasswordPage() {
   const { t: tr } = useTranslation();
+
   const navigate = useNavigate();
+
   const [ready, setReady] = useState(false);
+
   const [pwd, setPwd] = useState("");
+
   const [pwd2, setPwd2] = useState("");
+
   const [showPwd, setShowPwd] = useState(false);
+
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState("");
+
   useEffect(() => {
     const { data: sub } = authApi.onAuthStateChange(async (event) => {
       if (event === "PASSWORD_RECOVERY") setReady(true);
     });
+
     authApi.getSession().then((session) => {
       if (session) setReady(true);
     });
+
     return () => sub.subscription.unsubscribe();
   }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setError("");
+
     if (pwd.length < 6) return setError(tr("auth.errors.passwordMin"));
+
     if (pwd !== pwd2) return setError(tr("auth.errors.passwordMismatch"));
+
     setLoading(true);
+
     const { error } = await authApi.updateUserPassword(pwd);
+
     setLoading(false);
+
     if (error) return setError(error.message);
+
     toast.success(tr("toast.passwordChanged"));
+
     navigate({ to: "/" });
   };
+
   return (
     <AuthCinematicFrame>
       <AuthCard>

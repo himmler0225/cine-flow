@@ -44,13 +44,17 @@ export function WatchPartyRoomView({ state }: Props) {
     startCountdown,
     adjustManualTime,
     manualSync,
-    autoSyncActive,
     navigate,
     reactions,
+    onPlayerReady,
   } = state;
+
   if (!room) return null;
+
   const waitingForHost = !isHost && !hostHasJoined && !room.is_playing;
+
   const hostAwayOverlay = !isHost && hostHasJoined && !hostIsOnline && !room.is_playing;
+
   const chatPanel = (
     <RoomChat
       messages={messages}
@@ -58,11 +62,13 @@ export function WatchPartyRoomView({ state }: Props) {
       onSend={(c) => sendMessage(c)}
       onReact={(emoji) => {
         broadcast("REACTION", { emoji, user: me?.username });
+
         void sendMessage(emoji, "reaction");
       }}
       disabled={!user}
     />
   );
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="min-h-screen bg-netflix-black pt-16">
@@ -87,12 +93,12 @@ export function WatchPartyRoomView({ state }: Props) {
               waitingForHost={waitingForHost}
               hostAwayOverlay={hostAwayOverlay}
               iframeInfo={iframeInfo}
-              autoSyncActive={autoSyncActive}
               manualSync={manualSync}
               onPlay={hostPlay}
               onPause={hostPause}
               onSeek={hostSeek}
               onProviderReady={setIframeInfo}
+              onReady={onPlayerReady}
               onLeave={leave}
               onStartCountdown={startCountdown}
               onAdjustTime={adjustManualTime}

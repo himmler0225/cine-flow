@@ -30,7 +30,9 @@ export function AuthField({
   label?: string;
 }) {
   const fieldId = id ?? placeholder.replace(/\s+/g, "-").toLowerCase();
+
   const errorId = `${fieldId}-error`;
+
   return (
     <div className="space-y-1">
       {label ? (

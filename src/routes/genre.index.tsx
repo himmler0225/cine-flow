@@ -18,7 +18,9 @@ export const Route = createFileRoute("/genre/")({
 
 function AllGenres() {
   const { t: tr } = useTranslation();
+
   const { data: genres, isLoading } = useGenres();
+
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <div className="px-4 md:px-12">

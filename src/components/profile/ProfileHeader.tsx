@@ -15,33 +15,54 @@ import { ProfileStatsRow } from "@/components/profile/ProfileStatsRow";
 
 export function ProfileHeader() {
   const { t, i18n } = useTranslation();
+
   const user = useAuthStore((s) => s.user);
+
   const profile = useAuthStore((s) => s.profile);
+
   const updateProfile = useAuthStore((s) => s.updateProfile);
+
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
+
   const dateLocale = i18n.language === "vi" ? vi : enUS;
+
   const { displayName } = resolveUserDisplay(user, profile);
+
   const [editing, setEditing] = useState(false);
+
   const [name, setName] = useState(displayName);
+
   useEffect(() => setName(displayName), [displayName]);
+
   const fileRef = useRef<HTMLInputElement>(null);
+
   const [uploading, setUploading] = useState(false);
+
   const onUpload = async (file: File) => {
     if (!user) return;
+
     if (file.size > 5 * 1024 * 1024) {
       toast.error(t("profile.errors.avatarSize"));
+
       return;
     }
+
     setUploading(true);
+
     try {
       const publicUrl = await profilesApi.uploadAvatar(file);
+
       const url = `${publicUrl}?t=${Date.now()}`;
+
       await updateProfile({ avatar_url: url });
+
       await fetchProfile(user.id);
+
       useAuthStore.getState().setProfile({
         ...(profile ?? { id: user.id, username: null, plan: "free", role: "user" }),
         avatar_url: url,
       });
+
       toast.success(t("toast.avatarUpdated"));
     } catch (e) {
       toast.error((e as Error).message || t("toast.avatarFailed"));
@@ -49,26 +70,35 @@ export function ProfileHeader() {
       setUploading(false);
     }
   };
+
   const saveName = async () => {
     const v = name.trim();
+
     if (v.length < 2 || v.length > 30) {
       toast.error(t("profile.errors.nameLength"));
+
       return;
     }
+
     try {
       await updateProfile({ username: v });
+
       toast.success(t("toast.nameUpdated"));
+
       setEditing(false);
     } catch (e) {
       toast.error((e as Error).message);
     }
   };
+
   const joined = user?.created_at
     ? format(new Date(user.created_at), i18n.language === "vi" ? "'tháng' M, yyyy" : "MMMM yyyy", {
         locale: dateLocale,
       })
     : "";
+
   const isPremium = isPremiumPlan(profile?.plan);
+
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-netflix-dark/80 p-4 sm:p-6 md:p-8">
       <div className="flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-6">
@@ -83,7 +113,9 @@ export function ProfileHeader() {
             hidden
             onChange={(e) => {
               const f = e.target.files?.[0];
+
               if (f) void onUpload(f);
+
               e.target.value = "";
             }}
           />
@@ -105,8 +137,10 @@ export function ProfileHeader() {
                     onChange={(e) => setName(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") void saveName();
+
                       if (e.key === "Escape") {
                         setEditing(false);
+
                         setName(displayName);
                       }
                     }}
@@ -123,6 +157,7 @@ export function ProfileHeader() {
                     <button
                       onClick={() => {
                         setEditing(false);
+
                         setName(displayName);
                       }}
                       className="rounded p-1 text-netflix-muted hover:text-white"

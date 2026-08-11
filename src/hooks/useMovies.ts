@@ -18,6 +18,7 @@ const LIST_GC = CACHE_TTL.thirtyMinutes;
 
 export const usePagedByGenre = (slug: string, page: number, filters: MovieFilterParams = {}) => {
   const qc = useQueryClient();
+
   const q = useQuery({
     queryKey: ["movies", "genre-page", slug, page, filters],
     queryFn: () => moviesApi.getByGenre(slug, page, filters),
@@ -26,20 +27,25 @@ export const usePagedByGenre = (slug: string, page: number, filters: MovieFilter
     staleTime: STALE_LIST_LONG,
     gcTime: LIST_GC,
   });
+
   const total = q.data?.pagination?.totalPages ?? 0;
+
   useEffect(() => {
     if (!slug || page >= total) return;
+
     qc.prefetchQuery({
       queryKey: ["movies", "genre-page", slug, page + 1, filters],
       queryFn: () => moviesApi.getByGenre(slug, page + 1, filters),
       staleTime: STALE_LIST_LONG,
     });
   }, [qc, slug, page, total, filters]);
+
   return q;
 };
 
 export const usePagedByCountry = (slug: string, page: number, filters: MovieFilterParams = {}) => {
   const qc = useQueryClient();
+
   const q = useQuery({
     queryKey: ["movies", "country-page", slug, page, filters],
     queryFn: () => moviesApi.getByCountry(slug, page, filters),
@@ -48,20 +54,25 @@ export const usePagedByCountry = (slug: string, page: number, filters: MovieFilt
     staleTime: STALE_LIST_LONG,
     gcTime: LIST_GC,
   });
+
   const total = q.data?.pagination?.totalPages ?? 0;
+
   useEffect(() => {
     if (!slug || page >= total) return;
+
     qc.prefetchQuery({
       queryKey: ["movies", "country-page", slug, page + 1, filters],
       queryFn: () => moviesApi.getByCountry(slug, page + 1, filters),
       staleTime: STALE_LIST_LONG,
     });
   }, [qc, slug, page, total, filters]);
+
   return q;
 };
 
 export const usePagedByYear = (year: number, page: number, filters: MovieFilterParams = {}) => {
   const qc = useQueryClient();
+
   const q = useQuery({
     queryKey: ["movies", "year-page", year, page, filters],
     queryFn: () => moviesApi.getByYear(year, page, filters),
@@ -70,15 +81,19 @@ export const usePagedByYear = (year: number, page: number, filters: MovieFilterP
     staleTime: STALE_LIST_LONG,
     gcTime: LIST_GC,
   });
+
   const total = q.data?.pagination?.totalPages ?? 0;
+
   useEffect(() => {
     if (!year || page >= total) return;
+
     qc.prefetchQuery({
       queryKey: ["movies", "year-page", year, page + 1, filters],
       queryFn: () => moviesApi.getByYear(year, page + 1, filters),
       staleTime: STALE_LIST_LONG,
     });
   }, [qc, year, page, total, filters]);
+
   return q;
 };
 

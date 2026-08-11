@@ -24,6 +24,7 @@ class AdminCommentsApi {
       page: String(opts.page),
       pageSize: String(opts.pageSize),
     });
+
     return platformFetch<{
       rows: Comment[];
       total: number;

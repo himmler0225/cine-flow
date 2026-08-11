@@ -31,8 +31,11 @@ const ALL = "__all__";
 
 export function FilterBar({ value, onChange, hide = [] }: Props) {
   const { t } = useTranslation();
+
   const { data: genres } = useGenres();
+
   const { data: countries } = useCountries();
+
   const sortLangs = useMemo(
     () => [
       { value: "vietsub", label: t("filters.vietsub") },
@@ -41,6 +44,7 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
     ],
     [t],
   );
+
   const sortFields = useMemo(
     () => [
       { value: "modified.time", label: t("filters.sortUpdated") },
@@ -49,6 +53,7 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
     ],
     [t],
   );
+
   const sortTypes = useMemo(
     () => [
       { value: "desc", label: t("filters.sortDesc") },
@@ -56,12 +61,16 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
     ],
     [t],
   );
+
   const years = useMemo(() => {
     const now = new Date().getFullYear();
+
     return Array.from({ length: now - 1969 }, (_, i) => String(now - i));
   }, []);
+
   const set = <K extends keyof MovieFilters>(key: K, v: string) =>
     onChange({ ...value, [key]: v === ALL ? undefined : v });
+
   const hasAny =
     !!value.category ||
     !!value.country ||
@@ -69,7 +78,9 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
     !!value.sort_lang ||
     !!value.sort_field ||
     !!value.sort_type;
+
   const shouldShow = (k: keyof MovieFilters) => !hide.includes(k);
+
   return (
     <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:rounded-2xl sm:p-4 md:p-5">
       <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-4 md:grid-cols-3 lg:grid-cols-6">
@@ -156,6 +167,7 @@ function FilterSelect({
   placeholder: string;
 }) {
   const active = value !== ALL;
+
   return (
     <div className="min-w-0">
       <label

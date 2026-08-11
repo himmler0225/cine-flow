@@ -23,13 +23,17 @@ export function usePlayerEmbedMode(
 
   useEffect(() => {
     if (!allowAutoFallback) return;
+
     if (useEmbed || !embedSrc || !src || isEmbedUrl(src)) return;
+
     const timer = window.setTimeout(() => {
       const v = videoRef.current;
+
       if (!v || !Number.isFinite(v.duration) || v.duration === 0) {
         dispatch({ type: "setUseEmbed", useEmbed: true });
       }
     }, 12000);
+
     return () => window.clearTimeout(timer);
   }, [src, embedSrc, useEmbed, videoRef, dispatch, allowAutoFallback]);
 }

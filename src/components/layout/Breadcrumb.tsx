@@ -15,6 +15,7 @@ export function Breadcrumb({ items }: { items: Crumb[] }) {
     >
       {items.map((item, idx) => {
         const isLast = idx === items.length - 1;
+
         return (
           <span key={idx} className="flex items-center gap-1">
             {idx > 0 && <ChevronRight className="h-3.5 w-3.5" />}

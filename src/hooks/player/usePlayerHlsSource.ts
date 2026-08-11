@@ -26,28 +26,46 @@ export function usePlayerHlsSource(
   pendingSeekRef?: React.MutableRefObject<number | null>,
   onFallbackEmbed?: () => void,
 ) {
-  const adRangesRef = useRef<{ start: number; end: number }[]>([]);
+  const adRangesRef = useRef<
+    {
+      start: number;
+      end: number;
+    }[]
+  >([]);
+
   const skipAdsRef = useRef(skipAds);
+
   const hlsRef = useRef<Hls | null>(null);
+
   const [levels, setLevels] = useState<HlsQualityLevel[]>([]);
+
   const [subtitleTracks, setSubtitleTracks] = useState<HlsSubtitleTrack[]>([]);
+
   const [currentLevel, setCurrentLevel] = useState(-1);
+
   const [subtitleId, setSubtitleId] = useState(-1);
 
   useEffect(() => {
     skipAdsRef.current = skipAds;
+
     if (!skipAds) adRangesRef.current = [];
   }, [skipAds]);
 
   useEffect(() => {
     const video = videoRef.current;
+
     if (!video || !src || useEmbed) return;
 
     dispatch({ type: "setHasError", hasError: false });
+
     adRangesRef.current = [];
+
     setLevels([]);
+
     setSubtitleTracks([]);
+
     setCurrentLevel(-1);
+
     setSubtitleId(-1);
 
     const startPosition =
@@ -55,24 +73,32 @@ export function usePlayerHlsSource(
 
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
+
       const onMeta = () => {
         if (startPosition >= 0) {
           video.currentTime = startPosition;
+
           if (pendingSeekRef) pendingSeekRef.current = null;
         }
       };
+
       video.addEventListener("loadedmetadata", onMeta);
+
       return () => {
         video.removeEventListener("loadedmetadata", onMeta);
+
         video.removeAttribute("src");
+
         video.load();
       };
     }
 
     if (!Hls.isSupported()) {
       video.src = src;
+
       return () => {
         video.removeAttribute("src");
+
         video.load();
       };
     }
@@ -83,8 +109,11 @@ export function usePlayerHlsSource(
       startLevel: -1,
       ...(startPosition >= 0 ? { startPosition } : {}),
     });
+
     hlsRef.current = hls;
+
     hls.loadSource(src);
+
     hls.attachMedia(video);
 
     attachHlsAdSkip(
@@ -109,25 +138,30 @@ export function usePlayerHlsSource(
             : `${Math.round((level.bitrate || 0) / 1000)}kbps`,
         })),
       );
+
       setCurrentLevel(hls.currentLevel);
+
       setSubtitleTracks(
         (hls.subtitleTracks ?? []).map((track, id) => ({
           id,
           name: track.name || track.lang || `CC ${id + 1}`,
         })),
       );
+
       setSubtitleId(hls.subtitleTrack);
 
       const pending = pendingSeekRef?.current;
+
       if (pending != null && pending >= 0) {
         try {
           video.currentTime = pending;
+
           dispatch({ type: "setProgress", progress: pending });
+
           if (pendingSeekRef) pendingSeekRef.current = null;
+
           void video.play().catch(() => {});
-        } catch {
-          /* best-effort seek clamp — setting currentTime can throw on some browsers/readyStates */
-        }
+        } catch {}
       }
     });
 
@@ -139,46 +173,63 @@ export function usePlayerHlsSource(
       if (!data.fatal) {
         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
         else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+
         return;
       }
+
       console.error("[HLS fatal]", data.type, data.details);
+
       if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
         try {
           hls.recoverMediaError();
+
           return;
         } catch {
-          // recovery attempt itself threw — fall through to embed fallback / setHasError below
           console.warn("[HLS] recoverMediaError threw, falling back");
         }
       }
+
       if (embedSrc) {
         if (pendingSeekRef) pendingSeekRef.current = null;
+
         onFallbackEmbed?.();
+
         dispatch({ type: "setHasError", hasError: false });
+
         dispatch({ type: "setUseEmbed", useEmbed: true });
+
         return;
       }
+
       dispatch({ type: "setHasError", hasError: true });
+
       onError?.();
     });
 
     return () => {
       hlsRef.current = null;
+
       hls.destroy();
     };
   }, [src, embedSrc, useEmbed, onError, videoRef, dispatch, pendingSeekRef, onFallbackEmbed]);
 
   const selectQuality = (level: number) => {
     const hls = hlsRef.current;
+
     if (!hls) return;
+
     hls.currentLevel = level;
+
     setCurrentLevel(level);
   };
 
   const selectSubtitle = (id: number) => {
     const hls = hlsRef.current;
+
     if (!hls) return;
+
     hls.subtitleTrack = id;
+
     setSubtitleId(id);
   };
 

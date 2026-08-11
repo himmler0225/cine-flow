@@ -15,7 +15,6 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
@@ -23,8 +22,10 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { TopProgress } from "@/components/layout/TopProgress";
 import { ContinueWatchingBar } from "@/components/movie/ContinueWatchingBar";
+import { ChatModal } from "@/components/chat/ChatModal";
 import { useWatchlistSync } from "@/hooks/useWatchlistSync";
 import { I18nProvider } from "@/components/common/I18nProvider";
+import { PageSkeleton } from "@/components/common/PageSkeleton";
 import { registerAuthNavigator } from "@/lib/auth/authNavigation";
 import { buildLoginRedirect, isPublicAuthPath, isPublicPath } from "@/lib/auth/authRoutes";
 import { useAuthStore } from "@/store/authStore";
@@ -38,6 +39,7 @@ import { analyticsApi, pageTypeFromPath } from "@/services/platform/analytics.se
 
 function NotFoundComponent() {
   const { t } = useTranslation();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4">
       <div className="max-w-md text-center">
@@ -57,8 +59,11 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const { t } = useTranslation();
+
   console.error(error);
+
   const router = useRouter();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4">
       <div className="max-w-md text-center">
@@ -68,6 +73,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           <button
             onClick={() => {
               router.invalidate();
+
               reset();
             }}
             className="rounded bg-netflix-red px-4 py-2 text-sm font-semibold text-white hover:bg-netflix-red-hover"
@@ -167,11 +173,15 @@ export const Route = createRootRouteWithContext<{
 
 function LangShell({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState(() => (i18n.language?.startsWith("en") ? "en" : "vi"));
+
   useEffect(() => {
     const onChange = (lng: string) => setLang(lng.startsWith("en") ? "en" : "vi");
+
     i18n.on("languageChanged", onChange);
+
     return () => i18n.off("languageChanged", onChange);
   }, []);
+
   return (
     <html lang={lang}>
       <head>
@@ -191,27 +201,38 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
   const initialize = useAuthStore((state) => state.initialize);
+
   const authLoading = useAuthStore((state) => state.isLoading);
+
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   useEffect(() => {
     setAppQueryClient(queryClient);
   }, [queryClient]);
+
   useEffect(() => {
     void import("@/lib/envCheck").then((m) => m.runStartupEnvCheck());
+
     void initialize();
+
     let cleanup: (() => void) | undefined;
+
     (async () => {
       if (typeof window === "undefined") return;
+
       const [{ persistQueryClient }, { createSyncStoragePersister }] = await Promise.all([
         import("@tanstack/react-query-persist-client"),
         import("@tanstack/query-sync-storage-persister"),
       ]);
+
       const persister = createSyncStoragePersister({
         storage: window.localStorage,
         key: STORAGE_KEYS.reactQueryCache,
         throttleTime: 1000,
       });
+
       const [unsub] = persistQueryClient({
         queryClient,
         persister,
@@ -223,32 +244,47 @@ function RootComponent() {
             !(query.queryKey[0] === "favorites" && query.queryKey[1] === "slugs"),
         },
       });
+
       cleanup = unsub;
     })();
+
     return () => {
       cleanup?.();
     };
   }, [initialize, queryClient]);
+
   const location = useLocation();
+
   const navigate = useNavigate();
+
   const isAdmin = location.pathname.startsWith("/admin");
+
   const isAuthRoute = isPublicAuthPath(location.pathname);
+
   const isPublic = isPublicPath(location.pathname);
+
   const authBlocked = !isPublic && authLoading;
+
   const needsLogin = !isPublic && !authLoading && !isAuthenticated;
+
   const hideProtectedShell = authBlocked || needsLogin;
+
   const loginRedirect = needsLogin
     ? buildLoginRedirect(location.pathname, location.searchStr)
     : undefined;
+
   useEffect(() => {
     registerAuthNavigator((opts) => {
       navigate({ to: opts.to, search: opts.search });
     });
   }, [navigate]);
+
   useEffect(() => {
     void analyticsApi.trackPageView(pageTypeFromPath(location.pathname));
   }, [location.pathname]);
+
   useWatchlistSync();
+
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
@@ -269,6 +305,7 @@ function RootComponent() {
         </main>
         {!isAdmin && !isAuthRoute && !hideProtectedShell && <ContinueWatchingBar />}
         {!isAdmin && !isAuthRoute && !hideProtectedShell && <Footer />}
+        {!isAdmin && !isAuthRoute && !hideProtectedShell && isAuthenticated && <ChatModal />}
 
         <Toaster position="bottom-right" richColors theme="dark" duration={3000} />
       </I18nProvider>
@@ -277,13 +314,5 @@ function RootComponent() {
 }
 
 function AuthGateLoader() {
-  const { t } = useTranslation();
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-netflix-black">
-      <div className="text-center">
-        <Loader2 className="mx-auto h-8 w-8 animate-spin text-netflix-red" />
-        <p className="mt-4 text-sm text-netflix-muted">{t("common.loading")}</p>
-      </div>
-    </div>
-  );
+  return <PageSkeleton />;
 }

@@ -23,8 +23,11 @@ export function ListingEmpty({
   className,
 }: ListingEmptyProps) {
   const { t } = useTranslation();
+
   const { data: genres } = useGenres();
+
   const chips = (genres ?? []).slice(0, 8);
+
   return (
     <div
       className={cn(

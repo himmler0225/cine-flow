@@ -46,6 +46,7 @@ export const Route = createFileRoute("/watch/$slug")({
         queryFn: () => moviesApi.getMovieDetail(params.slug),
         staleTime: CACHE_TTL.tenMinutes,
       });
+
       return { movie: data?.movie ?? null };
     } catch {
       return { movie: null };
@@ -53,10 +54,15 @@ export const Route = createFileRoute("/watch/$slug")({
   },
   head: ({ params, loaderData }) => {
     const movie = loaderData?.movie ?? null;
+
     const name = movie?.name ?? prettifySlug(params.slug);
+
     const url = `${getSiteUrl()}/watch/${params.slug}`;
+
     const image = movie ? getImageUrl(movie.thumb_url || movie.poster_url) : null;
+
     const description = stripHtml(movie?.content) || t("seo.watchTitle", { slug: name });
+
     const breadcrumb = {
       "@context": EXTERNAL_URLS.schemaContext,
       "@type": "BreadcrumbList",
@@ -71,6 +77,7 @@ export const Route = createFileRoute("/watch/$slug")({
         { "@type": "ListItem", position: 3, name: t("nav.watch") || "Xem", item: url },
       ],
     };
+
     const videoLd: Record<string, unknown> = {
       "@context": EXTERNAL_URLS.schemaContext,
       "@type": "VideoObject",
@@ -85,6 +92,7 @@ export const Route = createFileRoute("/watch/$slug")({
       duration: movie?.time,
       isFamilyFriendly: false,
     };
+
     return {
       meta: [
         { title: t("seo.watchTitle", { slug: name }) },
@@ -108,18 +116,27 @@ export const Route = createFileRoute("/watch/$slug")({
 
 function WatchPage() {
   const { t: tr } = useTranslation();
+
   const { slug } = Route.useParams();
+
   const { tap, server, fromStart } = Route.useSearch();
+
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const navigate = useNavigate();
+
   const router = useRouter();
+
   const handleBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.history.back();
+
       return;
     }
+
     void navigate({ to: "/movie/$slug", params: { slug } });
   };
+
   const {
     movie,
     servers,
@@ -144,19 +161,27 @@ function WatchPage() {
     tryAlternateSource,
     progressByEpisode,
   } = useWatchPage(slug, tap, server, fromStart);
+
   const { isFavorite, toggleFavorite } = useFavorites();
+
   const isFav = isFavorite(slug);
+
   const relatedType = RELATED_TYPE_MAP[movie?.type ?? ""] ?? "phim-bo";
+
   const related = useMoviesByType(relatedType, 1);
+
   useEffect(() => {
     invalidateHistoryRefetchCache(slug);
   }, [slug, tap, server]);
+
   if (isLoading) {
     return <WatchPageSkeleton />;
   }
+
   if (!movie) {
     return <MovieNotFound slug={slug} />;
   }
+
   if (!currentEp) {
     return (
       <MovieNotFound
@@ -166,10 +191,13 @@ function WatchPage() {
       />
     );
   }
+
   const currentProgress = progressByEpisode[currentEp.name];
+
   const watchPercent = currentProgress
     ? Math.min(100, Math.max(0, Math.round(currentProgress.ratio * 100)))
     : 0;
+
   return (
     <div className="min-h-screen bg-netflix-black">
       <div className="relative bg-black pt-14 lg:pt-16">
@@ -219,6 +247,7 @@ function WatchPage() {
                 hideEpisodeHeading
                 onSelect={(s, e) => {
                   setServerIdx(s);
+
                   setEpisodeIdx(e);
                 }}
               />

@@ -18,7 +18,9 @@ export const Route = createFileRoute("/country/")({
 
 function AllCountries() {
   const { t: tr } = useTranslation();
+
   const { data: countries, isLoading } = useCountries();
+
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <div className="px-4 md:px-12">

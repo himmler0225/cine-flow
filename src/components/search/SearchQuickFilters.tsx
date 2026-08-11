@@ -6,8 +6,11 @@ import { useSearchModalStore } from "@/components/search/store/searchModalStore"
 
 export function SearchQuickFilters() {
   const { t } = useTranslation();
+
   const quickFilter = useSearchModalStore((s) => s.quickFilter);
+
   const setQuickFilter = useSearchModalStore((s) => s.setQuickFilter);
+
   return (
     <div className="flex flex-wrap gap-2 border-b border-white/5 px-4 py-2">
       {SEARCH_QUICK_FILTERS.map((f) => (

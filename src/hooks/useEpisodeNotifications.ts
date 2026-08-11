@@ -25,14 +25,19 @@ const SERIES_TYPES = new Set(["series", "hoathinh", "tvshows"]);
 
 function isSeriesType(type?: string) {
   if (!type) return true;
+
   return SERIES_TYPES.has(type);
 }
 
 export function useEpisodeNotifications() {
   const trackedSlugs = useTrackedSeriesSlugs();
+
   const qc = useQueryClient();
+
   const [readAt, setReadAt] = useState(getNotificationsReadAt);
+
   const slugsKey = trackedSlugs.slice(0, 20).join(",");
+
   const { data: notifications = [], refetch } = useQuery({
     queryKey: queryKeys.episodeNotifications(slugsKey),
     enabled: trackedSlugs.length > 0,
@@ -40,17 +45,26 @@ export function useEpisodeNotifications() {
     refetchOnWindowFocus: true,
     queryFn: async (): Promise<EpisodeNotification[]> => {
       const snapshots = getEpisodeSnapshots();
+
       const out: EpisodeNotification[] = [];
+
       const toCheck = trackedSlugs.slice(0, 20);
+
       await Promise.all(
         toCheck.map(async (slug) => {
           try {
             const detail = await moviesApi.getMovieDetail(slug);
+
             const movie = detail.movie;
+
             if (!isSeriesType(movie.type)) return;
+
             const current = movie.episode_current ?? "";
+
             if (!current) return;
+
             const snap = snapshots[slug]?.episode;
+
             if (snap && snap !== current) {
               out.push({
                 id: `${slug}-${current}`,
@@ -62,24 +76,33 @@ export function useEpisodeNotifications() {
                 at: Date.now(),
               });
             }
+
             setEpisodeSnapshot(slug, current);
           } catch (error) {
             console.warn("[episode-notifications] check failed", slug, error);
           }
         }),
       );
+
       return out.sort((a, b) => b.at - a.at);
     },
   });
+
   const unreadCount = notifications.filter((n) => n.at > readAt).length;
+
   const markRead = useCallback(() => {
     markNotificationsRead();
+
     setReadAt(Date.now());
+
     void qc.invalidateQueries({ queryKey: ["episode-notifications"] });
   }, [qc]);
+
   useEffect(() => {
     if (trackedSlugs.length === 0) return;
+
     void refetch();
   }, [trackedSlugs.length, slugsKey, refetch]);
+
   return { notifications, unreadCount, markRead, refetch };
 }

@@ -19,6 +19,7 @@ interface Point {
 
 export default function DashboardTrafficChart({ data }: { data: Point[] }) {
   const { t } = useTranslation();
+
   return (
     <ResponsiveContainer width="100%" height={260}>
       <LineChart data={data}>

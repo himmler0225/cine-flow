@@ -23,9 +23,11 @@ export const movieApiClient: AxiosInstance = axios.create({
 
 movieApiClient.interceptors.request.use((config) => {
   const token = config.skipAuth ? null : getAccessToken();
+
   if (token && !config.headers.has("Authorization")) {
     config.headers.set("Authorization", `Bearer ${token}`);
   }
+
   return config;
 });
 
@@ -33,24 +35,29 @@ movieApiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const config = error.config as InternalAxiosRequestConfig | undefined;
+
     const status = error.response?.status;
+
     const url = config?.url ?? "";
+
     const isAuthRefresh = url.includes("/api/auth/refresh") || url.includes("/api/auth/login");
 
     if (status === 401 && config && !config.skipAuth && !config._retry && !isAuthRefresh) {
       config._retry = true;
+
       try {
         const { authApi } = await import("@/services/platform/auth.service");
+
         const session = await authApi.refreshSession();
+
         if (session?.access_token) {
           config.headers.set("Authorization", `Bearer ${session.access_token}`);
+
           return movieApiClient.request(config);
         }
-      } catch {
-        // refresh attempt failed — fall through to the normalized rejection below,
-        // which callers already handle (e.g. redirect to login on auth errors)
-      }
+      } catch {}
     }
+
     return rejectNormalizedAxiosError(error);
   },
 );

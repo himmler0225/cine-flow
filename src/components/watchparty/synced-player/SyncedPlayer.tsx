@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { sendCommand } from "@/lib/iframeSync";
 import type {
   SyncedPlayerHandle,
@@ -17,27 +17,64 @@ import { SyncedIframeView } from "@/components/watchparty/synced-player/SyncedIf
 import { SyncedVideoView } from "@/components/watchparty/synced-player/SyncedVideoView";
 
 export const SyncedPlayer = forwardRef<SyncedPlayerHandle, SyncedPlayerProps>(function SyncedPlayer(
-  { src, embed, poster, disabled, onPlay, onPause, onSeek, onProviderReady },
+  { src, embed, poster, disabled, onPlay, onPause, onSeek, onProviderReady, onReady },
   ref,
 ) {
   const videoRef = useRef<HTMLVideoElement>(null);
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
   const lastSyncRef = useRef(0);
+
   const seekingFromSyncRef = useRef(false);
+
   const lastIframeTimeRef = useRef(0);
+
   const iframePausedRef = useRef(true);
+
   const syncRefs = {
     lastSyncRef,
     seekingFromSyncRef,
     lastIframeTimeRef,
     iframePausedRef,
   };
+
   const { setHlsFailed, useIframe, iframeInfo } = useSyncedPlayerMode(src, embed);
+
   useSyncedProviderReady(iframeInfo, onProviderReady);
-  useSyncedHlsSource(videoRef, src, useIframe, () => setHlsFailed(true));
+
+  useSyncedHlsSource(videoRef, src, useIframe, () => setHlsFailed(true), onReady);
+
+  useEffect(() => {
+    if (useIframe && iframeInfo) onReady?.();
+  }, [useIframe, iframeInfo, onReady]);
+
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    const v = videoRef.current;
+
+    if (!v) return;
+
+    const onVolumeChange = () => setMuted(v.muted);
+
+    setMuted(v.muted);
+
+    v.addEventListener("volumechange", onVolumeChange);
+
+    return () => v.removeEventListener("volumechange", onVolumeChange);
+  }, []);
+
+  const unmute = useCallback(() => {
+    if (videoRef.current) videoRef.current.muted = false;
+  }, []);
+
   const eventHandlers = { onPlay, onPause, onSeek };
+
   useSyncedVideoEvents(videoRef, useIframe, syncRefs, eventHandlers);
+
   useSyncedIframeEvents(iframeRef, useIframe, iframeInfo, syncRefs, eventHandlers);
+
   useImperativeHandle(
     ref,
     () =>
@@ -50,17 +87,23 @@ export const SyncedPlayer = forwardRef<SyncedPlayerHandle, SyncedPlayerProps>(fu
       }),
     [useIframe, iframeInfo],
   );
+
   const attemptJoinerPlay = useCallback(() => {
     if (!disabled) return;
+
     if (useIframe) {
       iframePausedRef.current = false;
+
       sendCommand(iframeRef.current, iframeInfo?.provider ?? "generic", "play", {
         time: lastIframeTimeRef.current,
       });
+
       return;
     }
+
     playVideoElement(videoRef.current);
   }, [disabled, useIframe, iframeInfo]);
+
   if (useIframe && iframeInfo) {
     return (
       <SyncedIframeView
@@ -71,12 +114,15 @@ export const SyncedPlayer = forwardRef<SyncedPlayerHandle, SyncedPlayerProps>(fu
       />
     );
   }
+
   return (
     <SyncedVideoView
       videoRef={videoRef}
       poster={poster}
       disabled={disabled}
       onGuestPlay={attemptJoinerPlay}
+      muted={muted}
+      onUnmute={unmute}
     />
   );
 });

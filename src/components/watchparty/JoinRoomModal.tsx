@@ -23,40 +23,56 @@ interface JoinRoomModalProps {
 
 export function JoinRoomModal({ open, onClose }: JoinRoomModalProps) {
   const { t } = useTranslation();
+
   const [code, setCode] = useState("");
+
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
+
   const handleClose = () => {
     if (!loading) {
       setCode("");
+
       onClose();
     }
   };
+
   const join = async () => {
     const c = code.trim().toUpperCase();
+
     if (c.length !== 6) return toast.error(t("watchparty.roomCodeHint"));
+
     setLoading(true);
+
     const { data, error } = await watchPartyApi.fetchRoomPreview(c);
+
     setLoading(false);
+
     if (error) {
       return toast.error(t("watchparty.joinFailed"), {
         description: `[${error.code ?? "?"}] ${error.message}`,
         duration: 6000,
       });
     }
+
     if (!data) {
       return toast.error(t("watchparty.roomNotFoundShort"), {
         description: t("watchparty.roomNotFoundJoinDesc", { code: c }),
       });
     }
+
     if (new Date(data.expires_at).getTime() < Date.now()) {
       return toast.error(t("watchparty.roomExpiredShort"), {
         description: t("watchparty.roomExpiredJoinDesc"),
       });
     }
+
     handleClose();
+
     navigate({ to: "/watch-party/$code", params: { code: c } });
   };
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent className="max-w-sm border-white/10 bg-[#1a1a1a] text-white">

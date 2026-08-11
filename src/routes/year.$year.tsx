@@ -23,15 +23,25 @@ export const Route = createFileRoute("/year/$year")({
 
 function YearPage() {
   const { t: tr } = useTranslation();
+
   const { year } = Route.useParams();
+
   const yearNum = parseInt(year, 10);
+
   const search = Route.useSearch();
+
   const navigate = useNavigate({ from: Route.fullPath });
+
   const page = search.page ?? 1;
+
   const { data, isFetching, isPlaceholderData } = usePagedByYear(yearNum, page, search);
+
   const items = data?.items ?? [];
+
   const totalPages = data?.pagination?.totalPages ?? 0;
+
   useScrollToTopOnChange(page);
+
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <div className="px-4 md:px-12">

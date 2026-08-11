@@ -19,6 +19,7 @@ const LEGAL_LINKS = [
 
 export function Footer() {
   const { t } = useTranslation();
+
   return (
     <footer className="mt-8 border-t border-white/[0.06] bg-[#0a0a0a] md:mt-12">
       <div className="mx-auto max-w-7xl px-4 md:px-8 lg:px-12">

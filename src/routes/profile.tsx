@@ -31,25 +31,36 @@ export const Route = createFileRoute("/profile")({
 
 function ProfilePage() {
   const { tab } = Route.useSearch();
+
   const navigate = useNavigate();
+
   const isAuth = useAuthStore((s) => s.isAuthenticated);
+
   const isLoading = useAuthStore((s) => s.isLoading);
+
   const initialize = useAuthStore((s) => s.initialize);
+
   const requestAuth = useAuthStore((s) => s.requestAuth);
+
   useEffect(() => {
     void initialize();
   }, [initialize]);
+
   useEffect(() => {
     if (!isLoading && !isAuth) {
       requestAuth("login");
+
       navigate({ to: "/", replace: true });
     }
   }, [isAuth, isLoading, requestAuth, navigate]);
+
   if (isLoading || !isAuth) {
     return <ProfilePageSkeleton />;
   }
+
   const setTab = (t: string) =>
     navigate({ to: "/profile", search: { tab: t as never }, replace: true });
+
   return (
     <div className="min-h-screen bg-netflix-black pt-20 pb-8 md:pb-12">
       <motion.div

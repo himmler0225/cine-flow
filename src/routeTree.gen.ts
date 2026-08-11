@@ -40,6 +40,9 @@ import { Route as AdminMoviesRouteImport } from './routes/admin.movies'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCommentsRouteImport } from './routes/admin.comments'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminAiConfigRouteImport } from './routes/admin.ai-config'
+import { Route as ApiChatStreamRouteImport } from './routes/api.chat.stream'
+import { Route as ApiAdminAiConfigRouteImport } from './routes/api.admin.ai-config'
 
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
@@ -196,6 +199,21 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAiConfigRoute = AdminAiConfigRouteImport.update({
+  id: '/ai-config',
+  path: '/ai-config',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ApiChatStreamRoute = ApiChatStreamRouteImport.update({
+  id: '/api/chat/stream',
+  path: '/api/chat/stream',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminAiConfigRoute = ApiAdminAiConfigRouteImport.update({
+  id: '/api/admin/ai-config',
+  path: '/api/admin/ai-config',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -212,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/admin/ai-config': typeof AdminAiConfigRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -229,6 +248,8 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/country/': typeof CountryIndexRoute
   '/genre/': typeof GenreIndexRoute
+  '/api/admin/ai-config': typeof ApiAdminAiConfigRoute
+  '/api/chat/stream': typeof ApiChatStreamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -244,6 +265,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/admin/ai-config': typeof AdminAiConfigRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -261,6 +283,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/country': typeof CountryIndexRoute
   '/genre': typeof GenreIndexRoute
+  '/api/admin/ai-config': typeof ApiAdminAiConfigRoute
+  '/api/chat/stream': typeof ApiChatStreamRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -278,6 +302,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/admin/ai-config': typeof AdminAiConfigRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -295,6 +320,8 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/country/': typeof CountryIndexRoute
   '/genre/': typeof GenreIndexRoute
+  '/api/admin/ai-config': typeof ApiAdminAiConfigRoute
+  '/api/chat/stream': typeof ApiChatStreamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -313,6 +340,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/watchlist'
+    | '/admin/ai-config'
     | '/admin/analytics'
     | '/admin/comments'
     | '/admin/dashboard'
@@ -330,6 +358,8 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/country/'
     | '/genre/'
+    | '/api/admin/ai-config'
+    | '/api/chat/stream'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -345,6 +375,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/watchlist'
+    | '/admin/ai-config'
     | '/admin/analytics'
     | '/admin/comments'
     | '/admin/dashboard'
@@ -362,6 +393,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/country'
     | '/genre'
+    | '/api/admin/ai-config'
+    | '/api/chat/stream'
   id:
     | '__root__'
     | '/'
@@ -378,6 +411,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/watchlist'
+    | '/admin/ai-config'
     | '/admin/analytics'
     | '/admin/comments'
     | '/admin/dashboard'
@@ -395,6 +429,8 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/country/'
     | '/genre/'
+    | '/api/admin/ai-config'
+    | '/api/chat/stream'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -422,6 +458,8 @@ export interface RootRouteChildren {
   YearYearRoute: typeof YearYearRoute
   CountryIndexRoute: typeof CountryIndexRoute
   GenreIndexRoute: typeof GenreIndexRoute
+  ApiAdminAiConfigRoute: typeof ApiAdminAiConfigRoute
+  ApiChatStreamRoute: typeof ApiChatStreamRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -643,10 +681,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/ai-config': {
+      id: '/admin/ai-config'
+      path: '/ai-config'
+      fullPath: '/admin/ai-config'
+      preLoaderRoute: typeof AdminAiConfigRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/api/chat/stream': {
+      id: '/api/chat/stream'
+      path: '/api/chat/stream'
+      fullPath: '/api/chat/stream'
+      preLoaderRoute: typeof ApiChatStreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/ai-config': {
+      id: '/api/admin/ai-config'
+      path: '/api/admin/ai-config'
+      fullPath: '/api/admin/ai-config'
+      preLoaderRoute: typeof ApiAdminAiConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminAiConfigRoute: typeof AdminAiConfigRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminCommentsRoute: typeof AdminCommentsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
@@ -657,6 +717,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAiConfigRoute: AdminAiConfigRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminCommentsRoute: AdminCommentsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
@@ -693,6 +754,8 @@ const rootRouteChildren: RootRouteChildren = {
   YearYearRoute: YearYearRoute,
   CountryIndexRoute: CountryIndexRoute,
   GenreIndexRoute: GenreIndexRoute,
+  ApiAdminAiConfigRoute: ApiAdminAiConfigRoute,
+  ApiChatStreamRoute: ApiChatStreamRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

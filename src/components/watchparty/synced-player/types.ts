@@ -21,4 +21,5 @@ export interface SyncedPlayerProps {
       supportsAuto: boolean;
     } | null,
   ) => void;
+  onReady?: () => void;
 }

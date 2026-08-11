@@ -23,6 +23,7 @@ export function ManualSyncBar({
   onStartCountdown,
 }: ManualSyncBarProps) {
   const { t } = useTranslation();
+
   return (
     <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 p-3">
       <p className="text-xs text-amber-200/90">{t("watchparty.manualSyncHint")}</p>

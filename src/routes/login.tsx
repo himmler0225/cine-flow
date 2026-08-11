@@ -41,36 +41,62 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const { tab: searchTab, redirect } = Route.useSearch();
+
   const navigate = useNavigate();
+
   const { t: tr } = useTranslation();
+
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   const tab = useAuthFormStore((state) => state.tab);
+
   const loading = useAuthFormStore((state) => state.loading);
+
   const apiError = useAuthFormStore((state) => state.apiError);
+
   const signupSuccess = useAuthFormStore((state) => state.signupSuccess);
+
   const fieldErrors = useAuthFormStore((state) => state.fieldErrors);
+
   const login = useAuthFormStore((state) => state.login);
+
   const register = useAuthFormStore((state) => state.register);
+
   const syncTab = useAuthFormStore((state) => state.syncTab);
+
   const setTab = useAuthFormStore((state) => state.setTab);
+
   const resetTransient = useAuthFormStore((state) => state.resetTransient);
+
   const patchLogin = useAuthFormStore((state) => state.patchLogin);
+
   const patchRegister = useAuthFormStore((state) => state.patchRegister);
+
   const submitLogin = useAuthFormStore((state) => state.submitLogin);
+
   const submitRegister = useAuthFormStore((state) => state.submitRegister);
+
   const submitGoogle = useAuthFormStore((state) => state.submitGoogle);
+
   const backToLoginAfterSignup = useAuthFormStore((state) => state.backToLoginAfterSignup);
+
   useEffect(() => {
     syncTab(searchTab ?? "login");
+
     resetTransient();
   }, [resetTransient, searchTab, syncTab]);
+
   useEffect(() => {
     if (!isAuthenticated) return;
+
     const target = redirect?.startsWith("/") ? redirect : "/";
+
     void navigate({ to: target, replace: true });
   }, [isAuthenticated, navigate, redirect]);
+
   const switchTab = (next: "login" | "register") => {
     setTab(next);
+
     navigate({
       to: "/login",
       search: {
@@ -80,6 +106,7 @@ function LoginPage() {
       replace: true,
     });
   };
+
   return (
     <AuthCinematicFrame>
       <AuthCard>
@@ -114,6 +141,7 @@ function LoginPage() {
             email={signupSuccess}
             onBack={() => {
               backToLoginAfterSignup();
+
               switchTab("login");
             }}
           />
@@ -122,6 +150,7 @@ function LoginPage() {
             className="space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
+
               void submitLogin();
             }}
           >
@@ -176,6 +205,7 @@ function LoginPage() {
             className="space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
+
               void submitRegister();
             }}
           >
@@ -252,6 +282,7 @@ function LoginPage() {
 
 function SignupSuccess({ email, onBack }: { email: string; onBack: () => void }) {
   const { t: tr } = useTranslation();
+
   return (
     <div className="space-y-4 text-center">
       <h1 className="text-xl font-semibold text-white">{tr("auth.pendingApproval")}</h1>

@@ -6,7 +6,9 @@ export type PlaybackSnapshot = {
 
 export function projectedTime(snap: PlaybackSnapshot, now = Date.now()): number {
   if (!snap.is_playing) return snap.playback_time;
+
   const elapsed = (now - snap.saved_at) / 1000;
+
   return Math.max(0, snap.playback_time + elapsed);
 }
 

@@ -15,12 +15,17 @@ interface Props {
 
 export function MemberList({ members, hostId, meId, onlineIds }: Props) {
   const { t } = useTranslation();
+
   const sorted = [...members].sort((a, b) => {
     if (a.user_id === hostId) return -1;
+
     if (b.user_id === hostId) return 1;
+
     return 0;
   });
+
   const onlineCount = sorted.filter((m) => onlineIds.has(m.user_id)).length;
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
@@ -38,10 +43,15 @@ export function MemberList({ members, hostId, meId, onlineIds }: Props) {
         <ul className="space-y-1">
           {sorted.map((m) => {
             const isHost = m.user_id === hostId;
+
             const isMe = m.user_id === meId;
+
             const online = onlineIds.has(m.user_id);
+
             const displayName = m.username || t("watchparty.guest");
+
             const initial = displayName.charAt(0).toUpperCase();
+
             return (
               <li
                 key={m.user_id}

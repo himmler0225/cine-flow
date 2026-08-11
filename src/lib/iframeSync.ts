@@ -16,24 +16,31 @@ export interface IframeSyncInfo {
 
 export function detectProvider(rawUrl: string): IframeSyncInfo {
   if (!rawUrl) return { provider: "generic", supportsAuto: false, url: rawUrl };
+
   try {
     const u = new URL(rawUrl);
+
     const host = u.hostname;
+
     if (YOUTUBE_HOST_PATTERN.test(host) || YOUTU_BE_HOST_PATTERN.test(host)) {
       u.searchParams.set("enablejsapi", "1");
+
       if (typeof window !== "undefined") {
         u.searchParams.set("origin", window.location.origin);
       }
+
       return { provider: "youtube", supportsAuto: true, url: u.toString() };
     }
+
     if (VIMEO_HOST_PATTERN.test(host)) {
       u.searchParams.set("api", "1");
+
       u.searchParams.set("player_id", "kkflix-player");
+
       return { provider: "vimeo", supportsAuto: true, url: u.toString() };
     }
-  } catch {
-    /* malformed URL — fall back to generic provider below */
-  }
+  } catch {}
+
   return { provider: "generic", supportsAuto: false, url: rawUrl };
 }
 
@@ -48,20 +55,29 @@ export function sendCommand(
   },
 ): void {
   const win = iframe?.contentWindow;
+
   if (!win) return;
+
   const time = payload?.time ?? 0;
+
   if (provider === "youtube") {
     let func: string;
+
     let args: unknown[] = [];
+
     if (cmd === "play") func = "playVideo";
     else if (cmd === "pause") func = "pauseVideo";
     else {
       func = "seekTo";
+
       args = [time, true];
     }
+
     win.postMessage(JSON.stringify({ event: "command", func, args }), "*");
+
     return;
   }
+
   if (provider === "vimeo") {
     const map: Record<
       SyncCmd,
@@ -74,9 +90,12 @@ export function sendCommand(
       pause: { method: "pause" },
       seek: { method: "setCurrentTime", value: time },
     };
+
     win.postMessage(JSON.stringify(map[cmd]), "*");
+
     return;
   }
+
   win.postMessage({ type: "KKFLIX_SYNC", cmd, time }, "*");
 }
 
@@ -93,25 +112,34 @@ export function subscribeEvents(
   handlers: SubscribeHandlers,
 ): () => void {
   if (!iframe || provider === "generic") return () => {};
+
   if (provider === "youtube") {
     const ready = () => {
       iframe.contentWindow?.postMessage(
         JSON.stringify({ event: "listening", id: "kkflix-player" }),
         "*",
       );
+
       iframe.contentWindow?.postMessage(
         JSON.stringify({ event: "command", func: "addEventListener", args: ["onStateChange"] }),
         "*",
       );
     };
+
     iframe.addEventListener("load", ready);
+
     ready();
   }
+
   let lastTime = 0;
+
   const onMessage = (ev: MessageEvent) => {
     if (provider === "youtube" && !YOUTUBE_ORIGIN_PATTERN.test(ev.origin)) return;
+
     if (provider === "vimeo" && !VIMEO_ORIGIN_PATTERN.test(ev.origin)) return;
+
     let data: unknown = ev.data;
+
     if (typeof data === "string") {
       try {
         data = JSON.parse(data);
@@ -119,8 +147,11 @@ export function subscribeEvents(
         return;
       }
     }
+
     const obj = data as Record<string, unknown>;
+
     if (!obj) return;
+
     if (provider === "youtube") {
       if (obj.event === "infoDelivery") {
         const info = obj.info as
@@ -129,14 +160,18 @@ export function subscribeEvents(
               playerState?: number;
             }
           | undefined;
+
         if (info?.currentTime != null) {
           lastTime = info.currentTime;
+
           handlers.onTime?.(info.currentTime);
         }
+
         if (info?.playerState === 1) handlers.onPlay?.(lastTime);
         else if (info?.playerState === 2) handlers.onPause?.(lastTime);
       } else if (obj.event === "onStateChange") {
         const state = obj.info as number;
+
         if (state === 1) handlers.onPlay?.(lastTime);
         else if (state === 2) handlers.onPause?.(lastTime);
       }
@@ -149,7 +184,9 @@ export function subscribeEvents(
               }
             | undefined
         )?.seconds ?? lastTime;
+
       if (typeof seconds === "number") lastTime = seconds;
+
       if (obj.event === "play") handlers.onPlay?.(lastTime);
       else if (obj.event === "pause") handlers.onPause?.(lastTime);
       else if (obj.event === "seeked") handlers.onSeek?.(lastTime);
@@ -157,6 +194,8 @@ export function subscribeEvents(
         handlers.onTime?.(lastTime);
     }
   };
+
   window.addEventListener("message", onMessage);
+
   return () => window.removeEventListener("message", onMessage);
 }

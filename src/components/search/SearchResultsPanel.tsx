@@ -22,7 +22,9 @@ export function SearchResultsPanel({
   onResultClick,
 }: Props) {
   const { t } = useTranslation();
+
   const { data: genres } = useGenres();
+
   if (debounced.length >= 2 && isFetching && items.length === 0) {
     return (
       <ul className="space-y-1">
@@ -38,8 +40,10 @@ export function SearchResultsPanel({
       </ul>
     );
   }
+
   if (debounced.length >= 2 && !isFetching && items.length === 0) {
     const chips = (genres ?? []).slice(0, 8);
+
     return (
       <div className="px-3 py-6 text-center">
         <p className="text-sm text-netflix-muted">
@@ -70,8 +74,11 @@ export function SearchResultsPanel({
       </div>
     );
   }
+
   if (items.length === 0) return null;
+
   const visible = items.slice(0, 12);
+
   return (
     <>
       <ul className="divide-y divide-white/5">

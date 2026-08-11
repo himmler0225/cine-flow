@@ -25,9 +25,11 @@ export function MovieGrid({ movies, isLoading, empty, hasFilters, onClearFilters
       </div>
     );
   }
+
   if (movies.length === 0) {
     return empty ?? <ListingEmpty hasFilters={hasFilters} onClearFilters={onClearFilters} />;
   }
+
   return (
     <div className="grid grid-cols-2 items-start gap-3 px-4 sm:grid-cols-3 md:grid-cols-4 md:gap-4 md:px-12 lg:grid-cols-5 xl:grid-cols-6">
       {movies.map((m, i) => (

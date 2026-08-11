@@ -13,13 +13,19 @@ interface MovieRatingProps {
 
 export function MovieRating({ slug, compact }: MovieRatingProps) {
   const { t } = useTranslation();
+
   const { average, count, userScore, rate, isSubmitting } = useMovieRating(slug);
+
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const [hover, setHover] = useState(0);
+
   const display = hover || userScore || 0;
+
   const handleRate = async (score: number) => {
     try {
       await rate(score);
+
       toast.success(t("toast.rated", { score }));
     } catch (e) {
       if ((e as Error).message === "RATINGS_UNAVAILABLE") {
@@ -27,8 +33,10 @@ export function MovieRating({ slug, compact }: MovieRatingProps) {
       }
     }
   };
+
   if (!isAuthenticated) {
     const rounded = Math.round(average);
+
     return (
       <div className={cn("flex flex-wrap items-center gap-2", compact && "gap-1.5")}>
         <div className="flex items-center" role="img" aria-label={t("movie.rateMovieAria")}>
@@ -50,6 +58,7 @@ export function MovieRating({ slug, compact }: MovieRatingProps) {
       </div>
     );
   }
+
   return (
     <div className={cn("flex flex-wrap items-center gap-2", compact && "gap-1.5")}>
       <div
@@ -60,7 +69,9 @@ export function MovieRating({ slug, compact }: MovieRatingProps) {
       >
         {Array.from({ length: 5 }).map((_, i) => {
           const star = i + 1;
+
           const filled = star <= display;
+
           return (
             <button
               key={star}

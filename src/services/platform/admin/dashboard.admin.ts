@@ -27,6 +27,7 @@ type DashboardTopKeyword = {
 class AdminDashboardApi {
   fetchStats(from: string, prevFrom: string) {
     const params = new URLSearchParams({ from, prevFrom });
+
     return platformFetch<{
       totalUsers: number;
       pageViews: {
@@ -48,6 +49,7 @@ class AdminDashboardApi {
   }
   fetchLineData(from: string, days: number) {
     const params = new URLSearchParams({ from, days: String(days) });
+
     return platformFetch<DashboardLinePoint[]>(`/api/admin/dashboard/line?${params}`);
   }
   fetchPageTypeDistribution(from: string) {

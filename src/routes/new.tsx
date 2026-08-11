@@ -28,13 +28,21 @@ export const Route = createFileRoute("/new")({
 
 function NewUpdatesPage() {
   const { t: tr } = useTranslation();
+
   const search = Route.useSearch();
+
   const navigate = useNavigate({ from: Route.fullPath });
+
   const page = search.page ?? 1;
+
   const { data, isFetching, isPlaceholderData } = useNewMovies(page);
+
   const items = data?.items ?? [];
+
   const totalPages = data?.pagination?.totalPages ?? 0;
+
   useScrollToTopOnChange(page);
+
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <div className="px-4 md:px-12">

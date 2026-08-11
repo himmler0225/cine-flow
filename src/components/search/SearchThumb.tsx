@@ -4,9 +4,13 @@ import { cn } from "@/lib/utils";
 
 export function SearchThumb({ src, eager = false }: { src?: string; eager?: boolean }) {
   const [loaded, setLoaded] = useState(false);
+
   const candidates = getImageCandidates(src);
+
   const webp = candidates[0] ?? "";
+
   const fallback = candidates[1] ?? "";
+
   return (
     <div className="relative h-16 w-12 flex-none overflow-hidden rounded bg-white/5">
       {!loaded && (
@@ -22,8 +26,10 @@ export function SearchThumb({ src, eager = false }: { src?: string; eager?: bool
         onLoad={() => setLoaded(true)}
         onError={(e) => {
           const img = e.currentTarget;
+
           if (img.dataset.f !== "1" && fallback && fallback !== webp) {
             img.dataset.f = "1";
+
             img.src = fallback;
           } else {
             setLoaded(true);

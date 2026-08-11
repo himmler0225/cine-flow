@@ -17,6 +17,7 @@ export const getRouter = () => {
       },
     },
   });
+
   const router = createRouter({
     routeTree,
     context: { queryClient },
@@ -24,5 +25,6 @@ export const getRouter = () => {
     defaultPreload: "intent",
     defaultPreloadStaleTime: 30000,
   });
+
   return router;
 };

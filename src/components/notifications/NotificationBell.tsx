@@ -7,14 +7,18 @@ import { MoviePosterImg } from "@/components/movie/MoviePosterImg";
 
 export function NotificationBell() {
   const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
+
   const { notifications, unreadCount, markRead } = useEpisodeNotifications();
+
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => {
           setOpen((v) => !v);
+
           if (!open) markRead();
         }}
         className="relative rounded-full p-2 text-white hover:bg-white/10"

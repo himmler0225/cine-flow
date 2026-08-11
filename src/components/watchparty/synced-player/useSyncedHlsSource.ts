@@ -6,29 +6,49 @@ export function useSyncedHlsSource(
   src: string,
   useIframe: boolean,
   onHlsFailed: () => void,
+  onReady?: () => void,
 ) {
   useEffect(() => {
     if (useIframe) return;
+
     const v = videoRef.current;
+
     if (!v || !src) return;
+
     let hls: Hls | null = null;
+
     const onNativeError = () => onHlsFailed();
+
+    const onNativeReady = () => onReady?.();
+
     v.addEventListener("error", onNativeError);
+
+    v.addEventListener("loadedmetadata", onNativeReady);
+
     if (v.canPlayType("application/vnd.apple.mpegurl")) {
       v.src = src;
     } else if (Hls.isSupported()) {
       hls = new Hls({ enableWorker: true });
+
       hls.loadSource(src);
+
       hls.attachMedia(v);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => onReady?.());
+
       hls.on(Hls.Events.ERROR, (_e, data) => {
         if (data.fatal) onHlsFailed();
       });
     } else {
       v.src = src;
     }
+
     return () => {
       v.removeEventListener("error", onNativeError);
+
+      v.removeEventListener("loadedmetadata", onNativeReady);
+
       hls?.destroy();
     };
-  }, [src, useIframe, videoRef, onHlsFailed]);
+  }, [src, useIframe, videoRef, onHlsFailed, onReady]);
 }

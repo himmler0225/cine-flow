@@ -6,12 +6,15 @@ import { useSettingsStore } from "@/store/settingsStore";
 
 function buildPosterCandidates(poster?: string, thumb?: string, dataSaver = false): string[] {
   const raw = [poster, thumb].filter(Boolean) as string[];
+
   const out: string[] = [];
+
   for (const r of raw) {
     for (const candidate of getImageCandidates(r, { skipWebp: dataSaver })) {
       if (!out.includes(candidate)) out.push(candidate);
     }
   }
+
   return out;
 }
 
@@ -33,6 +36,7 @@ export function DetailPoster({
   variant = "poster",
 }: DetailPosterProps) {
   const dataSaver = useSettingsStore((s) => s.dataSaver);
+
   const candidates = useMemo(
     () =>
       variant === "backdrop"
@@ -40,8 +44,11 @@ export function DetailPoster({
         : buildPosterCandidates(poster, thumb, dataSaver),
     [poster, thumb, variant, dataSaver],
   );
+
   const [idx, setIdx] = useState(0);
+
   const src = candidates[idx] ?? "";
+
   if (!src) {
     return (
       <div
@@ -55,6 +62,7 @@ export function DetailPoster({
       </div>
     );
   }
+
   return (
     <img
       key={src}

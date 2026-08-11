@@ -20,6 +20,7 @@ export function ProfileConfirmModal({
   onCancel,
 }: ProfileConfirmModalProps) {
   const { t } = useTranslation();
+
   return (
     <AnimatePresence>
       {open && (

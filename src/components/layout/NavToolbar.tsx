@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/authStore";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { ChatTriggerButton } from "@/components/chat/ChatTriggerButton";
 import { useNavbarUiStore } from "@/components/layout/store/navbarUiStore";
 
 type Props = {
@@ -11,8 +12,11 @@ type Props = {
 
 export function NavToolbar({ isAuthenticated }: Props) {
   const { t } = useTranslation();
+
   const requestAuth = useAuthStore((s) => s.requestAuth);
+
   const setOpenSearch = useNavbarUiStore((s) => s.setOpenSearch);
+
   return (
     <div className="flex min-w-0 shrink items-center gap-0.5 sm:gap-1.5 md:gap-2">
       <button
@@ -34,6 +38,7 @@ export function NavToolbar({ isAuthenticated }: Props) {
       >
         <Search className="h-5 w-5" />
       </button>
+      {isAuthenticated && <ChatTriggerButton />}
       <div className="hidden shrink-0 md:block">{isAuthenticated && <NotificationBell />}</div>
       {isAuthenticated ? (
         <UserMenu />

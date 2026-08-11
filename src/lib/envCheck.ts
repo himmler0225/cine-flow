@@ -10,7 +10,9 @@ interface EnvIssue {
 
 export function collectEnvIssues(): EnvIssue[] {
   const issues: EnvIssue[] = [];
+
   const movieApiUrl = clientEnv.rawMovieApiUrl;
+
   if (!movieApiUrl) {
     issues.push({
       key: "VITE_MOVIE_API_URL",
@@ -24,6 +26,7 @@ export function collectEnvIssues(): EnvIssue[] {
       message: `VITE_MOVIE_API_URL không hợp lệ: "${movieApiUrl}".`,
     });
   }
+
   return issues;
 }
 
@@ -31,18 +34,27 @@ let alreadyChecked = false;
 
 export function runStartupEnvCheck() {
   if (typeof window === "undefined" || alreadyChecked) return;
+
   alreadyChecked = true;
+
   const issues = collectEnvIssues();
+
   if (issues.length === 0) {
     console.info("[Cine-Flow] Env OK");
+
     return;
   }
+
   const errors = issues.filter((i) => i.level === "error");
+
   const warns = issues.filter((i) => i.level === "warn");
+
   for (const i of issues) {
     const fn = i.level === "error" ? console.error : console.warn;
+
     fn(`[Cine-Flow env] ${i.key}: ${i.message}`);
   }
+
   if (errors.length > 0) {
     toast.error(`Thiếu hoặc sai cấu hình: ${errors.map((e) => e.key).join(", ")}`, {
       description: errors[0].message,

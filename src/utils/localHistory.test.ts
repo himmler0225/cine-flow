@@ -25,6 +25,7 @@ describe("mergeWatchProgress", () => {
       },
       "2026-01-02T00:00:00.000Z",
     );
+
     assert.equal(merged.progress_sec, 600);
   });
 
@@ -50,6 +51,7 @@ describe("mergeWatchProgress", () => {
       },
       "2026-01-02T00:00:00.000Z",
     );
+
     assert.equal(merged.progress_sec, 3);
   });
 });

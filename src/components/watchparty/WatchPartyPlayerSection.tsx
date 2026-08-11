@@ -1,4 +1,5 @@
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Pause, Settings2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SyncedPlayer } from "@/components/watchparty/SyncedPlayer";
 import { ReactionOverlay } from "@/components/watchparty/ReactionOverlay";
@@ -28,7 +29,6 @@ type Props = {
     provider: IframeProvider;
     supportsAuto: boolean;
   } | null;
-  autoSyncActive: boolean;
   manualSync: boolean;
   onPlay: (time: number) => void;
   onPause: (time: number) => void;
@@ -44,6 +44,7 @@ type Props = {
   onAdjustTime: (delta: number) => void;
   onBroadcastPlay: () => void;
   onBroadcastPause: () => void;
+  onReady?: () => void;
 };
 
 export function WatchPartyPlayerSection({
@@ -56,7 +57,6 @@ export function WatchPartyPlayerSection({
   waitingForHost,
   hostAwayOverlay,
   iframeInfo,
-  autoSyncActive,
   manualSync,
   onPlay,
   onPause,
@@ -67,11 +67,17 @@ export function WatchPartyPlayerSection({
   onAdjustTime,
   onBroadcastPlay,
   onBroadcastPause,
+  onReady,
 }: Props) {
   const { t } = useTranslation();
+
+  const [showSync, setShowSync] = useState(false);
+
+  const needsManualSync = manualSync && iframeInfo && !iframeInfo.supportsAuto && !playable.usesHls;
+
   return (
-    <div className="space-y-3">
-      <div className="relative">
+    <div>
+      <div className="relative overflow-hidden rounded-lg bg-black">
         <SyncedPlayer
           ref={playerRef}
           src={playable.src}
@@ -82,17 +88,19 @@ export function WatchPartyPlayerSection({
           onPause={onPause}
           onSeek={onSeek}
           onProviderReady={onProviderReady}
+          onReady={onReady}
         />
 
         {countdown !== null && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70">
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-sm">
             <div className="text-center">
-              <div className="animate-pulse text-7xl font-bold text-white">
+              <div className="text-7xl font-bold text-white">
                 {countdown === 0 ? t("watchparty.countdownStart") : countdown}
               </div>
-              <p className="mt-2 text-sm text-white/80">
-                {countdown === 0 ? t("watchparty.countdownStart") : t("watchparty.countdownHint")}
-              </p>
+
+              {countdown > 0 && (
+                <p className="mt-2 text-sm text-white/70">{t("watchparty.countdownHint")}</p>
+              )}
             </div>
           </div>
         )}
@@ -100,85 +108,78 @@ export function WatchPartyPlayerSection({
         <ReactionOverlay reactions={reactions} />
 
         {!waitingForHost && hostAwayOverlay && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 rounded-t-lg bg-black/60 px-3 py-2 text-center text-xs text-amber-200">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 bg-black/60 px-3 py-2 text-center text-xs text-amber-200">
             {t("watchparty.hostLeftWaiting")}
           </div>
         )}
 
         {waitingForHost && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-lg bg-black/85 backdrop-blur-sm">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10">
-              <Loader2 className="h-7 w-7 animate-spin text-netflix-red" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10">
+              <Loader2 className="h-6 w-6 animate-spin text-netflix-red" />
             </div>
+
             <div className="text-center">
-              <p className="text-base font-semibold text-white">
-                {t("watchparty.waitingHostJoin")}
-              </p>
+              <p className="text-sm font-semibold text-white">{t("watchparty.waitingHostJoin")}</p>
+
               <p className="mt-1 text-xs text-netflix-muted">
                 {t("watchparty.startsWhenHostJoins")}
               </p>
             </div>
+
             <Button
               variant="outline"
               size="sm"
               onClick={onLeave}
-              className="mt-1 border-white/20 bg-transparent text-white hover:bg-white/10"
+              className="border-white/20 bg-transparent text-white hover:bg-white/10"
             >
-              <LogOut className="h-3.5 w-3.5" /> {t("watchparty.leaveRoom")}
+              <LogOut className="mr-1.5 h-3.5 w-3.5" />
+              {t("watchparty.leaveRoom")}
             </Button>
           </div>
         )}
+
+        {!isHost &&
+          !room.is_playing &&
+          !waitingForHost &&
+          !hostAwayOverlay &&
+          countdown === null && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-lg bg-black/85 backdrop-blur-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10">
+                <Pause className="h-6 w-6 text-netflix-red" />
+              </div>
+
+              <div className="text-center">
+                <p className="text-sm font-semibold text-white">
+                  {t("watchparty.hostPausedTitle")}
+                </p>
+
+                <p className="mt-1 text-xs text-netflix-muted">{t("watchparty.hostPausedHint")}</p>
+              </div>
+            </div>
+          )}
       </div>
 
-      <div>
-        <h1 className="text-xl font-bold text-white md:text-2xl">{room.movie_name}</h1>
-        {room.episode_name && (
-          <p className="mt-0.5 text-sm text-netflix-muted">{room.episode_name}</p>
-        )}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          {isHost ? (
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-medium text-amber-200">
-              {t("watchparty.youAreHost")}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-netflix-muted">
-              {t("watchparty.hostOnlyControls")}
-            </span>
-          )}
-          {autoSyncActive && (
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-400/40 bg-emerald-400/10 px-2.5 py-1 text-xs text-emerald-200">
-              {t("watchparty.hlsSyncActive")}
-            </span>
-          )}
-          {iframeInfo && !playable.usesHls && (
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs ${
-                iframeInfo.supportsAuto
-                  ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-200"
-                  : "border-amber-400/40 bg-amber-400/10 text-amber-200"
-              }`}
-            >
-              {iframeInfo.supportsAuto
-                ? t("watchparty.iframeSync", { provider: iframeInfo.provider })
-                : t("watchparty.iframeNoSync")}
-            </span>
-          )}
-          {isHost &&
-            iframeInfo &&
-            !iframeInfo.supportsAuto &&
-            !playable.usesHls &&
-            countdown === null && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 border-amber-400/40 bg-amber-400/10 text-xs text-amber-200 hover:bg-amber-400/20"
-                onClick={onStartCountdown}
-              >
-                {t("watchparty.countdown321")}
-              </Button>
+      <div className="mt-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="truncate text-xl font-bold text-white md:text-2xl">{room.movie_name}</h1>
+
+            {room.episode_name && (
+              <p className="mt-0.5 text-sm text-netflix-muted">{room.episode_name}</p>
             )}
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            {isHost && (
+              <span className="rounded-md bg-amber-400/10 px-2.5 py-1 text-xs font-medium text-amber-200 ring-1 ring-amber-400/20">
+                👑 Host
+              </span>
+            )}
+          </div>
         </div>
-        {manualSync && (
+
+        {needsManualSync && !isHost && (
           <div className="mt-3">
             <ManualSyncBar
               playbackTime={room.playback_time}
@@ -189,6 +190,46 @@ export function WatchPartyPlayerSection({
               onBroadcastPause={onBroadcastPause}
               onStartCountdown={onStartCountdown}
             />
+          </div>
+        )}
+
+        {needsManualSync && isHost && (
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setShowSync((value) => !value)}
+              className="
+                inline-flex
+                items-center
+                gap-1.5
+                rounded-md
+                px-2.5
+                py-1.5
+                text-xs
+                text-netflix-muted
+                transition-colors
+                hover:bg-white/5
+                hover:text-white
+              "
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+
+              {showSync ? "Ẩn đồng bộ" : "Đồng bộ thủ công"}
+            </button>
+
+            {showSync && (
+              <div className="mt-2">
+                <ManualSyncBar
+                  playbackTime={room.playback_time}
+                  isPlaying={room.is_playing}
+                  isHost={isHost}
+                  onAdjustTime={onAdjustTime}
+                  onBroadcastPlay={onBroadcastPlay}
+                  onBroadcastPause={onBroadcastPause}
+                  onStartCountdown={onStartCountdown}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

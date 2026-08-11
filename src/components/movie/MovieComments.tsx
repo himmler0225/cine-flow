@@ -23,11 +23,17 @@ export function MovieComments({
   className,
 }: MovieCommentsProps) {
   const { t, i18n } = useTranslation();
+
   const [content, setContent] = useState("");
+
   const [spoiler, setSpoiler] = useState(false);
+
   const [revealedSpoilers, setRevealedSpoilers] = useState<Set<string>>(() => new Set());
+
   const [episodeFilter, setEpisodeFilter] = useState<string | null>(episodeName ?? null);
+
   const activeEpisode = episodeName ?? episodeFilter;
+
   const {
     data: allComments = [],
     isLoading,
@@ -36,32 +42,45 @@ export function MovieComments({
   } = useComments(slug, {
     episodeName: activeEpisode,
   });
+
   const comments = useMemo(() => {
     if (!activeEpisode) return allComments;
+
     if (episodeName) {
       return allComments.filter((c) => c.episode_name === activeEpisode);
     }
+
     return allComments.filter((c) => !c.episode_name || c.episode_name === activeEpisode);
   }, [allComments, activeEpisode, episodeName]);
+
   const placeholder = activeEpisode
     ? t("movie.commentPlaceholderEpisode", { episode: activeEpisode, movie: movieName })
     : t("movie.commentPlaceholderMovie", { movie: movieName });
+
   const submit = async () => {
     const text = content.trim();
+
     if (text.length < 2) {
       toast.error(t("toast.commentTooShort"));
+
       return;
     }
+
     try {
       await submitComment({ content: text, isSpoiler: spoiler });
+
       setContent("");
+
       setSpoiler(false);
+
       toast.success(t("toast.commentSent"));
     } catch (e) {
       if ((e as Error).message === "AUTH_REQUIRED") return;
+
       toast.error((e as Error).message || t("toast.commentFailed"));
     }
   };
+
   return (
     <div className={cn("space-y-4", className)}>
       {episodeOptions && episodeOptions.length > 0 && !episodeName && (
@@ -176,7 +195,9 @@ export function MovieComments({
                       onClick={() =>
                         setRevealedSpoilers((prev) => {
                           const next = new Set(prev);
+
                           next.add(c.id);
+
                           return next;
                         })
                       }

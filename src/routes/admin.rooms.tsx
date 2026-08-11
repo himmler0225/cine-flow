@@ -32,14 +32,23 @@ type RoomRow = AdminRoomRow;
 
 function RoomsPage() {
   const { t } = useTranslation();
+
   const qc = useQueryClient();
+
   const [openRoom, setOpenRoom] = useState<RoomRow | null>(null);
+
   const [confirmDelete, setConfirmDelete] = useState<RoomRow | null>(null);
+
   const [showHistory, setShowHistory] = useState(false);
+
   const { stats, rooms, counts } = useAdminRooms(showHistory);
+
   const now = Date.now();
+
   const active = rooms.data?.filter((r) => new Date(r.expires_at).getTime() > now) ?? [];
+
   const expired = rooms.data?.filter((r) => new Date(r.expires_at).getTime() <= now) ?? [];
+
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.rooms")}</h1>
@@ -117,12 +126,16 @@ function RoomsPage() {
         onClose={() => setConfirmDelete(null)}
         onConfirm={async () => {
           if (!confirmDelete) return;
+
           const { error } = await adminRoomsApi.deleteById(confirmDelete.id);
+
           if (error) toast.error(t("toast.adminDeleteFailed"), { description: error.message });
           else {
             toast.success(t("toast.adminRoomDeleted"));
+
             qc.invalidateQueries({ queryKey: queryKeys.admin.all() });
           }
+
           setConfirmDelete(null);
         }}
       />
@@ -149,7 +162,9 @@ function RoomTable({
   onDelete: (r: RoomRow) => void;
 }) {
   const { t, i18n } = useTranslation();
+
   const locale = getIntlLocale(i18n.language);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] text-left text-sm">
@@ -215,14 +230,20 @@ function RoomTable({
 
 function RoomDetail({ room, onClose }: { room: RoomRow | null; onClose: () => void }) {
   const { t, i18n } = useTranslation();
+
   const locale = getIntlLocale(i18n.language);
+
   const [tab, setTab] = useState<"members" | "messages">("members");
+
   const roomId = room?.id ?? "";
+
   const { members, messages } = useAdminRoomDetail(roomId, tab);
+
   const tabs = [
     ["members", t("admin.common.members")] as const,
     ["messages", t("admin.common.messages")] as const,
   ];
+
   return (
     <SlidePanel
       open={!!room}
@@ -299,6 +320,7 @@ function RoomDetail({ room, onClose }: { room: RoomRow | null; onClose: () => vo
                       : m.type === "reaction"
                         ? "bg-purple-500/15 text-purple-300"
                         : "bg-zinc-700/40 text-zinc-300";
+
                   return (
                     <li
                       key={m.id}

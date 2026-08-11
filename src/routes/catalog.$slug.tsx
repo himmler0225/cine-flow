@@ -17,6 +17,7 @@ export const Route = createFileRoute("/catalog/$slug")({
   validateSearch: zodValidator(filterSearchSchema),
   head: ({ params }) => {
     const name = getMovieListLabel(params.slug);
+
     return buildListingHead({
       title: `${name} — Cine-Flow`,
       description: t("seo.listDescription", { name }),
@@ -28,16 +29,27 @@ export const Route = createFileRoute("/catalog/$slug")({
 
 function ListPage() {
   const { t: tr } = useTranslation();
+
   const { slug } = Route.useParams();
+
   const search = Route.useSearch();
+
   const navigate = useNavigate({ from: Route.fullPath });
+
   const page = search.page ?? 1;
+
   const [isPending, startTransition] = useTransition();
+
   const { data, isFetching, isPlaceholderData } = useMoviesByTypePaged(slug, page, search);
+
   const items = data?.items ?? [];
+
   const totalPages = data?.pagination?.totalPages ?? 0;
+
   const title = useMemo(() => getMovieListLabel(slug), [slug]);
+
   useScrollToTopOnChange(page);
+
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <div className="px-4 md:px-12">

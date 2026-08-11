@@ -19,6 +19,7 @@ class AdminUsersApi {
       page: String(opts.page),
       pageSize: String(opts.pageSize),
     });
+
     return platformFetch<{
       rows: AdminProfileRow[];
       total: number;

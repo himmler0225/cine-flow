@@ -11,22 +11,35 @@ type Props = {
 
 function getRange(page: number, total: number): Array<number | "..."> {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
   const out: Array<number | "..."> = [1];
+
   const start = Math.max(2, page - 1);
+
   const end = Math.min(total - 1, page + 1);
+
   if (start > 2) out.push("...");
+
   for (let i = start; i <= end; i++) out.push(i);
+
   if (end < total - 1) out.push("...");
+
   out.push(total);
+
   return out;
 }
 
 export function Pagination({ page, totalPages, onChange }: Props) {
   const { t } = useTranslation();
+
   if (!totalPages || totalPages < 2) return null;
+
   const items = getRange(page, totalPages);
+
   const canGoPrev = page > 1;
+
   const canGoNext = page < totalPages;
+
   return (
     <nav
       aria-label={t("filters.pagination")}

@@ -7,28 +7,33 @@ A Netflix-style movie & series streaming site — browsing, an HLS video player 
 ## Highlights
 
 **Browsing & discovery**
+
 - Home page with an auto-rotating hero carousel, a Top 10 trending board (podium + ranked list), continue-watching row, and catalog rows by type.
 - Catalog, genre, country, and year listing pages with filters and pagination.
 - Global search with debounced suggestions, recent/quick filters, and a command-style modal (`⌘K`).
 - SEO: per-route meta tags, JSON-LD (`VideoObject`, `BreadcrumbList`), `sitemap.xml`, i18n `hreflang`.
 
 **Playback**
+
 - Custom HLS.js player: adaptive quality levels, subtitle tracks, 0.5x–2x speed, Picture-in-Picture, fullscreen, keyboard shortcuts (space/arrows/M/F/N), resume-from-last-position.
 - Multi-server failover per episode (auto-retries an alternate upstream server on error) and an iframe/embed fallback player for sources with no direct `.m3u8`.
 - Auto-advance to the next episode with a 5s countdown overlay (cancelable).
 - "Watch trailer" button + modal (YouTube) on the home hero and movie detail page.
 
 **Watch Party**
+
 - Create/join a synced room by code or PIN; playback position, pause/seek, and reactions are synced over Socket.IO.
 - In-room chat, member list, host controls, and a mobile-optimized layout.
 
 **Account & social**
+
 - Supabase-backed auth (email/password + Google OAuth), password reset.
 - Favorites, watchlists (multiple named lists), watch history with resume, per-movie/episode ratings and comments.
 - Profile page with activity feed and watch stats; in-app notification bell for new episodes on tracked series.
 - Demo "Premium" plan gating ad-skip and longer watch-party sessions.
 
 **Admin dashboard**
+
 - Traffic/analytics charts (recharts): hourly traffic, page types, search terms, movie view/episode/server stats.
 - User role management, comment moderation, and watch-party room oversight.
 
@@ -38,8 +43,8 @@ A Netflix-style movie & series streaming site — browsing, an HLS video player 
 
 ## Demo
 
-| Global search (`⌘K`) | Movie detail | Player |
-|---|---|---|
+| Global search (`⌘K`)                   | Movie detail                                       | Player                                 |
+| -------------------------------------- | -------------------------------------------------- | -------------------------------------- |
 | ![Search](docs/screenshots/search.png) | ![Movie detail](docs/screenshots/movie-detail.png) | ![Player](docs/screenshots/player.png) |
 
 ---
@@ -108,21 +113,21 @@ Open `http://localhost:5173`. Requires [movie-aggregator-api](../movie-aggregato
 
 ## Environment variables
 
-| Variable | Description |
-|----------|--------------|
+| Variable             | Description                                                               |
+| -------------------- | ------------------------------------------------------------------------- |
 | `VITE_MOVIE_API_URL` | Base URL of `movie-aggregator-api` (defaults to a built-in URL if unset). |
-| `VITE_SITE_URL` | Public site URL used for SEO tags, canonical links, and the sitemap. |
+| `VITE_SITE_URL`      | Public site URL used for SEO tags, canonical links, and the sitemap.      |
 
 ---
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `yarn dev` | Dev server with HMR |
-| `yarn build` | Production build |
-| `yarn preview` | Preview the production build locally |
-| `yarn lint` | ESLint |
-| `yarn format` | Prettier write |
-| `yarn test` | Unit tests (auth routes/token, watch progress, local history, watch-party sync math) |
-| `yarn check:contract` | Validate the frontend's expected API shape against the live backend |
+| Command               | Description                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| `yarn dev`            | Dev server with HMR                                                                  |
+| `yarn build`          | Production build                                                                     |
+| `yarn preview`        | Preview the production build locally                                                 |
+| `yarn lint`           | ESLint                                                                               |
+| `yarn format`         | Prettier write                                                                       |
+| `yarn test`           | Unit tests (auth routes/token, watch progress, local history, watch-party sync math) |
+| `yarn check:contract` | Validate the frontend's expected API shape against the live backend                  |

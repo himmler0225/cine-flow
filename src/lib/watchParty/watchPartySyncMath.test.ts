@@ -5,6 +5,7 @@ import { projectedTime, shouldResync } from "./watchPartySyncMath.ts";
 describe("watch party sync math", () => {
   it("projects playback time while playing", () => {
     const now = 1_000_000;
+
     const projected = projectedTime(
       {
         is_playing: true,
@@ -13,6 +14,7 @@ describe("watch party sync math", () => {
       },
       now,
     );
+
     assert.equal(projected, 105);
   });
 
@@ -29,6 +31,7 @@ describe("watch party sync math", () => {
 
   it("flags drift above threshold", () => {
     assert.equal(shouldResync(10, 13, 2), true);
+
     assert.equal(shouldResync(10, 11.5, 2), false);
   });
 });

@@ -43,18 +43,29 @@ type Props = {
 
 export function NavDesktopMenu({ path }: Props) {
   const { t } = useTranslation();
+
   const { data: genres } = useGenres();
+
   const { data: countries } = useCountries();
+
   const genreList = (genres && genres.length > 0 ? genres : FALLBACK_GENRES).slice(0, 18);
+
   const sortedCountries = (countries ?? []).slice().sort((a, b) => {
     const ai = POPULAR_COUNTRY_ORDER.indexOf(a.slug);
+
     const bi = POPULAR_COUNTRY_ORDER.indexOf(b.slug);
+
     if (ai === -1 && bi === -1) return a.name.localeCompare(b.name);
+
     if (ai === -1) return 1;
+
     if (bi === -1) return -1;
+
     return ai - bi;
   });
+
   const countryList = sortedCountries.slice(0, 12);
+
   return (
     <nav className="hidden items-center gap-4 text-sm md:flex lg:gap-5">
       {DIRECT_LINKS.map((n) => (

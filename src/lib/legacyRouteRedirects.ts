@@ -11,12 +11,18 @@ const REDIRECTS: Array<[from: RegExp, to: (match: RegExpMatchArray) => string]> 
 
 export function legacyRouteRedirect(request: Request): Response | null {
   const url = new URL(request.url);
+
   const { pathname, search } = url;
+
   for (const [pattern, buildTarget] of REDIRECTS) {
     const match = pathname.match(pattern);
+
     if (!match) continue;
+
     const target = buildTarget(match);
+
     return Response.redirect(`${target}${search}`, 301);
   }
+
   return null;
 }

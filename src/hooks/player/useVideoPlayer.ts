@@ -32,19 +32,33 @@ export function useVideoPlayer({
   onNextEpisode,
 }: UseVideoPlayerOptions) {
   const { t } = useTranslation();
+
   const navigate = useNavigate();
+
   const { isPremium } = usePremium();
+
   const dataSaver = useSettingsStore((s) => s.dataSaver);
+
   const playableSrc = resolvePlayableSrc(src, embed);
+
   const embedSrc = embed || (isEmbedUrl(src) ? src : "");
+
   const preferEmbed = dataSaver && !!embedSrc;
+
   const videoRef = useRef<HTMLVideoElement>(null);
+
   const containerRef = useRef<HTMLDivElement>(null);
+
   const pendingSeekRef = useRef<number | null>(null);
+
   const blockEmbedFallbackRef = useRef(false);
+
   const seekLockRef = useRef<SeekLock | null>(null);
+
   const [preferNative, setPreferNative] = useState(false);
+
   const initialSkip = isPremium && readSkipAdsPreference();
+
   const [state, dispatch] = useReducer(
     playerUiReducer,
     {
@@ -56,8 +70,11 @@ export function useVideoPlayer({
 
   useEffect(() => {
     setPreferNative(false);
+
     blockEmbedFallbackRef.current = false;
+
     pendingSeekRef.current = null;
+
     seekLockRef.current = null;
   }, [playableSrc, embedSrc]);
 
@@ -66,9 +83,13 @@ export function useVideoPlayer({
 
   const onFallbackEmbed = useCallback(() => {
     setPreferNative(false);
+
     blockEmbedFallbackRef.current = false;
+
     pendingSeekRef.current = null;
+
     seekLockRef.current = null;
+
     dispatch({ type: "setForceEmbed", forceEmbed: true });
   }, []);
 
@@ -91,6 +112,7 @@ export function useVideoPlayer({
     dispatch,
     !preferNative,
   );
+
   const hls = usePlayerHlsSource(
     videoRef,
     playableSrc,
@@ -102,6 +124,7 @@ export function useVideoPlayer({
     pendingSeekRef,
     onFallbackEmbed,
   );
+
   usePlayerTelemetry({
     videoRef,
     useEmbed: state.useEmbed,
@@ -116,6 +139,7 @@ export function useVideoPlayer({
     onProgress,
     onLiveTime,
   });
+
   usePlayerResume(
     videoRef,
     state.useEmbed,
@@ -126,7 +150,9 @@ export function useVideoPlayer({
     pendingSeekRef,
     seekLockRef,
   );
+
   usePlayerSeekEvent(videoRef, state.useEmbed, dispatch, seekLockRef);
+
   const { toggleFullscreen } = usePlayerKeyboard(
     videoRef,
     containerRef,
@@ -134,6 +160,7 @@ export function useVideoPlayer({
     dispatch,
     onNextEpisode,
   );
+
   const controls = createPlayerControls(
     videoRef,
     containerRef,
@@ -142,12 +169,14 @@ export function useVideoPlayer({
     toggleFullscreen,
     (cur, dur) => {
       onLiveTime?.(cur, dur);
+
       onProgress?.(cur, dur);
     },
   );
 
   const setSkipAds = (updater: boolean | ((prev: boolean) => boolean)) => {
     const next = typeof updater === "function" ? updater(state.skipAds) : updater;
+
     if (next && !isPremium) {
       toast.message(t("player.skipAdsPremiumOnly"), {
         action: {
@@ -155,8 +184,10 @@ export function useVideoPlayer({
           onClick: () => navigate({ to: "/premium" }),
         },
       });
+
       return;
     }
+
     controls.setSkipAds(next);
   };
 
@@ -164,12 +195,17 @@ export function useVideoPlayer({
 
   const skipCurrentAd = () => {
     const end = DEFAULT_MIDROLL_AD.end;
+
     const video = videoRef.current;
+
     if (state.useEmbed || !video || !playableSrc) return;
 
     seekLockRef.current = { minTime: end, until: Date.now() + 10000 };
+
     pendingSeekRef.current = null;
+
     dispatch({ type: "incrementAdsSkipped", count: 1 });
+
     dispatch({ type: "setProgress", progress: end });
 
     const dur =
@@ -179,11 +215,12 @@ export function useVideoPlayer({
 
     try {
       video.currentTime = Math.min(end, Math.max(0, dur - 0.25));
-    } catch {
-      /* best-effort seek — setting currentTime can throw on some browsers/readyStates */
-    }
+    } catch {}
+
     void video.play().catch(() => {});
+
     onLiveTime?.(end, dur);
+
     onProgress?.(end, dur);
   };
 
@@ -212,8 +249,11 @@ export function useVideoPlayer({
     skipCurrentAd,
     useBackupPlayer: () => {
       setPreferNative(false);
+
       blockEmbedFallbackRef.current = false;
+
       seekLockRef.current = null;
+
       dispatch({ type: "setForceEmbed", forceEmbed: true });
     },
     levels: hls.levels,

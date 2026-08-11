@@ -17,9 +17,13 @@ type Props = {
 
 export function UserAvatar({ size = "sm", className, ring = false }: Props) {
   const user = useAuthStore((s) => s.user);
+
   const profile = useAuthStore((s) => s.profile);
+
   const { displayName, avatarUrl, initial } = resolveUserDisplay(user, profile);
+
   const gradient = colorFor(displayName);
+
   return (
     <div
       className={cn(

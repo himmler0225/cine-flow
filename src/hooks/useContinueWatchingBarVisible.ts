@@ -19,15 +19,21 @@ export function pickContinueWatchingItem(history: WatchHistoryItem[]): WatchHist
 
 export function isContinueWatchingBarHiddenOnPath(pathname: string): boolean {
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return true;
+
   if (pathname === "/") return true;
+
   return false;
 }
 
 export function useContinueWatchingBar() {
   const location = useLocation();
+
   const { history, deleteItem } = useWatchHistory();
+
   const item = useMemo(() => pickContinueWatchingItem(history), [history]);
+
   const visible = !!item && !isContinueWatchingBarHiddenOnPath(location.pathname);
+
   return { item, visible, deleteItem };
 }
 

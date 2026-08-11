@@ -21,10 +21,15 @@ export const Route = createFileRoute("/search")({
 
 function SearchPage() {
   const { t: tr } = useTranslation();
+
   const { q } = Route.useSearch();
+
   const navigate = useNavigate();
+
   const [input, setInput] = useState(q);
+
   const { data, fetchNextPage, hasNextPage, isFetching, debounced } = useSearch(input);
+
   useEffect(() => {
     if (debounced !== q) {
       navigate({
@@ -34,10 +39,14 @@ function SearchPage() {
       });
     }
   }, [debounced, q, navigate]);
+
   const sentinel = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const el = sentinel.current;
+
     if (!el) return;
+
     const obs = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetching) {
@@ -46,10 +55,14 @@ function SearchPage() {
       },
       { rootMargin: "300px" },
     );
+
     obs.observe(el);
+
     return () => obs.disconnect();
   }, [hasNextPage, isFetching, fetchNextPage]);
+
   const items = data?.pages.flatMap((p) => p.items ?? []) ?? [];
+
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <div className="px-4 md:px-12">

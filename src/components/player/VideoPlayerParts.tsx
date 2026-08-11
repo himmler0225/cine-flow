@@ -76,49 +76,72 @@ export function VideoPlayerControls({
   onSelectSubtitle,
 }: VideoPlayerControlsProps) {
   const { t } = useTranslation();
+
   const speedButtonRef = useRef<HTMLButtonElement>(null);
+
   const speedMenuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!showSpeed) return;
+
     const menu = speedMenuRef.current;
+
     if (!menu) return;
+
     const items = Array.from(menu.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+
     const selectedIdx = Math.max(
       0,
       PLAYBACK_SPEEDS.findIndex((s) => s === speed),
     );
+
     items[selectedIdx]?.focus();
+
     const onKeyDown = (e: KeyboardEvent) => {
       const idx = items.indexOf(document.activeElement as HTMLButtonElement);
+
       if (e.key === "ArrowDown") {
         e.preventDefault();
+
         items[(idx + 1 + items.length) % items.length]?.focus();
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
+
         items[(idx - 1 + items.length) % items.length]?.focus();
       } else if (e.key === "Escape") {
         e.preventDefault();
+
         onToggleSpeedMenu();
+
         speedButtonRef.current?.focus();
       } else if (e.key === "Tab") {
         e.preventDefault();
       }
     };
+
     menu.addEventListener("keydown", onKeyDown);
+
     return () => menu.removeEventListener("keydown", onKeyDown);
   }, [showSpeed, speed, onToggleSpeedMenu]);
+
   useEffect(() => {
     if (!showSpeed) return;
+
     const onClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
+
       if (speedMenuRef.current?.contains(target) || speedButtonRef.current?.contains(target)) {
         return;
       }
+
       onToggleSpeedMenu();
     };
+
     document.addEventListener("mousedown", onClickOutside);
+
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, [showSpeed, onToggleSpeedMenu]);
+
   return (
     <div
       className={cn(
@@ -256,6 +279,7 @@ export function VideoPlayerControls({
                     tabIndex={-1}
                     onClick={() => {
                       onSetSpeed(s);
+
                       speedButtonRef.current?.focus();
                     }}
                     className={cn(
@@ -321,6 +345,7 @@ export function VideoPlayerError({
   onUseBackup?: () => void;
 }) {
   const { t } = useTranslation();
+
   return (
     <div className="flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-lg bg-black text-center">
       <p className="text-lg font-semibold text-white">{t("player.loadErrorTryServer")}</p>

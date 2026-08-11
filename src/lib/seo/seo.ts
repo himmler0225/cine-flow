@@ -5,6 +5,7 @@ import { EXTERNAL_URLS } from "@/constants/urls";
 
 export function buildListingHead(opts: { title: string; description: string; path: string }) {
   const url = `${getSiteUrl()}${opts.path}`;
+
   return {
     meta: [
       { title: opts.title },
@@ -26,6 +27,7 @@ export const buildItemListJsonLd = (
   },
 ) => {
   const max = opts.max ?? 20;
+
   return {
     "@context": EXTERNAL_URLS.schemaContext,
     "@type": "ItemList",

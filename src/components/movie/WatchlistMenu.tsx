@@ -16,23 +16,39 @@ interface WatchlistMenuProps {
 
 export function WatchlistMenu({ slug, movieName, iconOnly = false }: WatchlistMenuProps) {
   const { t } = useTranslation();
+
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const [open, setOpen] = useState(false);
+
   const lists = useWatchlistStore((s) => s.lists);
+
   const addToList = useWatchlistStore((s) => s.addToList);
+
   const removeFromList = useWatchlistStore((s) => s.removeFromList);
+
   const isInList = useWatchlistStore((s) => s.isInList);
+
   const createList = useWatchlistStore((s) => s.createList);
+
   const [newListName, setNewListName] = useState("");
+
   const inAny = lists.some((l) => isInList(l.id, slug));
+
   const handleCreate = () => {
     const name = newListName.trim();
+
     if (!name) return;
+
     createList(name);
+
     setNewListName("");
+
     toast.success(t("toast.listCreated"));
   };
+
   if (!isAuthenticated) return null;
+
   return (
     <div className={iconOnly ? "shrink-0" : "w-full md:w-auto"}>
       <Popover open={open} onOpenChange={setOpen}>
@@ -85,6 +101,7 @@ export function WatchlistMenu({ slug, movieName, iconOnly = false }: WatchlistMe
           <ul className="max-h-56 overflow-y-auto py-1">
             {lists.map((list) => {
               const active = isInList(list.id, slug);
+
               return (
                 <li key={list.id}>
                   <button
@@ -92,9 +109,11 @@ export function WatchlistMenu({ slug, movieName, iconOnly = false }: WatchlistMe
                     onClick={() => {
                       if (active) {
                         removeFromList(list.id, slug);
+
                         toast.success(t("toast.removedFromList", { name: list.name }));
                       } else {
                         addToList(list.id, slug);
+
                         toast.success(t("toast.addedToList", { name: list.name }));
                       }
                     }}

@@ -12,16 +12,23 @@ interface WatchPartyPinGateProps {
 
 export function WatchPartyPinGate({ code, pending, error, onSubmit }: WatchPartyPinGateProps) {
   const { t } = useTranslation();
+
   const [pin, setPin] = useState("");
+
   const [localError, setLocalError] = useState("");
+
   const submit = () => {
     if (pin.trim().length < 4) {
       setLocalError(t("watchparty.pinMinLength"));
+
       return;
     }
+
     setLocalError("");
+
     onSubmit(pin.trim());
   };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4 pt-16">
       <div className="w-full max-w-sm rounded-xl border border-white/10 bg-white/5 p-6">
@@ -45,6 +52,7 @@ export function WatchPartyPinGate({ code, pending, error, onSubmit }: WatchParty
           value={pin}
           onChange={(e) => {
             setPin(e.target.value);
+
             setLocalError("");
           }}
           onKeyDown={(e) => e.key === "Enter" && submit()}

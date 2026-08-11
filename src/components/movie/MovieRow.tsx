@@ -23,7 +23,9 @@ const arrowBtnClass =
 
 function readScrollEdges(el: HTMLElement) {
   const maxScroll = el.scrollWidth - el.clientWidth;
+
   if (maxScroll <= 1) return { canGoPrev: false, canGoNext: false };
+
   return {
     canGoPrev: el.scrollLeft > 1,
     canGoNext: el.scrollLeft < maxScroll - 1,
@@ -32,53 +34,81 @@ function readScrollEdges(el: HTMLElement) {
 
 export function MovieRow({ title, movies, isLoading, href }: Props) {
   const { t } = useTranslation();
+
   const ref = useRef<HTMLDivElement>(null);
+
   const [canGoPrev, setCanGoPrev] = useState(false);
+
   const [canGoNext, setCanGoNext] = useState(false);
+
   const syncScrollEdges = useCallback(() => {
     const el = ref.current;
+
     if (!el) return;
+
     const { canGoPrev: prev, canGoNext: next } = readScrollEdges(el);
+
     setCanGoPrev(prev);
+
     setCanGoNext(next);
   }, []);
+
   const scroll = (dir: 1 | -1) => {
     const el = ref.current;
+
     if (!el) return;
+
     el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: "smooth" });
   };
+
   useEffect(() => {
     const el = ref.current;
+
     if (!el) return;
+
     syncScrollEdges();
+
     el.addEventListener("scroll", syncScrollEdges, { passive: true });
+
     const ro = new ResizeObserver(syncScrollEdges);
+
     ro.observe(el);
+
     return () => {
       el.removeEventListener("scroll", syncScrollEdges);
+
       ro.disconnect();
     };
   }, [movies, isLoading, syncScrollEdges]);
+
   useEffect(() => {
     if (!movies || movies.length === 0) return;
+
     const run = () => {
       movies.slice(0, 8).forEach((m) => {
         const url = getImageUrl(m.poster_url || m.thumb_url);
+
         if (!url) return;
+
         const img = new Image();
+
         img.decoding = "async";
+
         img.src = url;
       });
     };
+
     const w = window as Window & {
       requestIdleCallback?: (cb: () => void) => number;
     };
+
     if (typeof w.requestIdleCallback === "function") {
       w.requestIdleCallback(run);
     } else {
       setTimeout(run, UI_DELAY_MS.deferredRowWork);
     }
   }, [movies]);
+
   return (
     <section className="group/row relative py-4">
       <div className="mb-3 flex items-end justify-between gap-3 px-4 md:px-12">

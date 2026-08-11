@@ -26,11 +26,16 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { t } = useTranslation();
+
   const newMovies = useNewMovies(1);
+
   const trending = useTop10();
+
   const heroItems =
     trending.items.length > 0 ? trending.items.map((t) => t.m) : (newMovies.data?.items ?? []);
+
   const rows = getHomeRows().filter((r) => r.type);
+
   return (
     <AuthGuard>
       <div>
@@ -63,25 +68,36 @@ function LazyTypedRow({
   eager: boolean;
 }) {
   const { t } = useTranslation();
+
   const title = t(titleKey);
+
   const ref = useRef<HTMLDivElement>(null);
+
   const [active, setActive] = useState(eager);
+
   useEffect(() => {
     if (active) return;
+
     const el = ref.current;
+
     if (!el) return;
+
     const obs = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
           setActive(true);
+
           obs.disconnect();
         }
       },
       { rootMargin: "600px 0px" },
     );
+
     obs.observe(el);
+
     return () => obs.disconnect();
   }, [active]);
+
   return (
     <div ref={ref} className="min-h-[280px]">
       {active ? <TypedRow type={type} titleKey={titleKey} /> : <MovieRow title={title} isLoading />}
@@ -91,8 +107,11 @@ function LazyTypedRow({
 
 function TypedRow({ type, titleKey }: { type: string; titleKey: string }) {
   const { t } = useTranslation();
+
   const title = t(titleKey);
+
   const { data, isLoading, isError, refetch } = useMoviesByType(type, 1);
+
   if (isError) {
     return (
       <MovieRowError
@@ -102,6 +121,7 @@ function TypedRow({ type, titleKey }: { type: string; titleKey: string }) {
       />
     );
   }
+
   return (
     <MovieRow
       title={title}

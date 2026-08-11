@@ -19,13 +19,19 @@ export const Route = createFileRoute("/favorites")({
 
 function FavoritesPage() {
   const { t } = useTranslation();
+
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const { favoritesList } = useFavorites();
+
   const { history } = useWatchHistory();
+
   const recent = useMemo(() => {
     const seen = new Set<string>();
+
     return history.filter((h) => (seen.has(h.movie_slug) ? false : (seen.add(h.movie_slug), true)));
   }, [history]);
+
   return (
     <div className="pt-24 pb-4 md:pb-8">
       <h1 className="mb-2 px-4 text-2xl font-bold text-white md:px-12 md:text-3xl">
@@ -55,7 +61,9 @@ function FavoritesPage() {
           <div className="scrollbar-hide flex gap-3 overflow-x-auto px-4 md:px-12">
             {recent.slice(0, 12).map((p) => {
               const tapMatch = p.episode_name.match(EPISODE_NUMBER_PATTERN);
+
               const tap = tapMatch ? Math.max(1, parseInt(tapMatch[0], 10)) : 1;
+
               return (
                 <Link
                   key={p.movie_slug}

@@ -21,7 +21,9 @@ interface Props {
 
 function parseEpisodeNumber(name: string): string | null {
   const m = name.match(/^t(?:ập|ap)\s*0*(\d+)$/i);
+
   if (!m) return null;
+
   return m[1].padStart(2, "0");
 }
 
@@ -37,21 +39,30 @@ export function EpisodeList({
   variant = "compact",
 }: Props) {
   const { t } = useTranslation();
+
   if (!servers?.length) return null;
+
   const stacked = serverLayout === "stack";
+
   const soft = accent === "soft";
+
   const tile = variant === "tile";
+
   const serverActive = soft
     ? "border border-netflix-red/60 bg-white/10 text-white shadow-[inset_0_0_0_1px_rgba(229,9,20,0.15)]"
     : "bg-netflix-red text-white";
+
   const serverIdle = soft
     ? "border border-white/10 bg-white/[0.04] text-netflix-text hover:border-white/25 hover:bg-white/[0.08]"
     : "bg-white/10 text-netflix-text hover:bg-white/20";
+
   const episodeActive = soft
     ? "border-netflix-red/70 bg-white/10 text-white ring-1 ring-netflix-red/25"
     : "border-netflix-red bg-netflix-red text-white";
+
   const episodeIdle =
     "border-white/10 bg-white/5 text-netflix-text hover:border-white/30 hover:bg-white/10";
+
   return (
     <div className="space-y-5">
       <div>
@@ -101,9 +112,13 @@ export function EpisodeList({
         >
           {servers[serverIdx]?.server_data.map((ep, i) => {
             const prog = progressByEpisode?.[ep.name];
+
             const ratio = prog ? Math.min(1, Math.max(0, prog.ratio)) : 0;
+
             const showBar = ratio > 0.01 && !prog?.finished;
+
             const epNum = tile ? parseEpisodeNumber(ep.name) : null;
+
             return (
               <button
                 key={ep.slug + i}

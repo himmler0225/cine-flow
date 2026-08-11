@@ -8,6 +8,7 @@ export function getAccessToken(): string | null {
 
 export function setAccessToken(token: string | null): void {
   memoryAccessToken = token;
+
   writeStorageKey("accessToken", null);
 }
 
@@ -21,7 +22,9 @@ export function setRefreshToken(token: string | null): void {
 
 export function clearAuthTokens(): void {
   memoryAccessToken = null;
+
   writeStorageKey("accessToken", null);
+
   writeStorageKey("refreshToken", null);
 }
 
@@ -30,6 +33,7 @@ export function applySessionTokens(session: {
   refresh_token?: string;
 }): void {
   setAccessToken(session.access_token);
+
   if (session.refresh_token) {
     setRefreshToken(session.refresh_token);
   }

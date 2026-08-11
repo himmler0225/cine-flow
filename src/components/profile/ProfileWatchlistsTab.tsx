@@ -12,14 +12,23 @@ import { MoviePosterImg } from "@/components/movie/MoviePosterImg";
 
 export function ProfileWatchlistsTab() {
   const { t } = useTranslation();
+
   const lists = useWatchlistStore((s) => s.lists);
+
   const createList = useWatchlistStore((s) => s.createList);
+
   const deleteList = useWatchlistStore((s) => s.deleteList);
+
   const removeFromList = useWatchlistStore((s) => s.removeFromList);
+
   const [newName, setNewName] = useState("");
+
   const [activeId, setActiveId] = useState(lists[0]?.id ?? "default");
+
   const active = lists.find((l) => l.id === activeId) ?? lists[0];
+
   const slugs = active?.slugs ?? [];
+
   const movies = useQueries({
     queries: slugs.map((slug) => ({
       queryKey: queryKeys.movies.detail(slug),
@@ -27,14 +36,21 @@ export function ProfileWatchlistsTab() {
       staleTime: CACHE_TTL.fiveMinutes,
     })),
   });
+
   const handleCreate = () => {
     const name = newName.trim();
+
     if (!name) return;
+
     const id = createList(name);
+
     setNewName("");
+
     setActiveId(id);
+
     toast.success(t("toast.listCreatedNamed", { name }));
   };
+
   if (lists.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
@@ -50,6 +66,7 @@ export function ProfileWatchlistsTab() {
       </div>
     );
   }
+
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       <aside className="lg:w-56 shrink-0">
@@ -76,7 +93,9 @@ export function ProfileWatchlistsTab() {
                   type="button"
                   onClick={() => {
                     deleteList(list.id);
+
                     if (activeId === list.id) setActiveId("default");
+
                     toast.success(t("toast.listDeleted"));
                   }}
                   className="rounded p-1.5 text-zinc-500 hover:bg-red-500/20 hover:text-red-400"
@@ -119,7 +138,9 @@ export function ProfileWatchlistsTab() {
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
                 {slugs.map((slug, i) => {
                   const movie = movies[i]?.data?.movie;
+
                   const loading = movies[i]?.isLoading;
+
                   return (
                     <div key={slug} className="group relative">
                       <Link to="/movie/$slug" params={{ slug }} className="block">
@@ -141,6 +162,7 @@ export function ProfileWatchlistsTab() {
                         type="button"
                         onClick={() => {
                           removeFromList(active.id, slug);
+
                           toast.success(t("toast.removedFromWatchlist"));
                         }}
                         className="absolute right-1 top-1 rounded bg-black/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"

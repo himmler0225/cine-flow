@@ -24,12 +24,18 @@ export const Route = createFileRoute("/admin/dashboard")({
 
 function DashboardPage() {
   const { t, i18n } = useTranslation();
+
   const locale = getIntlLocale(i18n.language);
+
   const { dateRange, getDateFrom, getPrevDateFrom } = useAdminStore();
+
   const from = getDateFrom();
+
   const prevFrom = getPrevDateFrom();
+
   const { stats, lineData, pieData, topMovies, topKeywords, recentUsers, recentComments } =
     useAdminDashboard(dateRange, from, prevFrom, useAdminStore.getState().getRangeDays());
+
   return (
     <div className="space-y-5">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.dashboard")}</h1>
@@ -240,6 +246,7 @@ function DashboardPage() {
                   <button
                     onClick={async () => {
                       await adminCommentsApi.deleteById(c.id);
+
                       recentComments.refetch();
                     }}
                     className="rounded p-1 text-zinc-500 hover:bg-red-500/10 hover:text-red-400"

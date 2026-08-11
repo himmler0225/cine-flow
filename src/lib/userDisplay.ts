@@ -13,6 +13,7 @@ export function resolveUserDisplay(user: User | null, profile: Profile | null) {
     avatar_url?: string;
     picture?: string;
   };
+
   const displayName =
     profile?.username ||
     meta.full_name ||
@@ -20,7 +21,9 @@ export function resolveUserDisplay(user: User | null, profile: Profile | null) {
     meta.username ||
     user?.email?.split("@")[0] ||
     "User";
+
   const avatarUrl = profile?.avatar_url || meta.avatar_url || meta.picture || null;
+
   return {
     displayName,
     avatarUrl,

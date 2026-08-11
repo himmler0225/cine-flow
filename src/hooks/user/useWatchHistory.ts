@@ -19,8 +19,11 @@ export type { WatchHistoryItem };
 
 export function useWatchHistory() {
   const user = useAuthStore((s) => s.user);
+
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const queryClient = useQueryClient();
+
   const key =
     isAuthenticated && user
       ? queryKeys.watchHistory.byUser(user.id)
@@ -36,6 +39,7 @@ export function useWatchHistory() {
       if (isAuthenticated && user) {
         return watchHistoryApi.fetch();
       }
+
       return getLocalHistory();
     },
     staleTime: CACHE_TTL.fiveMinutes,
@@ -57,6 +61,7 @@ export function useWatchHistory() {
       const previous = queryClient
         .getQueryData<WatchHistoryItem[]>(key)
         ?.find((h) => h.movie_slug === item.movie_slug && h.episode_name === item.episode_name);
+
       const normalizedItem = mergeWatchProgress(previous, {
         ...item,
         completed: isWatchFinished(item.progress_sec, item.duration_sec),
@@ -71,6 +76,7 @@ export function useWatchHistory() {
       }
 
       saveLocalHistory(normalizedItem);
+
       invalidateHistoryRefetchCache(item.movie_slug);
 
       queryClient.setQueryData<WatchHistoryItem[]>(key, (old = []) => {
@@ -79,13 +85,19 @@ export function useWatchHistory() {
             h.movie_slug === normalizedItem.movie_slug &&
             h.episode_name === normalizedItem.episode_name,
         );
+
         if (idx >= 0) {
           const next = [...old];
+
           next[idx] = { ...old[idx], ...normalizedItem };
+
           const [hit] = next.splice(idx, 1);
+
           next.unshift(hit);
+
           return next;
         }
+
         return [normalizedItem, ...old].slice(0, 50);
       });
 
@@ -103,12 +115,15 @@ export function useWatchHistory() {
   const deleteItem = useCallback(
     async (movieSlug: string, episodeName: string) => {
       removeLocalHistoryItem(movieSlug, episodeName);
+
       queryClient.setQueryData<WatchHistoryItem[]>(key, (old = []) =>
         old.filter((h) => !(h.movie_slug === movieSlug && h.episode_name === episodeName)),
       );
+
       if (isAuthenticated && user) {
         await watchHistoryApi.deleteItem(movieSlug, episodeName);
       }
+
       void invalidate();
     },
     [isAuthenticated, user, invalidate, key, queryClient],
@@ -116,10 +131,13 @@ export function useWatchHistory() {
 
   const clearAll = useCallback(async () => {
     clearLocalHistory();
+
     queryClient.setQueryData<WatchHistoryItem[]>(key, []);
+
     if (isAuthenticated && user) {
       await watchHistoryApi.clear();
     }
+
     void invalidate();
   }, [isAuthenticated, user, invalidate, key, queryClient]);
 
@@ -128,7 +146,9 @@ export function useWatchHistory() {
       const item = history.find(
         (h) => h.movie_slug === movieSlug && h.episode_name === episodeName,
       );
+
       if (!item || !item.duration_sec) return 0;
+
       return getWatchProgressPercent(item.progress_sec, item.duration_sec);
     },
     [history],

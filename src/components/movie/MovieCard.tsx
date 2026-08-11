@@ -21,18 +21,26 @@ interface Props {
 
 function MovieCardImpl({ movie, className, priority = false }: Props) {
   const { t } = useTranslation();
+
   const { isFavorite, toggleFavorite } = useFavorites();
+
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const queryClient = useQueryClient();
+
   const [imgLoaded, setImgLoaded] = useState(false);
+
   const isFav = isFavorite(movie.slug);
+
   const epLabel =
     movie.episode_current && movie.episode_current.toLowerCase().includes("hoàn")
       ? movie.episode_current
       : movie.episode_current && movie.episode_total
         ? `${movie.episode_current}/${movie.episode_total}`
         : movie.episode_current;
+
   const title = `${movie.name}${movie.year ? ` (${movie.year})` : ""}`;
+
   const prefetchDetail = useCallback(() => {
     queryClient.prefetchQuery({
       queryKey: queryKeys.movies.detail(movie.slug),
@@ -40,6 +48,7 @@ function MovieCardImpl({ movie, className, priority = false }: Props) {
       staleTime: CACHE_TTL.fiveMinutes,
     });
   }, [queryClient, movie.slug]);
+
   return (
     <div
       className={cn("group relative", className)}
@@ -78,11 +87,14 @@ function MovieCardImpl({ movie, className, priority = false }: Props) {
               )}
               onError={(e) => {
                 const img = e.currentTarget;
+
                 if (img.dataset.fallback !== "1") {
                   img.dataset.fallback = "1";
+
                   img.src = getImageUrl(movie.poster_url || movie.thumb_url);
                 } else if (img.dataset.fallback === "1" && movie.thumb_url) {
                   img.dataset.fallback = "2";
+
                   img.src = getImageUrl(movie.thumb_url);
                 } else {
                   setImgLoaded(true);
@@ -142,23 +154,26 @@ function MovieCardImpl({ movie, className, priority = false }: Props) {
       </div>
 
       <div className="mt-2 min-w-0">
-        <p className="line-clamp-1 text-xs font-medium text-netflix-text/90 sm:text-sm">
-          {movie.name}
-        </p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        <Link to="/movie/$slug" params={{ slug: movie.slug }} className="block min-w-0">
+          <p className="line-clamp-1 text-xs font-medium text-netflix-text/90 transition-colors hover:text-white sm:text-sm">
+            {movie.name}
+          </p>
+        </Link>
+        <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[10px] font-medium">
           {movie.lang && (
             <span
               className={cn(
-                "rounded-sm px-1.5 py-[3px] text-[10px] font-semibold tracking-wide",
+                "truncate rounded-sm px-1.5 py-[2px]",
+                "text-[9px] font-semibold tracking-wide",
                 langBadgeClass(movie.lang),
               )}
             >
               {movie.lang}
             </span>
           )}
-          {movie.year && (
-            <span className="text-[10px] font-medium text-netflix-muted">{movie.year}</span>
-          )}
+
+          {movie.lang && movie.year && <span className="text-white/20">•</span>}
+          {movie.year && <span className="shrink-0 text-netflix-muted">{movie.year}</span>}
         </div>
       </div>
     </div>

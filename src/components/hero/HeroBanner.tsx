@@ -20,38 +20,60 @@ interface Props {
 
 export function HeroBanner({ movies }: Props) {
   const { t } = useTranslation();
+
   const [idx, setIdx] = useState(0);
+
   const [firstLoaded, setFirstLoaded] = useState(false);
+
   const [paused, setPaused] = useState(false);
+
   const featured = useMemo(() => movies.slice(0, 6), [movies]);
+
   const { isFavorite, toggleFavorite } = useFavorites();
+
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const currentSlug = featured[idx]?.slug ?? "";
+
   const isFav = isFavorite(currentSlug);
+
   const detail = useMovieDetail(currentSlug);
+
   const [visited, setVisited] = useState<Set<number>>(() => new Set([0]));
+
   useEffect(() => {
     setVisited((prev) => {
       if (prev.has(idx)) return prev;
+
       const next = new Set(prev);
+
       next.add(idx);
+
       return next;
     });
   }, [idx]);
+
   useEffect(() => {
     if (featured.length === 0) return;
+
     if (idx >= featured.length) setIdx(0);
   }, [featured.length, idx]);
+
   useEffect(() => {
     if (featured.length === 0 || paused) return;
+
     if (!firstLoaded) return;
+
     const nextTimer = window.setTimeout(
       () => setIdx((i) => (i + 1) % featured.length),
       UI_DELAY_MS.heroSlide,
     );
+
     return () => window.clearTimeout(nextTimer);
   }, [featured.length, idx, firstLoaded, paused]);
+
   const firstSrc = featured[0] ? getImageWebp(featured[0].thumb_url || featured[0].poster_url) : "";
+
   if (featured.length === 0) {
     return (
       <div className="relative h-[80vh] min-h-[480px] w-full overflow-hidden bg-netflix-surface">
@@ -68,9 +90,13 @@ export function HeroBanner({ movies }: Props) {
       </div>
     );
   }
+
   const m = featured[idx];
+
   const movieDetail = detail.data?.movie;
+
   const description = stripHtml(movieDetail?.content) || m.origin_name;
+
   return (
     <div
       className="relative h-[80vh] min-h-[480px] w-full overflow-hidden bg-netflix-black"
@@ -96,7 +122,9 @@ export function HeroBanner({ movies }: Props) {
       )}
       {featured.map((slide, i) => {
         if (!visited.has(i)) return null;
+
         const isCurrent = i === idx;
+
         return (
           <div
             key={slide.slug}
@@ -117,13 +145,18 @@ export function HeroBanner({ movies }: Props) {
               }}
               onError={(e) => {
                 const img = e.currentTarget;
+
                 if (i === 0) setFirstLoaded(true);
+
                 const step = img.dataset.fallback || "0";
+
                 if (step === "0") {
                   img.dataset.fallback = "1";
+
                   img.src = getImageUrl(slide.thumb_url || slide.poster_url);
                 } else if (step === "1" && slide.poster_url) {
                   img.dataset.fallback = "2";
+
                   img.src = getImageUrl(slide.poster_url);
                 }
               }}
@@ -183,6 +216,7 @@ export function HeroBanner({ movies }: Props) {
                   type="button"
                   onClick={() => {
                     const m = featured[idx];
+
                     if (m) void toggleFavorite(m);
                   }}
                   aria-pressed={isFav}

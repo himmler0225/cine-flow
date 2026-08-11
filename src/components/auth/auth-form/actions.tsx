@@ -15,6 +15,7 @@ export function AuthSubmitButton({ loading, label }: { loading: boolean; label: 
 
 export function AuthDivider() {
   const { t } = useTranslation();
+
   return (
     <div className="flex items-center gap-3 py-1 text-xs text-muted-foreground">
       <div className="h-px flex-1 bg-border" />
@@ -32,6 +33,7 @@ export function GoogleAuthButton({
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
+
   return (
     <Button
       type="button"

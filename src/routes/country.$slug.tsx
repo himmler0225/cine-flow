@@ -26,7 +26,9 @@ export const Route = createFileRoute("/country/$slug")({
         queryFn: () => countriesApi.getAll(),
         staleTime: CACHE_TTL.hour,
       });
+
       const found = countries?.find((c) => c.slug === params.slug);
+
       return { name: found?.name ?? prettifySlug(params.slug) };
     } catch {
       return { name: prettifySlug(params.slug) };
@@ -34,6 +36,7 @@ export const Route = createFileRoute("/country/$slug")({
   },
   head: ({ params, loaderData }) => {
     const name = loaderData?.name ?? prettifySlug(params.slug);
+
     return buildListingHead({
       title: t("seo.countryTitle", { name }),
       description: t("seo.countryDescription", { name }),
@@ -45,20 +48,32 @@ export const Route = createFileRoute("/country/$slug")({
 
 function CountryPage() {
   const { t: tr } = useTranslation();
+
   const { slug } = Route.useParams();
+
   const search = Route.useSearch();
+
   const navigate = useNavigate({ from: Route.fullPath });
+
   const page = search.page ?? 1;
+
   const { data: countries } = useCountries();
+
   const [isPending, startTransition] = useTransition();
+
   const { data, isFetching, isPlaceholderData } = usePagedByCountry(slug, page, search);
+
   const items = data?.items ?? [];
+
   const totalPages = data?.pagination?.totalPages ?? 0;
+
   const title = useMemo(
     () => countries?.find((c) => c.slug === slug)?.name ?? prettifySlug(slug),
     [countries, slug],
   );
+
   useScrollToTopOnChange(page);
+
   const jsonLd = useMemo(
     () =>
       items.length > 0
@@ -71,6 +86,7 @@ function CountryPage() {
         : null,
     [items, title, slug, tr],
   );
+
   return (
     <div className="pt-24 pb-4 md:pb-8">
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />}

@@ -21,24 +21,36 @@ import {
 
 export function ProfileFavoritesTab() {
   const { t, i18n } = useTranslation();
+
   const userId = useAuthStore((s) => s.user?.id);
+
   const queryClient = useQueryClient();
+
   const [sort, setSort] = useState<"recent" | "name">("recent");
+
   const [view, setView] = useState<"grid" | "list">("grid");
+
   const { data: favs = [], isLoading: loading } = useFavoritesList(userId);
+
   const sorted = useMemo<FavoriteRow[]>(() => {
     const arr = [...favs];
+
     if (sort === "recent") arr.sort(compareFavoritesNewest);
     else arr.sort((a, b) => a.movie_name.localeCompare(b.movie_name, i18n.language));
+
     return arr;
   }, [favs, sort, i18n.language]);
+
   const remove = async (id: string) => {
     queryClient.setQueryData<FavoriteRow[]>(queryKeys.favorites.list(userId ?? ""), (prev) =>
       (prev || []).filter((f) => f.id !== id),
     );
+
     await favoritesApi.remove(id);
+
     toast.success(t("toast.favoriteRemoved"));
   };
+
   if (loading) {
     return (
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
@@ -48,6 +60,7 @@ export function ProfileFavoritesTab() {
       </div>
     );
   }
+
   if (favs.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
@@ -65,6 +78,7 @@ export function ProfileFavoritesTab() {
       </div>
     );
   }
+
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

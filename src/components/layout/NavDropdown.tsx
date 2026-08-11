@@ -21,34 +21,51 @@ export function NavDropdown({
   width = "min-w-[460px]",
 }: NavDropdownProps) {
   const [open, setOpen] = useState(false);
+
   const openTimer = useRef<number | null>(null);
+
   const closeTimer = useRef<number | null>(null);
+
   const wrapperRef = useRef<HTMLDivElement>(null);
+
   const path = useRouterState({ select: (s) => s.location.pathname });
+
   useEffect(() => {
     setOpen(false);
   }, [path]);
+
   useEffect(() => {
     if (!open) return;
+
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+
     const onClick = (e: MouseEvent) => {
       if (!wrapperRef.current?.contains(e.target as Node)) setOpen(false);
     };
+
     window.addEventListener("keydown", onKey);
+
     window.addEventListener("mousedown", onClick);
+
     return () => {
       window.removeEventListener("keydown", onKey);
+
       window.removeEventListener("mousedown", onClick);
     };
   }, [open]);
+
   const scheduleOpen = () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
+
     openTimer.current = window.setTimeout(() => setOpen(true), UI_DELAY_MS.navbarOpen);
   };
+
   const scheduleClose = () => {
     if (openTimer.current) window.clearTimeout(openTimer.current);
+
     closeTimer.current = window.setTimeout(() => setOpen(false), UI_DELAY_MS.navbarClose);
   };
+
   return (
     <div
       ref={wrapperRef}

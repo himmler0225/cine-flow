@@ -4,10 +4,15 @@ import { STORAGE_KEYS, LEGACY_STORAGE_KEYS } from "@/constants/storage";
 
 function migratePersistName(next: string, legacy: string | null) {
   if (typeof window === "undefined" || !legacy) return;
+
   if (localStorage.getItem(next) != null) return;
+
   const old = localStorage.getItem(legacy);
+
   if (old == null) return;
+
   localStorage.setItem(next, old);
+
   localStorage.removeItem(legacy);
 }
 

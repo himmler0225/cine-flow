@@ -2,9 +2,13 @@ import { t } from "@/lib/i18n";
 
 export function renderErrorPage(): string {
   const title = t("errors.page.title");
+
   const message = t("errors.page.message");
+
   const retry = t("errors.page.retry");
+
   const goHome = t("errors.page.goHome");
+
   return `<!doctype html>
 <html lang="en">
   <head>

@@ -12,35 +12,52 @@ import { getWatchProgressPercent } from "@/utils/watchProgress";
 
 export function ProfileHistoryTab() {
   const { t } = useTranslation();
+
   const { history, deleteItem, clearAll: clearWatchHistory } = useWatchHistory();
+
   const [q, setQ] = useState("");
+
   const [confirmClear, setConfirmClear] = useState(false);
+
   const entries = useMemo(() => {
     if (!q.trim()) return history;
+
     const s = q.toLowerCase();
+
     return history.filter((e) => e.movie_name.toLowerCase().includes(s));
   }, [history, q]);
+
   const groups = useMemo(() => {
     const g: Record<string, typeof entries> = {};
+
     entries.forEach((e) => {
       const d = new Date(e.watched_at);
+
       let key = t("profile.groupOlder");
+
       if (isToday(d)) key = t("profile.groupToday");
       else if (isYesterday(d)) key = t("profile.groupYesterday");
       else {
         const diff = differenceInDays(new Date(), d);
+
         if (diff <= 7) key = t("profile.groupDaysAgo", { count: diff });
         else if (diff <= 30) key = t("profile.groupThisMonth");
       }
+
       (g[key] ||= []).push(e);
     });
+
     return g;
   }, [entries, t]);
+
   const clearAll = async () => {
     await clearWatchHistory();
+
     setConfirmClear(false);
+
     toast.success(t("toast.historyCleared"));
   };
+
   if (history.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
@@ -56,6 +73,7 @@ export function ProfileHistoryTab() {
       </div>
     );
   }
+
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -90,7 +108,9 @@ export function ProfileHistoryTab() {
             <ul className="space-y-2">
               {items.map((e) => {
                 const pct = getWatchProgressPercent(e.progress_sec, e.duration_sec);
+
                 const tap = e.episode_index !== undefined ? e.episode_index + 1 : 1;
+
                 return (
                   <li
                     key={`${e.movie_slug}-${e.episode_name}`}

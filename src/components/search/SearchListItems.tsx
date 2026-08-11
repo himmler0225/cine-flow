@@ -36,7 +36,9 @@ export function SearchSuggestionItem({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+
   const Icon = SOURCE_ICONS[source];
+
   return (
     <li>
       <Link
