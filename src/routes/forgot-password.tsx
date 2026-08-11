@@ -25,19 +25,30 @@ export const Route = createFileRoute("/forgot-password")({
 
 function ForgotPasswordPage() {
   const { t: tr } = useTranslation();
+
   const [email, setEmail] = useState("");
+
   const [loading, setLoading] = useState(false);
+
   const [sent, setSent] = useState(false);
+
   const [error, setError] = useState("");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setError("");
+
     setLoading(true);
+
     const { error } = await authApi.resetPasswordForEmail(email);
+
     setLoading(false);
+
     if (error) setError(error.message);
     else setSent(true);
   };
+
   return (
     <AuthCinematicFrame>
       <AuthCard>

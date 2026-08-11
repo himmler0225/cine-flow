@@ -24,10 +24,12 @@ export function useAdminUserDetail(userId: string, tab: "history" | "favorites" 
     enabled: !!userId,
     queryFn: () => adminUsersApi.fetchUserWatchHistory(userId),
   });
+
   const favorites = useQuery({
     queryKey: queryKeys.admin.userFavorites(userId),
     enabled: !!userId && tab === "favorites",
     queryFn: () => adminUsersApi.fetchUserFavorites(userId),
   });
+
   return { history, favorites };
 }

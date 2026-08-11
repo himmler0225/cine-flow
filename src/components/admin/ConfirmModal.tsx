@@ -26,19 +26,29 @@ export function ConfirmModal({
   onClose,
 }: Props) {
   const { t } = useTranslation();
+
   const resolvedConfirm = confirmText ?? t("admin.confirm");
+
   const resolvedCancel = cancelText ?? t("admin.cancel");
+
   const btnRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     if (open) btnRef.current?.focus();
   }, [open]);
+
   useEffect(() => {
     if (!open) return;
+
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+
     document.addEventListener("keydown", onKey);
+
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
   if (!open) return null;
+
   return (
     <div
       className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4"

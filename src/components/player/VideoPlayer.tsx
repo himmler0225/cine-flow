@@ -23,7 +23,9 @@ interface Props {
 
 export function VideoPlayer(props: Props) {
   const { t } = useTranslation();
+
   const player = useVideoPlayer(props);
+
   const autoAdvance =
     props.autoAdvanceSecondsLeft != null && props.onPlayNextNow && props.onCancelAutoAdvance ? (
       <NextEpisodeOverlay
@@ -33,6 +35,7 @@ export function VideoPlayer(props: Props) {
         onCancel={props.onCancelAutoAdvance}
       />
     ) : null;
+
   if (player.hasError) {
     return (
       <VideoPlayerError
@@ -41,6 +44,7 @@ export function VideoPlayer(props: Props) {
       />
     );
   }
+
   if (player.useEmbed && player.embedSrc) {
     return (
       <div className="relative w-full overflow-hidden rounded-lg bg-black">
@@ -56,6 +60,7 @@ export function VideoPlayer(props: Props) {
       </div>
     );
   }
+
   return (
     <div className="w-full overflow-hidden rounded-lg bg-black">
       <div

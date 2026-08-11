@@ -9,6 +9,7 @@ interface WatchPartyAuthGateProps {
 
 export function WatchPartyAuthGate({ code, onLogin }: WatchPartyAuthGateProps) {
   const { t } = useTranslation();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4 pt-16">
       <div className="max-w-sm rounded-lg border border-white/10 bg-white/5 p-6 text-center">
@@ -42,6 +43,7 @@ interface WatchPartyNotFoundProps {
 
 export function WatchPartyNotFound({ code }: WatchPartyNotFoundProps) {
   const { t } = useTranslation();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4 pt-20">
       <div className="w-full max-w-md rounded-xl border border-white/10 bg-white/[0.04] p-6 text-center">
@@ -79,6 +81,7 @@ interface WatchPartyExpiredProps {
 
 export function WatchPartyExpired({ code, movieSlug, movieName }: WatchPartyExpiredProps) {
   const { t } = useTranslation();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-netflix-black px-4 pt-20">
       <div className="w-full max-w-md rounded-xl border border-amber-400/30 bg-amber-400/[0.04] p-6 text-center">

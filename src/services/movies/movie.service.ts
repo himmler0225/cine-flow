@@ -42,6 +42,7 @@ async function fetchAggregator<T>(
       timeout: ms,
       skipAuth: true,
     });
+
     return data;
   } catch (err) {
     if (err instanceof AxiosError && err.response?.status === 404) {
@@ -50,12 +51,16 @@ async function fetchAggregator<T>(
             error?: string;
           }
         | undefined;
+
       throw new MovieNotFoundError(body?.error || "Movie not found");
     }
+
     if (err instanceof MovieNotFoundError) throw err;
+
     if (clientEnv.isDevelopment) {
       console.error("[MovieService]", path, err);
     }
+
     throw new Error(t("errors.dataLoadFailed"));
   }
 }
@@ -67,6 +72,7 @@ class MoviesApi {
       { page },
       TIMEOUT.list,
     );
+
     return toListResult(envelope);
   }
   async getMoviesByType(
@@ -79,6 +85,7 @@ class MoviesApi {
       { page, limit: 24, ...cleanParams(extra) },
       TIMEOUT.list,
     );
+
     return toListResult(envelope);
   }
   async getMovieDetail(slug: string): Promise<DetailResponse> {
@@ -88,6 +95,7 @@ class MoviesApi {
         episodes: DetailResponse["episodes"];
       }>
     >(`/${encodeURIComponent(slug)}`, undefined, TIMEOUT.detail);
+
     return toDetailResponse(envelope);
   }
   async searchMovies(keyword: string, page = 1): Promise<MovieListResult> {
@@ -96,6 +104,7 @@ class MoviesApi {
       { keyword, page, limit: 24 },
       TIMEOUT.search,
     );
+
     return toListResult(envelope);
   }
   async getByGenre(
@@ -108,6 +117,7 @@ class MoviesApi {
       { page, limit: 24, ...cleanParams(extra) },
       TIMEOUT.list,
     );
+
     return toListResult(envelope);
   }
   async getByCountry(
@@ -120,6 +130,7 @@ class MoviesApi {
       { page, limit: 24, ...cleanParams(extra) },
       TIMEOUT.list,
     );
+
     return toListResult(envelope);
   }
   async getByYear(year: number, page = 1, extra: MovieFilterParams = {}): Promise<MovieListResult> {
@@ -128,6 +139,7 @@ class MoviesApi {
       { page, limit: 24, ...cleanParams(extra) },
       TIMEOUT.list,
     );
+
     return toListResult(envelope);
   }
 }
@@ -143,6 +155,7 @@ class GenresApi {
         }>
       >
     >("/meta/genres", undefined, TIMEOUT.meta);
+
     return toMetadataList(envelope);
   }
 }
@@ -158,6 +171,7 @@ class CountriesApi {
         }>
       >
     >("/meta/countries", undefined, TIMEOUT.meta);
+
     return toMetadataList(envelope);
   }
 }

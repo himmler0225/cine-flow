@@ -10,6 +10,7 @@ export function movieApiUrl(
   params?: Record<string, string | number | undefined>,
 ): string {
   const url = new URL(`${MOVIE_API_BASE_URL}${MOVIE_API_PREFIX}${path}`);
+
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined && value !== "") {
@@ -17,5 +18,6 @@ export function movieApiUrl(
       }
     }
   }
+
   return url.toString();
 }

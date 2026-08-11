@@ -13,6 +13,7 @@ class ProfilesApi {
       method: "PATCH",
       body: JSON.stringify(data),
     });
+
     return { data: updated, error: null };
   }
   upgradeToPremium(): Promise<Profile> {

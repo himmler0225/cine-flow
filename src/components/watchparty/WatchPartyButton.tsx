@@ -30,32 +30,48 @@ export function WatchPartyButton({
   className,
 }: WatchPartyButtonProps) {
   const { t } = useTranslation();
+
   const [loading, setLoading] = useState(false);
+
   const [setupOpen, setSetupOpen] = useState(false);
+
   const [createdOpen, setCreatedOpen] = useState(false);
+
   const [code, setCode] = useState("");
+
   const { isAuthenticated, user, profile, requestAuth } = useAuthStore();
+
   const { partyHours } = usePremium();
+
   const navigate = useNavigate();
+
   const openSetup = () => {
     if (!isAuthenticated || !user) {
       toast.info(t("watchparty.loginRequired"));
+
       requestAuth("login");
+
       return;
     }
+
     setSetupOpen(true);
   };
+
   const create = async (opts: { isPrivate: boolean; pin: string | null }) => {
     if (!user) return;
+
     setLoading(true);
+
     try {
       for (let attempt = 0; attempt < 4; attempt++) {
         const newCode = generateRoomCode();
+
         const username =
           profile?.username ??
           (user.user_metadata?.full_name as string | undefined) ??
           user.email?.split("@")[0] ??
           t("watchparty.guest");
+
         const { data: room, error } = await watchPartyApi.createRoom({
           code: newCode,
           hostId: user.id,
@@ -68,6 +84,7 @@ export function WatchPartyButton({
           isPrivate: opts.isPrivate,
           pin: opts.pin,
         });
+
         if (!error && room) {
           await watchPartyApi.insertMessage(
             room.id,
@@ -78,22 +95,30 @@ export function WatchPartyButton({
             }),
             "system",
           );
+
           setCode(newCode);
+
           setSetupOpen(false);
+
           setCreatedOpen(true);
+
           return;
         }
+
         if (error) {
           const isDup = error.message.toLowerCase().includes("duplicate") || error.code === "23505";
+
           if (!isDup) {
             toast.error(t("watchparty.createFailed"), {
               description: `[${error.code ?? "?"}] ${error.message}`,
               duration: 8000,
             });
+
             return;
           }
         }
       }
+
       toast.error(t("watchparty.codeGenFailed"), {
         description: t("watchparty.codeGenFailedDesc"),
       });
@@ -102,6 +127,7 @@ export function WatchPartyButton({
         message?: string;
         code?: string;
       };
+
       toast.error(t("watchparty.unknownError"), {
         description: err.message ?? String(e),
         duration: 8000,
@@ -110,10 +136,13 @@ export function WatchPartyButton({
       setLoading(false);
     }
   };
+
   const start = () => {
     setCreatedOpen(false);
+
     navigate({ to: "/watch-party/$code", params: { code } });
   };
+
   return (
     <>
       <Button

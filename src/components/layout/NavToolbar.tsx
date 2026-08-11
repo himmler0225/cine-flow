@@ -12,8 +12,11 @@ type Props = {
 
 export function NavToolbar({ isAuthenticated }: Props) {
   const { t } = useTranslation();
+
   const requestAuth = useAuthStore((s) => s.requestAuth);
+
   const setOpenSearch = useNavbarUiStore((s) => s.setOpenSearch);
+
   return (
     <div className="flex min-w-0 shrink items-center gap-0.5 sm:gap-1.5 md:gap-2">
       <button

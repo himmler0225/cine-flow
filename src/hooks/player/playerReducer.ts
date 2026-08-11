@@ -107,28 +107,40 @@ export function playerUiReducer(state: PlayerUiState, action: PlayerUiAction): P
         playing: false,
         adsSkipped: 0,
       };
+
     case "setPlaying":
       return { ...state, playing: action.playing };
+
     case "setMuted":
       return { ...state, muted: action.muted };
+
     case "setVolume":
       return { ...state, volume: action.volume };
+
     case "setProgress":
       return { ...state, progress: action.progress };
+
     case "setBuffered":
       return { ...state, buffered: action.buffered };
+
     case "setDuration":
       return { ...state, duration: action.duration };
+
     case "setSpeed":
       return { ...state, speed: action.speed };
+
     case "toggleShowSpeed":
       return { ...state, showSpeed: !state.showSpeed };
+
     case "setShowSpeed":
       return { ...state, showSpeed: action.showSpeed };
+
     case "setHasError":
       return { ...state, hasError: action.hasError };
+
     case "setUseEmbed":
       return { ...state, useEmbed: action.useEmbed };
+
     case "setForceEmbed":
       return {
         ...state,
@@ -136,13 +148,16 @@ export function playerUiReducer(state: PlayerUiState, action: PlayerUiAction): P
         useEmbed: action.forceEmbed ? true : state.useEmbed,
         hasError: false,
       };
+
     case "setSkipAds":
       return { ...state, skipAds: action.skipAds };
+
     case "incrementAdsSkipped":
       return {
         ...state,
         adsSkipped: state.adsSkipped + (action.count ?? 1),
       };
+
     default:
       return state;
   }

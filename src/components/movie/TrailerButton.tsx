@@ -12,7 +12,9 @@ interface Props {
 
 export function TrailerButton({ trailerUrl, movieName, className }: Props) {
   const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
+
   const embed = getYoutubeEmbed(trailerUrl);
 
   if (!embed) return null;

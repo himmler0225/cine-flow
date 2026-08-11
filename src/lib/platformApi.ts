@@ -8,6 +8,7 @@ export class PlatformApiError extends Error {
     readonly status: number,
   ) {
     super(message);
+
     this.name = "PlatformApiError";
   }
 }
@@ -28,15 +29,19 @@ type PlatformFetchOptions = RequestInit & {
 
 export async function platformFetch<T>(path: string, options?: PlatformFetchOptions): Promise<T> {
   const headers: Record<string, string> = {};
+
   if (options?.headers) {
     const incoming = new Headers(options.headers);
+
     incoming.forEach((value, key) => {
       headers[key] = value;
     });
   }
+
   if (options?.body && !headers["Content-Type"] && !headers["content-type"]) {
     headers["Content-Type"] = "application/json";
   }
+
   try {
     const response = await movieApiClient.request<T>({
       url: path,
@@ -46,10 +51,13 @@ export async function platformFetch<T>(path: string, options?: PlatformFetchOpti
       signal: options?.signal ?? undefined,
       skipAuth: options?.auth === false,
     });
+
     if (response.status === 204) return undefined as T;
+
     if (response.data === "" || response.data === null || response.data === undefined) {
       return undefined as T;
     }
+
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
@@ -58,6 +66,7 @@ export async function platformFetch<T>(path: string, options?: PlatformFetchOpti
         error.response.status,
       );
     }
+
     throw error;
   }
 }
@@ -68,14 +77,17 @@ export async function platformMutate(
 ): Promise<ApiMutationResult> {
   try {
     const data = await platformFetch<unknown>(path, options);
+
     if (data && typeof data === "object" && "error" in data) {
       return data as ApiMutationResult;
     }
+
     return { data: data as never, error: null };
   } catch (error) {
     if (error instanceof PlatformApiError) {
       return { error: { message: error.message } };
     }
+
     return {
       error: {
         message: error instanceof Error ? error.message : "Request failed",

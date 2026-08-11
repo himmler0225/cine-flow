@@ -6,9 +6,18 @@ type Props = {
   poster?: string;
   disabled?: boolean;
   onGuestPlay: () => void;
+  muted?: boolean;
+  onUnmute?: () => void;
 };
 
-export function SyncedVideoView({ videoRef, poster, disabled, onGuestPlay }: Props) {
+export function SyncedVideoView({
+  videoRef,
+  poster,
+  disabled,
+  onGuestPlay,
+  muted,
+  onUnmute,
+}: Props) {
   return (
     <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
       <video
@@ -18,7 +27,12 @@ export function SyncedVideoView({ videoRef, poster, disabled, onGuestPlay }: Pro
         controls={!disabled}
         className="h-full w-full"
       />
-      <GuestOnlyOverlay disabled={!!disabled} onGuestPlay={onGuestPlay} />
+      <GuestOnlyOverlay
+        disabled={!!disabled}
+        onGuestPlay={onGuestPlay}
+        muted={!!muted}
+        onUnmute={onUnmute}
+      />
     </div>
   );
 }

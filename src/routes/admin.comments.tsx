@@ -22,30 +22,47 @@ export const Route = createFileRoute("/admin/comments")({
 
 function CommentsPage() {
   const { t, i18n } = useTranslation();
+
   const locale = getIntlLocale(i18n.language);
+
   const qc = useQueryClient();
+
   const [query, setQuery] = useState("");
+
   const [movie, setMovie] = useState("");
+
   const [sort, setSort] = useState<"new" | "likes">("new");
+
   const [page, setPage] = useState(0);
+
   const [selected, setSelected] = useState<Set<string>>(new Set());
+
   const [confirm, setConfirm] = useState<{
     ids: string[];
     label: string;
   } | null>(null);
+
   const stats = useAdminCommentStats();
+
   const list = useAdminCommentsList({ query, movie, sort, page, pageSize: ADMIN_PAGE_SIZE });
+
   const totalPages = getTotalPages(list.data?.total ?? 0, ADMIN_PAGE_SIZE);
+
   const toggleAll = (checked: boolean) => {
     if (!list.data) return;
+
     setSelected(checked ? new Set(list.data.rows.map((r) => r.id)) : new Set());
   };
+
   const toggleOne = (id: string) => {
     const s = new Set(selected);
+
     if (s.has(id)) s.delete(id);
     else s.add(id);
+
     setSelected(s);
   };
+
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.comments")}</h1>
@@ -86,6 +103,7 @@ function CommentsPage() {
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
+
                   setPage(0);
                 }}
                 placeholder={t("admin.comments.searchContent")}
@@ -96,6 +114,7 @@ function CommentsPage() {
               value={movie}
               onChange={(e) => {
                 setMovie(e.target.value);
+
                 setPage(0);
               }}
               placeholder={t("admin.comments.movieSlugPlaceholder")}
@@ -249,13 +268,18 @@ function CommentsPage() {
         onClose={() => setConfirm(null)}
         onConfirm={async () => {
           if (!confirm) return;
+
           const { error } = await adminCommentsApi.deleteByIds(confirm.ids);
+
           if (error) toast.error(t("toast.adminDeleteFailed"), { description: error.message });
           else {
             toast.success(t("toast.adminDeleteSuccess", { label: confirm.label }));
+
             setSelected(new Set());
+
             qc.invalidateQueries({ queryKey: queryKeys.admin.all() });
           }
+
           setConfirm(null);
         }}
       />

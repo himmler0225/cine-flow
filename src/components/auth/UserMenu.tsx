@@ -22,24 +22,39 @@ import { isAdminRole } from "@/constants/roles";
 
 export function UserMenu() {
   const { t } = useTranslation();
+
   const profile = useAuthStore((s) => s.profile);
+
   const user = useAuthStore((s) => s.user);
+
   const signOut = useAuthStore((s) => s.signOut);
+
   const setOpenJoin = useNavbarUiStore((s) => s.setOpenJoin);
+
   const [open, setOpen] = useState(false);
+
   const ref = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
+
     const onClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
+
     document.addEventListener("mousedown", onClick);
+
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
+
   const { displayName } = resolveUserDisplay(user, profile);
+
   const isAdmin = isAdminRole(profile?.role);
+
   const dataSaver = useSettingsStore((s) => s.dataSaver);
+
   const setDataSaver = useSettingsStore((s) => s.setDataSaver);
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -98,6 +113,7 @@ export function UserMenu() {
                 type="button"
                 onClick={() => {
                   setOpen(false);
+
                   setOpenJoin(true);
                 }}
                 className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-netflix-text hover:bg-white/5"
@@ -123,15 +139,17 @@ export function UserMenu() {
                 </span>
               </button>
             </div>
-            <div className="border-t border-white/10 py-1">
-              <Item
-                to="/premium"
-                icon={<Crown className="h-4 w-4" />}
-                label={t("auth.upgradePremium")}
-                className="text-amber-400"
-                onClick={() => setOpen(false)}
-              />
-            </div>
+            {profile?.plan !== "premium" && (
+              <div className="border-t border-white/10 py-1">
+                <Item
+                  to="/premium"
+                  icon={<Crown className="h-4 w-4" />}
+                  label={t("auth.upgradePremium")}
+                  className="text-amber-400"
+                  onClick={() => setOpen(false)}
+                />
+              </div>
+            )}
             {isAdmin && (
               <div className="border-t border-white/10 py-1">
                 <Item
@@ -147,6 +165,7 @@ export function UserMenu() {
               <button
                 onClick={() => {
                   setOpen(false);
+
                   void signOut();
                 }}
                 className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-netflix-red hover:bg-white/5"

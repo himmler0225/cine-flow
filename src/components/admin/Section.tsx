@@ -1,4 +1,3 @@
-import { Loader2 } from "lucide-react";
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 
 export function Section({
@@ -23,10 +22,16 @@ export function Section({
   );
 }
 
-export function SectionLoader() {
+export function SectionLoader({ rows = 4 }: { rows?: number }) {
   return (
-    <div className="flex items-center justify-center py-10 text-zinc-500">
-      <Loader2 className="h-5 w-5 animate-spin" />
+    <div className="space-y-2 py-1">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div
+          key={i}
+          className="h-10 w-full animate-pulse rounded-md bg-white/5"
+          style={{ opacity: 1 - i * 0.12 }}
+        />
+      ))}
     </div>
   );
 }

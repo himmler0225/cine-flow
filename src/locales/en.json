@@ -401,9 +401,10 @@
     "hostOnlyControls": "🔒 Only host can play/pause",
     "iframeSync": "🔗 Iframe sync ({{provider}})",
     "iframeNoSync": "⚠️ Embed doesn't respond to sync — use the sync bar below",
-    "hlsSyncActive": "✅ HLS sync — play/pause is automatic",
+    "hostPausedTitle": "Host has paused",
+    "hostPausedHint": "Playback will resume when the host presses play",
     "manualSyncHint": "This embed can't be controlled remotely. Host: seek to the right spot, adjust time below, then Broadcast Play or use Countdown 3-2-1.",
-    "manualSyncJoiner": "Video syncs with the host automatically — no action needed.",
+    "manualSyncJoiner": "This embed can't be synced automatically — manually play/seek your own video to match the time above.",
     "broadcastPlay": "Broadcast Play",
     "broadcastPause": "Broadcast Pause",
     "seekBack10": "Seek back 10 seconds",
@@ -450,6 +451,7 @@
     "hostOnlyTitle": "Only host can control",
     "hostOnlyBadge": "🔒 Host only",
     "tapToPlaySync": "Tap to play with host",
+    "tapToUnmute": "🔇 Tap to unmute",
     "roomExpiredShort": "Room expired",
     "roomRemaining": "⏳ Room remaining {{time}}",
     "pageTitle": "Watch Party {{code}} — Cine-Flow",
@@ -534,7 +536,8 @@
       "movies": "Movies & Views",
       "rooms": "Watch Party Rooms",
       "comments": "Comments",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "aiConfig": "AI Settings"
     },
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -693,6 +696,89 @@
       "noRoomsInPeriod": "No rooms in this period",
       "movieLanguage": "Movie language distribution",
       "movieQuality": "🎞 Movie quality distribution"
+    },
+    "aiConfig": {
+      "title": "AI Settings",
+      "subtitle": "Manage ai-layer's models, prompts, and limits",
+      "groups": {
+        "models": "AI Models",
+        "agent": "Agent Behavior",
+        "limits": "Rate Limits",
+        "prompts": "Prompts",
+        "services": "Connected Services",
+        "miner": "Data Miner"
+      },
+      "showSecret": "Show",
+      "hideSecret": "Hide",
+      "secretHidden": "Hidden — contains live API keys",
+      "invalidJson": "Invalid JSON",
+      "unsavedBadge": "Unsaved",
+      "lastUpdated": "Last updated {{time}}",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "discard": "Discard changes",
+      "confirmTitle": "Save AI configuration?",
+      "confirmMessage": "This updates ai-layer's live configuration immediately for all users.",
+      "saveSuccess": "Configuration saved",
+      "saveError": "Failed to save configuration",
+      "loadError": "Failed to load configuration",
+      "empty": "No config keys available",
+      "prompts": {
+        "empty": "No prompt groups found in this value.",
+        "groups": {
+          "agent": "Agent",
+          "review_summary": "Review Summary",
+          "aspect_group": "Aspect Grouping",
+          "aspect_summary": "Aspect Summary"
+        },
+        "fields": {
+          "system": "System prompt",
+          "synth_system": "Synthesis system prompt",
+          "prompt": "Prompt template"
+        }
+      },
+      "models": {
+        "empty": "No providers found in this value.",
+        "activeProvider": "Active provider",
+        "noActive": "No provider is marked active — the agent has no model to call.",
+        "baseUrl": "Base URL",
+        "apiKey": "API key",
+        "model": "Model",
+        "maxTokens": "Max tokens",
+        "toolModel": "Tool-calling model",
+        "toolMaxTokens": "Tool-calling max tokens"
+      },
+      "agent": {
+        "fields": {
+          "max_iter": "Max iterations",
+          "max_comments": "Max comments per video",
+          "max_comment_len": "Max comment length",
+          "max_list_items": "Max list items",
+          "max_result_chars": "Max result characters",
+          "curated_top_n": "Curated reviews (top N)",
+          "include_review_summary": "Include review summary"
+        }
+      },
+      "rateLimit": {
+        "placeholder": "e.g. 60/minute"
+      },
+      "services": {
+        "empty": "No services found in this value."
+      },
+      "proxy": {
+        "empty": "No proxy pools configured.",
+        "key": "Key",
+        "countries": "Countries",
+        "value": "Value",
+        "url": "URL",
+        "method": "Method",
+        "query": "Query params",
+        "queryKey": "Key",
+        "queryValue": "Value",
+        "addQueryParam": "Add query param",
+        "addPool": "Add pool",
+        "remove": "Remove"
+      }
     }
   },
   "seo": {

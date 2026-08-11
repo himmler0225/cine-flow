@@ -38,6 +38,7 @@ export const queryKeys = {
   },
   admin: {
     all: () => ["admin"] as const,
+    aiConfig: () => ["admin", "ai-config"] as const,
     stats: (dateRange: string) => ["admin", "stats", dateRange] as const,
     line: (dateRange: string) => ["admin", "line", dateRange] as const,
     pageType: (dateRange: string) => ["admin", "pagetype", dateRange] as const,

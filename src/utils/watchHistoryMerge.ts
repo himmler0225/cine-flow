@@ -19,11 +19,16 @@ export function mergeWatchProgress(
   nowIso = new Date().toISOString(),
 ): WatchHistoryItem {
   const progressSec = Math.max(0, Math.round(next.progress_sec));
+
   const durationSec = Math.max(0, Math.round(next.duration_sec));
+
   const prevProgress = prev?.progress_sec ?? 0;
+
   const resetToStart = progressSec <= 5;
+
   const finished =
     next.completed === true || (durationSec > 0 && progressSec / durationSec >= 0.95);
+
   return {
     ...prev,
     ...next,

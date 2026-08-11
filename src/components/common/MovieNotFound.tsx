@@ -11,6 +11,7 @@ type Props = {
 
 export function MovieNotFound({ slug, title, message }: Props) {
   const { t } = useTranslation();
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 pt-24 pb-12">
       <div className="pointer-events-none absolute inset-0">

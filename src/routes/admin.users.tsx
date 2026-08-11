@@ -36,18 +36,28 @@ type ProfileRow = AdminProfileRow;
 
 function UsersPage() {
   const { t, i18n } = useTranslation();
+
   const locale = getIntlLocale(i18n.language);
+
   const qc = useQueryClient();
+
   const [query, setQuery] = useState("");
+
   const [sort, setSort] = useState<"new" | "name">("new");
+
   const [filter, setFilter] = useState<AdminUserFilter>("all");
+
   const [page, setPage] = useState(0);
+
   const [selected, setSelected] = useState<Set<string>>(new Set());
+
   const [openUser, setOpenUser] = useState<ProfileRow | null>(null);
+
   const [confirm, setConfirm] = useState<{
     user: ProfileRow;
     action: "make-admin" | "remove-admin" | "approve" | "reject";
   } | null>(null);
+
   const { data, isLoading } = useAdminUsers({
     query,
     sort,
@@ -55,34 +65,51 @@ function UsersPage() {
     page,
     pageSize: ADMIN_PAGE_SIZE,
   });
+
   const toggleAll = (checked: boolean) => {
     if (!data) return;
+
     setSelected(checked ? new Set(data.rows.map((r) => r.id)) : new Set());
   };
+
   const toggleOne = (id: string) => {
     const s = new Set(selected);
+
     if (s.has(id)) s.delete(id);
     else s.add(id);
+
     setSelected(s);
   };
+
   const exportCsv = () => {
     if (!data) return;
+
     const rows = data.rows.filter((r) => selected.has(r.id));
+
     const csv = [
       "id,username,role,plan,created_at",
       ...rows.map((r) =>
         [r.id, r.username ?? "", r.role ?? "", r.plan ?? "", r.created_at].join(","),
       ),
     ].join("\n");
+
     const blob = new Blob([csv], { type: "text/csv" });
+
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
+
     a.href = url;
+
     a.download = `users-${Date.now()}.csv`;
+
     a.click();
+
     URL.revokeObjectURL(url);
   };
+
   const totalPages = getTotalPages(data?.total ?? 0, ADMIN_PAGE_SIZE);
+
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.users")}</h1>
@@ -96,6 +123,7 @@ function UsersPage() {
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
+
                   setPage(0);
                 }}
                 placeholder={t("admin.users.searchPlaceholder")}
@@ -114,6 +142,7 @@ function UsersPage() {
               value={filter}
               onValueChange={(v) => {
                 setFilter(v);
+
                 setPage(0);
               }}
               options={[
@@ -236,6 +265,7 @@ function UsersPage() {
         onClose={() => setConfirm(null)}
         onConfirm={async () => {
           if (!confirm) return;
+
           const { error } =
             confirm.action === "approve" || confirm.action === "reject"
               ? await adminUsersApi.updateStatus(
@@ -246,11 +276,14 @@ function UsersPage() {
                   confirm.user.id,
                   confirm.action === "make-admin" ? ROLE.ADMIN : ROLE.USER,
                 );
+
           if (error) toast.error(t("toast.adminUpdateFailed"), { description: error.message });
           else {
             toast.success(t("toast.adminUpdateSuccess"));
+
             qc.invalidateQueries({ queryKey: queryKeys.admin.users(query, sort, filter, page) });
           }
+
           setConfirm(null);
         }}
       />
@@ -278,11 +311,17 @@ function UserRow({
   onReject: () => void;
 }) {
   const { t, i18n } = useTranslation();
+
   const locale = getIntlLocale(i18n.language);
+
   const [menu, setMenu] = useState(false);
+
   const isAdmin = isAdminRole(user.role);
+
   const isPending = user.status === "pending";
+
   const isRejected = user.status === "rejected";
+
   return (
     <tr className="border-b border-white/5 hover:bg-white/5">
       <td className="py-2.5">
@@ -376,6 +415,7 @@ function UserRow({
               <button
                 onClick={() => {
                   onOpen();
+
                   setMenu(false);
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-zinc-200 hover:bg-white/5"
@@ -385,6 +425,7 @@ function UserRow({
               <button
                 onClick={() => {
                   onAdminToggle();
+
                   setMenu(false);
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-zinc-200 hover:bg-white/5"
@@ -409,25 +450,35 @@ function UserRow({
 
 function UserDetail({ user, onClose }: { user: ProfileRow | null; onClose: () => void }) {
   const { t, i18n } = useTranslation();
+
   const locale = getIntlLocale(i18n.language);
+
   const [tab, setTab] = useState<"history" | "favorites" | "stats">("history");
+
   const userId = user?.id ?? "";
+
   const { history, favorites } = useAdminUserDetail(userId, tab);
+
   const stats = useMemo(() => {
     if (!history.data) return null;
+
     const unique = new Set(history.data.map((h) => h.movie_slug));
+
     const totalSec = history.data.reduce((s, h) => s + (h.progress_sec ?? 0), 0);
+
     return {
       movies: unique.size,
       episodes: history.data.length,
       hours: Math.round((totalSec / 3600) * 10) / 10,
     };
   }, [history.data]);
+
   const tabs = [
     ["history", t("admin.users.tabHistory")] as const,
     ["favorites", t("admin.users.tabFavorites")] as const,
     ["stats", t("admin.users.tabStats")] as const,
   ];
+
   return (
     <SlidePanel
       open={!!user}

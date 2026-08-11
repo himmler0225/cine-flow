@@ -10,8 +10,11 @@ type Props = {
 
 export function SearchInputBar({ isFetching, onClose }: Props) {
   const { t } = useTranslation();
+
   const q = useSearchModalStore((s) => s.q);
+
   const setQ = useSearchModalStore((s) => s.setQ);
+
   return (
     <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
       <Search
@@ -42,7 +45,7 @@ export function SearchInputBar({ isFetching, onClose }: Props) {
         onClick={onClose}
         className="rounded border border-white/10 px-2 py-0.5 text-[11px] font-medium text-netflix-muted hover:bg-white/10 hover:text-white"
       >
-        Esc
+        Close
       </button>
     </div>
   );

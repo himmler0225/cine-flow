@@ -44,16 +44,23 @@ export function MovieDetailHero({
   onToggleFavorite,
 }: MovieDetailHeroProps) {
   const { t } = useTranslation();
+
   const navigate = useNavigate();
+
   const router = useRouter();
+
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const handleBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.history.back();
+
       return;
     }
+
     void navigate({ to: "/" });
   };
+
   const iconBtn = (active?: boolean) =>
     cn(
       "inline-flex h-11 w-11 items-center justify-center rounded-full ring-1 transition-colors",
@@ -61,6 +68,7 @@ export function MovieDetailHero({
         ? "bg-netflix-red text-white ring-netflix-red"
         : "bg-white/5 text-white ring-white/15 hover:bg-white/10",
     );
+
   return (
     <div className="relative">
       <div className="absolute inset-0 overflow-hidden">

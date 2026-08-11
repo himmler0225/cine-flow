@@ -5,10 +5,15 @@ import { STORAGE_KEYS, LEGACY_STORAGE_KEYS } from "@/constants/storage";
 
 function migratePersistName(next: string, legacy: string | null) {
   if (typeof window === "undefined" || !legacy) return;
+
   if (localStorage.getItem(next) != null) return;
+
   const old = localStorage.getItem(legacy);
+
   if (old == null) return;
+
   localStorage.setItem(next, old);
+
   localStorage.removeItem(legacy);
 }
 
@@ -40,13 +45,16 @@ export const useWatchlistStore = create<WatchlistState>()(
       ],
       createList: (name) => {
         const id = crypto.randomUUID();
+
         set((s) => ({
           lists: [{ id, name: name.trim(), slugs: [], createdAt: Date.now() }, ...s.lists],
         }));
+
         return id;
       },
       deleteList: (id) => {
         if (id === "default" || id === "watchlater") return;
+
         set((s) => ({ lists: s.lists.filter((l) => l.id !== id) }));
       },
       addToList: (listId, slug) => {
@@ -65,6 +73,7 @@ export const useWatchlistStore = create<WatchlistState>()(
       },
       isInList: (listId, slug) => {
         const list = get().lists.find((l) => l.id === listId);
+
         return list?.slugs.includes(slug) ?? false;
       },
       replaceLists: (lists) => set({ lists }),

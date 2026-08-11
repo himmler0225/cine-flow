@@ -4,7 +4,9 @@ import { useChatStore } from "@/store/chatStore";
 
 export function ChatTriggerButton() {
   const { t } = useTranslation();
+
   const open = useChatStore((s) => s.open);
+
   return (
     <button
       type="button"

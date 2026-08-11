@@ -18,12 +18,16 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   getRangeDays: () => DAYS[get().dateRange],
   getDateFrom: () => {
     const d = new Date();
+
     d.setDate(d.getDate() - DAYS[get().dateRange]);
+
     return d.toISOString();
   },
   getPrevDateFrom: () => {
     const d = new Date();
+
     d.setDate(d.getDate() - DAYS[get().dateRange] * 2);
+
     return d.toISOString();
   },
 }));

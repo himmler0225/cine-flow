@@ -28,9 +28,13 @@ export const Route = createFileRoute("/admin/analytics")({
 
 function AnalyticsPage() {
   const { t } = useTranslation();
+
   const { dateRange, getDateFrom } = useAdminStore();
+
   const from = getDateFrom();
+
   const { search, hourly, rooms, langQuality } = useAdminAnalytics(dateRange, from);
+
   return (
     <div className="space-y-5">
       <h1 className="text-xl font-bold text-white">{t("admin.nav.analytics")}</h1>

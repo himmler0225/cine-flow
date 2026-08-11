@@ -14,26 +14,43 @@ interface Props {
 
 export function StatCard({ icon, label, value, change, loading, format }: Props) {
   const { t, i18n } = useTranslation();
+
   const [display, setDisplay] = useState(0);
+
   useEffect(() => {
     if (loading) return;
+
     let raf = 0;
+
     const start = performance.now();
+
     const duration = 600;
+
     const from = 0;
+
     const tick = (t: number) => {
       const p = Math.min(1, (t - start) / duration);
+
       setDisplay(Math.round(from + (value - from) * (1 - Math.pow(1 - p, 3))));
+
       if (p < 1) raf = requestAnimationFrame(tick);
     };
+
     raf = requestAnimationFrame(tick);
+
     return () => cancelAnimationFrame(raf);
   }, [value, loading]);
+
   const locale = getIntlLocale(i18n.language);
+
   const fmt = format ?? ((n: number) => n.toLocaleString(locale));
+
   const trend = change == null ? 0 : change;
+
   const trendColor = trend > 0 ? "text-emerald-400" : trend < 0 ? "text-red-400" : "text-zinc-500";
+
   const TrendIcon = trend > 0 ? ArrowUp : trend < 0 ? ArrowDown : Minus;
+
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.05]">
       <div className="mb-3 flex items-center justify-between">

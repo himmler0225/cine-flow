@@ -28,16 +28,21 @@ export const Route = createFileRoute("/watch-party/$code")({
 
 function WatchPartyPage() {
   const { code } = Route.useParams();
+
   const state = useWatchPartyRoom(code);
+
   if (!state.authLoading && !state.isAuthenticated) {
     return <WatchPartyAuthGate code={code} onLogin={() => state.requestAuth("login")} />;
   }
+
   if (state.isLoading) {
     return <WatchPartyLoading />;
   }
+
   if (!state.room) {
     return <WatchPartyNotFound code={code} />;
   }
+
   if (state.expired) {
     return (
       <WatchPartyExpired
@@ -47,6 +52,7 @@ function WatchPartyPage() {
       />
     );
   }
+
   if (state.joinStatus === "need-pin") {
     return (
       <WatchPartyPinGate
@@ -57,9 +63,11 @@ function WatchPartyPage() {
       />
     );
   }
+
   if (state.joinStatus !== "joined") {
     return <WatchPartyLoading />;
   }
+
   return (
     <Suspense fallback={<WatchPartyLoading />}>
       <WatchPartyRoomView state={state} />

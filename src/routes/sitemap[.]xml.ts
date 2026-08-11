@@ -53,10 +53,13 @@ export const Route = createFileRoute("/sitemap.xml")({
     handlers: {
       GET: async () => {
         const currentYear = new Date().getFullYear();
+
         const years: SitemapEntry[] = [];
+
         for (let y = currentYear; y >= currentYear - 10; y--) {
           years.push({ path: `/year/${y}`, changefreq: "weekly", priority: "0.5" });
         }
+
         const entries: SitemapEntry[] = [
           ...staticEntries,
           ...genreSlugs.map((s) => ({
@@ -71,6 +74,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           })),
           ...years,
         ];
+
         const urls = entries.map((e) =>
           [
             `  <url>`,
@@ -82,12 +86,14 @@ export const Route = createFileRoute("/sitemap.xml")({
             .filter(Boolean)
             .join("\n"),
         );
+
         const xml = [
           `<?xml version="1.0" encoding="UTF-8"?>`,
           `<urlset xmlns="${EXTERNAL_URLS.sitemapNamespace}">`,
           ...urls,
           `</urlset>`,
         ].join("\n");
+
         return new Response(xml, {
           headers: {
             "Content-Type": "application/xml",

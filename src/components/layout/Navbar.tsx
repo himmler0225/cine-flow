@@ -20,33 +20,53 @@ const JoinRoomModal = lazy(() =>
 
 export function Navbar() {
   const { t } = useTranslation();
+
   const path = useRouterState({ select: (s) => s.location.pathname });
+
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const requestAuth = useAuthStore((s) => s.requestAuth);
+
   const scrolled = useNavbarUiStore((s) => s.scrolled);
+
   const openSearch = useNavbarUiStore((s) => s.openSearch);
+
   const openJoin = useNavbarUiStore((s) => s.openJoin);
+
   const openDrawer = useNavbarUiStore((s) => s.openDrawer);
+
   const setScrolled = useNavbarUiStore((s) => s.setScrolled);
+
   const setOpenSearch = useNavbarUiStore((s) => s.setOpenSearch);
+
   const setOpenJoin = useNavbarUiStore((s) => s.setOpenJoin);
+
   const setOpenDrawer = useNavbarUiStore((s) => s.setOpenDrawer);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
+
     onScroll();
+
     window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", onScroll);
   }, [setScrolled]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
+
         setOpenSearch(true);
       }
     };
+
     window.addEventListener("keydown", onKey);
+
     return () => window.removeEventListener("keydown", onKey);
   }, [setOpenSearch]);
+
   return (
     <>
       <header

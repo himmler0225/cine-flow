@@ -8,6 +8,7 @@ import {
   PartyPopper,
   MessageSquare,
   TrendingUp,
+  Bot,
   LogOut,
   ArrowLeft,
   ShieldCheck,
@@ -24,19 +25,28 @@ const NAV = [
   { to: "/admin/rooms", labelKey: "admin.nav.rooms", icon: PartyPopper },
   { to: "/admin/comments", labelKey: "admin.nav.comments", icon: MessageSquare },
   { to: "/admin/analytics", labelKey: "admin.nav.analytics", icon: TrendingUp },
+  { to: "/admin/ai-config", labelKey: "admin.nav.aiConfig", icon: Bot },
 ] as const;
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
+
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
   const navigate = useNavigate();
+
   const { profile, user, signOut } = useAuthStore();
+
   const [drawerOpen, setDrawerOpen] = useState(false);
+
   useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
+
   const avatar = profile?.avatar_url ?? "";
+
   const initial = (profile?.username ?? user?.email ?? "A").charAt(0).toUpperCase();
+
   const sidebarContent = (
     <>
       <div className="border-b border-white/10 px-4 py-4">
@@ -60,7 +70,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-3">
         {NAV.map((item) => {
           const Icon = item.icon;
+
           const active = pathname.startsWith(item.to);
+
           return (
             <Link
               key={item.to}
@@ -111,6 +123,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </div>
     </>
   );
+
   return (
     <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-white/10 bg-zinc-950 lg:flex">

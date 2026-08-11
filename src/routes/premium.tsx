@@ -20,19 +20,29 @@ export const Route = createFileRoute("/premium")({
 
 function PremiumPage() {
   const { t: tr } = useTranslation();
+
   const { isPremium, upgradeDemo, isAuthenticated } = usePremium();
+
   const requestAuth = useAuthStore((s) => s.requestAuth);
+
   const [upgrading, setUpgrading] = useState(false);
+
   const freeFeatures = getFreeFeatures();
+
   const premiumFeatures = getPremiumFeatures();
+
   const handleUpgrade = async () => {
     if (!isAuthenticated) {
       requestAuth("login");
+
       return;
     }
+
     setUpgrading(true);
+
     try {
       await upgradeDemo();
+
       toast.success(tr("toast.premiumUpgraded"));
     } catch (e) {
       toast.error((e as Error).message || tr("toast.premiumFailed"));
@@ -40,6 +50,7 @@ function PremiumPage() {
       setUpgrading(false);
     }
   };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-netflix-black pt-24 pb-16">
       <div
@@ -140,6 +151,7 @@ function FeatureColumn({
   current?: boolean;
 }) {
   const { t: tr } = useTranslation();
+
   return (
     <div
       className={cn(

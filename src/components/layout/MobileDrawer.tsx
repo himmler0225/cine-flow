@@ -47,50 +47,79 @@ export function MobileDrawer({
   onOpenAuth,
 }: MobileDrawerProps) {
   const { t } = useTranslation();
+
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
   const [genreOpen, setGenreOpen] = useState(false);
+
   const [countryOpen, setCountryOpen] = useState(false);
+
   const { data: genres } = useGenres();
+
   const { data: countries } = useCountries();
+
   const titleId = useId();
+
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+
   const panelRef = useRef<HTMLElement>(null);
+
   const genreList = genres && genres.length > 0 ? genres : FALLBACK_GENRES;
+
   useEffect(() => {
     if (!open) return;
+
     document.body.style.overflow = "hidden";
+
     const t = window.setTimeout(() => closeBtnRef.current?.focus(), 50);
+
     return () => {
       document.body.style.overflow = "";
+
       window.clearTimeout(t);
     };
   }, [open]);
+
   useEffect(() => {
     if (!open) return;
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+
         onClose();
+
         return;
       }
+
       if (e.key !== "Tab" || !panelRef.current) return;
+
       const focusable = panelRef.current.querySelectorAll<HTMLElement>(
         'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
       );
+
       if (focusable.length === 0) return;
+
       const first = focusable[0];
+
       const last = focusable[focusable.length - 1];
+
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
+
         last.focus();
       } else if (!e.shiftKey && document.activeElement === last) {
         e.preventDefault();
+
         first.focus();
       }
     };
+
     window.addEventListener("keydown", onKey);
+
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
   return (
     <AnimatePresence>
       {open && (
@@ -271,6 +300,7 @@ export function MobileDrawer({
                 type="button"
                 onClick={() => {
                   onClose();
+
                   if (isAuthenticated) onJoinWatchParty?.();
                   else onOpenAuth?.();
                 }}
@@ -314,9 +344,11 @@ function DrawerLink({
   exact?: boolean;
 }) {
   const target = matchPrefix ?? (params ? to.replace("$slug", params.slug) : to);
+
   const active = exact
     ? pathname === target
     : pathname === target || pathname.startsWith(`${target}/`);
+
   return (
     <Link
       to={to as never}

@@ -11,6 +11,7 @@ export type EpisodeSnapshot = Record<
 export function getEpisodeSnapshots(): EpisodeSnapshot {
   try {
     const raw = readStorageKey("episodeSnapshots");
+
     return raw ? (JSON.parse(raw) as EpisodeSnapshot) : {};
   } catch {
     return {};
@@ -20,21 +21,21 @@ export function getEpisodeSnapshots(): EpisodeSnapshot {
 export function setEpisodeSnapshot(slug: string, episode: string): void {
   try {
     const all = getEpisodeSnapshots();
+
     all[slug] = { episode, at: Date.now() };
+
     writeStorageKey("episodeSnapshots", JSON.stringify(all));
-  } catch {
-    /* storage unavailable (private mode / quota) — non-critical */
-  }
+  } catch {}
 }
 
 export function removeEpisodeSnapshot(slug: string): void {
   try {
     const all = getEpisodeSnapshots();
+
     delete all[slug];
+
     writeStorageKey("episodeSnapshots", JSON.stringify(all));
-  } catch {
-    /* storage unavailable (private mode / quota) — non-critical */
-  }
+  } catch {}
 }
 
 export function getNotificationsReadAt(): number {
@@ -48,7 +49,5 @@ export function getNotificationsReadAt(): number {
 export function markNotificationsRead(): void {
   try {
     writeStorageKey("notifReadAt", String(Date.now()));
-  } catch {
-    /* storage unavailable (private mode / quota) — non-critical */
-  }
+  } catch {}
 }

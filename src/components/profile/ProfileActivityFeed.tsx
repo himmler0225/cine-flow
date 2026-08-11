@@ -15,6 +15,7 @@ interface ProfileActivityFeedProps {
 
 export function ProfileActivityFeed({ history, favs }: ProfileActivityFeedProps) {
   const { t, i18n } = useTranslation();
+
   const events = useMemo(() => {
     const items: {
       kind: "watch" | "fav";
@@ -23,6 +24,7 @@ export function ProfileActivityFeed({ history, favs }: ProfileActivityFeedProps)
       poster: string;
       slug: string;
     }[] = [];
+
     history.forEach((h) =>
       items.push({
         kind: "watch",
@@ -35,6 +37,7 @@ export function ProfileActivityFeed({ history, favs }: ProfileActivityFeedProps)
         slug: h.movie_slug,
       }),
     );
+
     favs.forEach((f) =>
       items.push({
         kind: "fav",
@@ -44,11 +47,14 @@ export function ProfileActivityFeed({ history, favs }: ProfileActivityFeedProps)
         slug: f.movie_slug,
       }),
     );
+
     return items.sort((a, b) => b.ts - a.ts).slice(0, 10);
   }, [history, favs, t]);
+
   if (events.length === 0) {
     return <ProfileEmptyHint icon={<Clock className="h-8 w-8" />} text={t("profile.noActivity")} />;
   }
+
   return (
     <ul className="space-y-2">
       {events.map((e, i) => (
@@ -71,7 +77,9 @@ export function ProfileActivityFeed({ history, favs }: ProfileActivityFeedProps)
           {e.kind === "fav" ? (
             <Heart className="h-4 w-4 text-netflix-red" />
           ) : (
-            <Play className="h-4 w-4 text-netflix-muted" />
+            <Link to="/movie/$slug" params={{ slug: e.slug }} className="shrink-0">
+              <Play className="h-4 w-4 text-netflix-muted" />
+            </Link>
           )}
         </li>
       ))}

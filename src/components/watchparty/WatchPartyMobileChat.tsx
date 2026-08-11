@@ -13,6 +13,7 @@ type Props = {
 
 export function WatchPartyMobileChat({ open, onOpenChange, messageCount, chatPanel }: Props) {
   const { t } = useTranslation();
+
   return (
     <>
       <Button

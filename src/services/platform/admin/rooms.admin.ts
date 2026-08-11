@@ -19,11 +19,15 @@ class AdminRoomsApi {
   }
   async fetchMemberAndMessageCounts(roomIds: string[]) {
     const memberCount: Record<string, number> = {};
+
     const msgCount: Record<string, number> = {};
+
     for (const id of roomIds) {
       memberCount[id] = 0;
+
       msgCount[id] = 0;
     }
+
     return { memberCount, msgCount };
   }
   deleteById(roomId: string): Promise<ApiMutationResult> {

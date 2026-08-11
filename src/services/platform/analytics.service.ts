@@ -8,9 +8,7 @@ class AnalyticsApi {
         body: JSON.stringify(body),
         auth,
       });
-    } catch {
-      /* analytics beacons are fire-and-forget — a failed send shouldn't affect UX or logs */
-    }
+    } catch {}
   }
   trackPageView(pageType: string) {
     return this.track("/api/analytics/page-view", { page_type: pageType }, false);
@@ -59,14 +57,24 @@ export const analyticsApi = new AnalyticsApi();
 
 export function pageTypeFromPath(pathname: string): string {
   if (pathname === "/") return "home";
+
   if (pathname.startsWith("/movie/")) return "movie";
+
   if (pathname.startsWith("/watch/")) return "watch";
+
   if (pathname.startsWith("/search")) return "search";
+
   if (pathname.startsWith("/catalog/")) return "catalog";
+
   if (pathname.startsWith("/genre/")) return "genre";
+
   if (pathname.startsWith("/country/")) return "country";
+
   if (pathname.startsWith("/new")) return "new";
+
   if (pathname.startsWith("/admin")) return "admin";
+
   if (pathname.startsWith("/profile")) return "profile";
+
   return "other";
 }

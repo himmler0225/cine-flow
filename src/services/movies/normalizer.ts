@@ -17,6 +17,7 @@ export interface AggregatorEnvelope<T> {
 export class MovieNotFoundError extends Error {
   constructor(msg = "Movie not found") {
     super(msg);
+
     this.name = "MovieNotFoundError";
   }
 }
@@ -37,6 +38,7 @@ export function toDetailResponse(
   if (!envelope.data?.movie?.slug) {
     throw new MovieNotFoundError();
   }
+
   return {
     movie: envelope.data.movie,
     episodes: envelope.data.episodes ?? [],

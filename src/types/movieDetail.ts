@@ -10,13 +10,10 @@ export interface MovieDetailTabsProps {
   progressByEpisode?: Record<string, EpisodeProgressInfo>;
 }
 
-export type MovieDetailTab = "episodes" | "trailer" | "cast" | "similar" | "comments";
+export type MovieDetailTab = "episodes" | "cast" | "similar" | "comments";
 
-export function getDefaultDetailTab(
-  episodes: DetailResponse["episodes"],
-  hasTrailer: boolean,
-): MovieDetailTab {
+export function getDefaultDetailTab(episodes: DetailResponse["episodes"]): MovieDetailTab {
   if (episodes.length > 0) return "episodes";
-  if (hasTrailer) return "trailer";
+
   return "cast";
 }

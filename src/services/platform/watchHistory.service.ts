@@ -16,20 +16,25 @@ class WatchHistoryApi {
       `/api/watch-history/${encodeURIComponent(movieSlug)}/${encodeURIComponent(episodeName)}`,
       { method: "DELETE" },
     );
+
     return { error: null };
   }
   async clear() {
     await platformFetch("/api/watch-history", { method: "DELETE" });
+
     return { error: null };
   }
   async migrateLocalToServer(): Promise<void> {
     const local = getLocalHistory();
+
     if (local.length === 0) return;
+
     try {
       await platformFetch("/api/watch-history/batch", {
         method: "POST",
         body: JSON.stringify({ items: local }),
       });
+
       clearLocalHistory();
     } catch (e) {
       console.error("[watch_history] migration failed", e);

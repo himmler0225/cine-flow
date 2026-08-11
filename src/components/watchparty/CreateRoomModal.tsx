@@ -24,18 +24,25 @@ interface Props {
 
 export function CreateRoomModal({ open, onClose, code, movieName, thumb, onStart }: Props) {
   const { t } = useTranslation();
+
   const url = buildRoomUrl(code);
+
   const [copied, setCopied] = useState(false);
+
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(t("watchparty.inviteText", { movie: movieName, url }));
+
       setCopied(true);
+
       toast.success(t("toast.copyInvite"));
+
       window.setTimeout(() => setCopied(false), UI_DELAY_MS.copyFeedback);
     } catch {
       toast.error(t("toast.copyFailedShort"));
     }
   };
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md border-white/10 bg-[#1a1a1a] text-white">

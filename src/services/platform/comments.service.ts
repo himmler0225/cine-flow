@@ -10,6 +10,7 @@ class CommentsApi {
     } = {},
   ): Promise<Comment[]> {
     const limit = options.limit ?? 50;
+
     return platformFetch<Comment[]>(
       `/api/comments/movie/${encodeURIComponent(slug)}?limit=${limit}`,
       { auth: false },

@@ -42,24 +42,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   initialize: async () => {
     if (initPromise) return initPromise;
+
     initPromise = (async () => {
       set({ isLoading: true });
+
       const session = await authApi.getSession();
+
       set({
         session,
         user: session?.user ?? null,
         isAuthenticated: !!session,
         isLoading: false,
       });
+
       if (session?.user) {
         void get().fetchProfile(session.user.id);
+
         void watchHistoryApi.migrateLocalToServer();
+
         void favoritesApi.migrateLocalToServer().then(async () => {
           const { clearFavoritesCache } = await import("@/hooks/useFavorites");
+
           clearFavoritesCache();
         });
+
         void watchlistApi.migrateLocalToServer();
       }
+
       authApi.onAuthStateChange(async (event, newSession) => {
         set({
           session: newSession,
@@ -67,14 +76,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isAuthenticated: !!newSession,
           isLoading: false,
         });
+
         if (newSession?.user) {
           void get().fetchProfile(newSession.user.id);
+
           if (event === "SIGNED_IN") {
             void watchHistoryApi.migrateLocalToServer();
+
             void favoritesApi.migrateLocalToServer().then(async () => {
               const { clearFavoritesCache } = await import("@/hooks/useFavorites");
+
               clearFavoritesCache();
             });
+
             void watchlistApi.migrateLocalToServer();
           }
         } else {
@@ -83,9 +97,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     })().catch((error) => {
       console.error("[auth] initialize failed", error);
+
       set({ isLoading: false });
+
       initPromise = null;
     });
+
     return initPromise;
   },
   requestAuth: (tab = "login") => {
@@ -93,15 +110,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       typeof window !== "undefined" && window.location.pathname !== "/login"
         ? window.location.pathname + window.location.search
         : undefined;
+
     goToAuth(tab, redirect);
   },
   fetchProfile: async (userId) => {
     try {
       const profile = await profilesApi.fetchById(userId);
+
       if (!profile) return;
+
       set({ profile });
+
       const session = get().session;
+
       if (!session) return;
+
       set({
         session: {
           ...session,
@@ -132,32 +155,45 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   clearAuth: () => set({ session: null, user: null, profile: null, isAuthenticated: false }),
   signInWithEmail: async (email, password) => {
     const { data, error } = await authApi.signInWithPassword(email, password);
+
     if (error) throw new Error(error.message);
+
     if (data.user) await get().fetchProfile(data.user.id);
+
     toast.success(t("toast.welcomeBack"));
   },
   signUpWithEmail: async (email, password, username) => {
     const { error } = await authApi.signUp(email, password, username);
+
     if (error) throw new Error(error.message);
   },
   signInWithGoogle: async () => {
     const { error } = await authApi.signInWithGoogle();
+
     if (error) throw new Error(error.message);
   },
   signOut: async () => {
     await authApi.signOut();
+
     set({ user: null, profile: null, session: null, isAuthenticated: false });
+
     toast.success(t("toast.loggedOut"));
+
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEYS.reactQueryCache);
+
       window.location.href = "/login";
     }
   },
   updateProfile: async (data) => {
     const user = get().user;
+
     if (!user) return;
+
     const { error } = await profilesApi.update(data);
+
     if (error) throw new Error(error.message);
+
     await get().fetchProfile(user.id);
   },
 }));

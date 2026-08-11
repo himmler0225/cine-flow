@@ -1,4 +1,3 @@
-// Mirrors ai-layer's SSE schema (app/services/agent/events/schema.py).
 export type AgentSSEEvent =
   | { type: "status"; detail: string }
   | { type: "tool_start"; tool: string; detail: string; args: unknown; worker?: string }
@@ -10,9 +9,13 @@ export type AgentSSEEvent =
 
 export interface ChatVideoPreview {
   video_id?: string;
+  url?: string;
   title?: string;
-  thumbnail?: string;
-  channel_title?: string;
+  channel?: string;
+  thumbnails?: { url: string; width?: number; height?: number }[];
+  desc?: string;
+  cover?: string;
+  author?: { nickname?: string; unique_id?: string };
   [key: string]: unknown;
 }
 
@@ -24,7 +27,6 @@ export interface ChatDoneData {
   review_source: string | null;
 }
 
-// One tool call's live lifecycle within a single assistant turn.
 export interface ChatToolAction {
   id: string;
   tool: string;

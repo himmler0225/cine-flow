@@ -32,11 +32,14 @@ export const useChatStore = create<ChatState>()((set, get) => ({
   toggle: () => set((s) => ({ isOpen: !s.isOpen })),
   reset: () => {
     abortController?.abort();
+
     set({ messages: [], isStreaming: false });
   },
   stop: () => {
     abortController?.abort();
+
     set({ isStreaming: false });
+
     updateMessage(
       set,
       (m) => m.status === "streaming",
@@ -46,6 +49,7 @@ export const useChatStore = create<ChatState>()((set, get) => ({
 
   sendMessage: async (task: string, lang: string) => {
     const trimmed = task.trim();
+
     if (!trimmed || get().isStreaming) return;
 
     const userMessage: ChatMessage = {
@@ -57,7 +61,9 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       status: "done",
       createdAt: Date.now(),
     };
+
     const assistantId = newId();
+
     const assistantMessage: ChatMessage = {
       id: assistantId,
       role: "assistant",
@@ -67,10 +73,40 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       status: "pending",
       createdAt: Date.now(),
     };
+
     set((s) => ({ messages: [...s.messages, userMessage, assistantMessage], isStreaming: true }));
 
     abortController = new AbortController();
+
     let toolSeq = 0;
+
+    let pendingDelta = "";
+
+    let rafId: number | null = null;
+
+    const flushDelta = () => {
+      rafId = null;
+
+      if (!pendingDelta) return;
+
+      const chunk = pendingDelta;
+
+      pendingDelta = "";
+
+      patchAssistant(set, assistantId, (m) => ({
+        ...m,
+        status: m.status === "done" || m.status === "error" ? m.status : "streaming",
+        text: m.text + chunk,
+      }));
+    };
+
+    const cancelFlush = () => {
+      if (rafId != null) {
+        cancelAnimationFrame(rafId);
+
+        rafId = null;
+      }
+    };
 
     try {
       for await (const event of streamChat({
@@ -86,13 +122,16 @@ export const useChatStore = create<ChatState>()((set, get) => ({
               detail: event.detail,
               status: "done",
             };
+
             patchAssistant(set, assistantId, (m) => ({
               ...m,
               status: "streaming",
               actions: [...m.actions, action],
             }));
+
             break;
           }
+
           case "tool_start": {
             const action: ChatToolAction = {
               id: `${event.tool}-${toolSeq++}`,
@@ -100,59 +139,87 @@ export const useChatStore = create<ChatState>()((set, get) => ({
               detail: event.detail,
               status: "running",
             };
+
             patchAssistant(set, assistantId, (m) => ({
               ...m,
               status: "streaming",
               actions: [...m.actions, action],
             }));
+
             break;
           }
+
           case "tool_done": {
             patchAssistant(set, assistantId, (m) => {
               const idx = m.actions.findIndex(
                 (a) => a.tool === event.tool && a.status === "running",
               );
+
               if (idx === -1) return m;
+
               const actions = [...m.actions];
+
               actions[idx] = { ...actions[idx]!, status: "done" };
+
               return { ...m, actions };
             });
+
             break;
           }
+
           case "text_delta": {
-            patchAssistant(set, assistantId, (m) => ({
-              ...m,
-              status: "streaming",
-              text: m.text + event.delta,
-            }));
+            pendingDelta += event.delta;
+
+            if (rafId == null) {
+              rafId = requestAnimationFrame(flushDelta);
+            }
+
             break;
           }
+
           case "data_preview": {
             patchAssistant(set, assistantId, (m) => ({
               ...m,
               videos: mergeVideos(m.videos, event.videos),
             }));
+
             break;
           }
+
           case "done": {
+            cancelFlush();
+
+            flushDelta();
+
             patchAssistant(set, assistantId, (m) => ({
               ...m,
               status: "done",
               videos: mergeVideos(m.videos, event.data.videos ?? []),
             }));
+
             break;
           }
+
           case "error": {
+            cancelFlush();
+
+            flushDelta();
+
             patchAssistant(set, assistantId, (m) => ({
               ...m,
               status: "error",
               errorMessage: event.message || event.detail,
             }));
+
             break;
           }
         }
       }
     } catch (err) {
+      cancelFlush();
+
+      flushDelta();
+
       if ((err as Error)?.name !== "AbortError") {
         patchAssistant(set, assistantId, (m) => ({
           ...m,
@@ -161,7 +228,12 @@ export const useChatStore = create<ChatState>()((set, get) => ({
         }));
       }
     } finally {
+      cancelFlush();
+
+      flushDelta();
+
       abortController = null;
+
       set({ isStreaming: false });
     }
   },
@@ -190,7 +262,10 @@ function mergeVideos(
   incoming: ChatMessage["videos"],
 ): ChatMessage["videos"] {
   if (!incoming?.length) return existing;
+
   const seen = new Set(existing.map((v) => v.video_id).filter(Boolean));
+
   const added = incoming.filter((v) => v.video_id && !seen.has(v.video_id));
+
   return added.length ? [...existing, ...added] : existing;
 }

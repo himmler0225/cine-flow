@@ -20,14 +20,20 @@ export function MovieDetailTabs({
   progressByEpisode,
 }: MovieDetailTabsProps) {
   const { t } = useTranslation();
+
   const navigate = useNavigate();
+
   const [serverIdx, setServerIdx] = useState(0);
+
   const [episodeIdx, setEpisodeIdx] = useState(0);
-  const trailerEmbed = movie.trailer_url ? getYoutubeEmbed(movie.trailer_url) : null;
-  const defaultTab = getDefaultDetailTab(episodes, !!trailerEmbed);
+
+  const defaultTab = getDefaultDetailTab(episodes);
+
   const episodeNames = episodes[0]?.server_data.map((e) => e.name) ?? [];
+
   const tabTriggerClass =
     "shrink-0 snap-start rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-netflix-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-netflix-red data-[state=active]:border-netflix-red data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:shadow-none";
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -43,11 +49,7 @@ export function MovieDetailTabs({
                 {t("movie.episodes", { count: episodes[0]?.server_data.length ?? 0 })}
               </TabsTrigger>
             )}
-            {trailerEmbed && (
-              <TabsTrigger value="trailer" className={tabTriggerClass}>
-                {t("movie.trailer")}
-              </TabsTrigger>
-            )}
+
             <TabsTrigger value="cast" className={tabTriggerClass}>
               {t("movie.cast")}
             </TabsTrigger>
@@ -70,7 +72,9 @@ export function MovieDetailTabs({
                 progressByEpisode={progressByEpisode}
                 onSelect={(s, e) => {
                   setServerIdx(s);
+
                   setEpisodeIdx(e);
+
                   navigate({
                     to: "/watch/$slug",
                     params: { slug },
@@ -82,22 +86,6 @@ export function MovieDetailTabs({
               <p className="text-sm text-netflix-muted">{t("movie.noEpisodes")}</p>
             )}
           </TabsContent>
-
-          {trailerEmbed && (
-            <TabsContent value="trailer" className="mt-0">
-              <div className="overflow-hidden rounded-xl border border-white/10">
-                <div className="aspect-video w-full bg-black">
-                  <iframe
-                    src={trailerEmbed}
-                    title={t("movie.trailerTitle", { name: movie.name })}
-                    className="h-full w-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              </div>
-            </TabsContent>
-          )}
 
           <TabsContent value="cast" className="mt-0">
             <div className="space-y-6 text-sm">

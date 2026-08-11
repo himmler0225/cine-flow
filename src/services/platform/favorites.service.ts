@@ -10,6 +10,7 @@ export function favoriteToMovieListItem(f: {
   thumb_url?: string | null;
 }): MovieListItem {
   const thumb = f.thumb_url ?? "";
+
   return {
     slug: f.movie_slug,
     name: f.movie_name,
@@ -21,12 +22,16 @@ export function favoriteToMovieListItem(f: {
 class FavoritesApi {
   async fetchSlugs(): Promise<Map<string, string>> {
     const rows = await platformFetch<FavoriteSlug[]>(`/api/favorites/slugs`);
+
     const map = new Map<string, string>();
+
     rows.forEach((r) => map.set(r.movie_slug, r.id));
+
     return map;
   }
   async remove(id: string) {
     await platformFetch(`/api/favorites/${id}`, { method: "DELETE" });
+
     return { error: null };
   }
   async insert(input: InsertFavoriteInput) {
@@ -40,6 +45,7 @@ class FavoritesApi {
         thumb_url: input.thumbUrl,
       }),
     });
+
     return { data, error: null };
   }
   fetchList(): Promise<Favorite[]> {
@@ -49,6 +55,7 @@ class FavoritesApi {
     await platformFetch(`/api/favorites/slug/${encodeURIComponent(movieSlug)}`, {
       method: "DELETE",
     });
+
     return { error: null };
   }
   count(): Promise<number> {
@@ -56,14 +63,20 @@ class FavoritesApi {
   }
   async migrateLocalToServer(): Promise<void> {
     const local = useFavoriteStore.getState().favorites;
+
     if (local.length === 0) return;
+
     try {
       const existing = await this.fetchSlugs();
+
       const toInsert = local.filter((m) => !existing.has(m.slug));
+
       if (toInsert.length === 0) {
         useFavoriteStore.getState().clearAll();
+
         return;
       }
+
       await platformFetch("/api/favorites/batch", {
         method: "POST",
         body: JSON.stringify({
@@ -74,6 +87,7 @@ class FavoritesApi {
           })),
         }),
       });
+
       useFavoriteStore.getState().clearAll();
     } catch (e) {
       console.error("[favorites] migration failed", e);

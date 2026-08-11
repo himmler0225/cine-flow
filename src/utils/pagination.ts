@@ -9,5 +9,6 @@ export function getNextPage(
   } | null,
 ): number | undefined {
   if (!pagination) return undefined;
+
   return pagination.currentPage < pagination.totalPages ? pagination.currentPage + 1 : undefined;
 }

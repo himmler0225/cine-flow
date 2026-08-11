@@ -6,6 +6,7 @@ import {
 
 export function removeDiacritics(str: string): string {
   if (!str) return "";
+
   return str
     .normalize("NFD")
     .replace(COMBINING_MARK_PATTERN, "")

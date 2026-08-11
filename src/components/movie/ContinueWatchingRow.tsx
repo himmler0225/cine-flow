@@ -12,7 +12,9 @@ const arrowBtnClass =
 
 function readScrollEdges(el: HTMLElement) {
   const maxScroll = el.scrollWidth - el.clientWidth;
+
   if (maxScroll <= 1) return { canGoPrev: false, canGoNext: false };
+
   return {
     canGoPrev: el.scrollLeft > 1,
     canGoNext: el.scrollLeft < maxScroll - 1,
@@ -21,22 +23,31 @@ function readScrollEdges(el: HTMLElement) {
 
 export function ContinueWatchingRow() {
   const { t } = useTranslation();
+
   const { history, deleteItem } = useWatchHistory();
+
   const ref = useRef<HTMLDivElement>(null);
+
   const [canGoPrev, setCanGoPrev] = useState(false);
+
   const [canGoNext, setCanGoNext] = useState(false);
 
   const items = useMemo(() => {
     const seen = new Set<string>();
+
     return history
       .filter((h) => {
         if (h.progress_sec < 10) return h.duration_sec === 0;
+
         if (isWatchFinished(h.progress_sec, h.duration_sec)) return false;
+
         return true;
       })
       .filter((h) => {
         if (seen.has(h.movie_slug)) return false;
+
         seen.add(h.movie_slug);
+
         return true;
       })
       .slice(0, 12);
@@ -44,27 +55,40 @@ export function ContinueWatchingRow() {
 
   const syncScrollEdges = useCallback(() => {
     const el = ref.current;
+
     if (!el) return;
+
     const { canGoPrev: prev, canGoNext: next } = readScrollEdges(el);
+
     setCanGoPrev(prev);
+
     setCanGoNext(next);
   }, []);
 
   const scroll = (dir: 1 | -1) => {
     const el = ref.current;
+
     if (!el) return;
+
     el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: "smooth" });
   };
 
   useEffect(() => {
     const el = ref.current;
+
     if (!el) return;
+
     syncScrollEdges();
+
     el.addEventListener("scroll", syncScrollEdges, { passive: true });
+
     const ro = new ResizeObserver(syncScrollEdges);
+
     ro.observe(el);
+
     return () => {
       el.removeEventListener("scroll", syncScrollEdges);
+
       ro.disconnect();
     };
   }, [items, syncScrollEdges]);
@@ -73,19 +97,29 @@ export function ContinueWatchingRow() {
 
   const formatTime = (sec: number) => {
     const s = Math.max(0, Math.floor(sec));
+
     const h = Math.floor(s / 3600);
+
     const m = Math.floor((s % 3600) / 60);
+
     const r = s % 60;
+
     const pad = (n: number) => n.toString().padStart(2, "0");
+
     return h > 0 ? `${h}:${pad(m)}:${pad(r)}` : `${pad(m)}:${pad(r)}`;
   };
 
   const formatRemaining = (sec: number) => {
     const s = Math.max(0, Math.floor(sec));
+
     if (s < 60) return `còn ${s}s`;
+
     const h = Math.floor(s / 3600);
+
     const m = Math.floor((s % 3600) / 60);
+
     if (h > 0) return `còn ${h}h${m > 0 ? ` ${m}m` : ""}`;
+
     return `còn ${m}m`;
   };
 
@@ -116,14 +150,19 @@ export function ContinueWatchingRow() {
         >
           {items.map((item) => {
             const isComputing = item.duration_sec <= 0;
+
             const pct = getWatchProgressPercent(item.progress_sec, item.duration_sec, {
               clamp: true,
             });
+
             const remainingSec = isComputing
               ? 0
               : Math.max(0, item.duration_sec - item.progress_sec);
+
             const tapParam = item.episode_index !== undefined ? item.episode_index + 1 : 1;
+
             const timeLabel = item.progress_sec >= 1 ? formatTime(item.progress_sec) : null;
+
             const remainingLabel = !isComputing ? formatRemaining(remainingSec) : null;
 
             return (

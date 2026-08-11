@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 interface Props {
   text: string;
   className?: string;
+  streaming?: boolean;
 }
 
-export function ChatMarkdown({ text, className }: Props) {
+export function ChatMarkdown({ text, className, streaming }: Props) {
   return (
     <div
       className={cn(
@@ -29,6 +30,9 @@ export function ChatMarkdown({ text, className }: Props) {
       )}
     >
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+      {streaming && (
+        <span className="inline-block h-3.5 w-1.5 animate-pulse rounded-sm bg-white/70 align-text-bottom" />
+      )}
     </div>
   );
 }

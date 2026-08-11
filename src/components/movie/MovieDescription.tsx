@@ -12,14 +12,21 @@ interface Props {
 
 export function MovieDescription({ html, className }: Props) {
   const { t } = useTranslation();
+
   const [expanded, setExpanded] = useState(false);
+
   const [canExpand, setCanExpand] = useState(false);
+
   const measureRef = useRef<HTMLDivElement>(null);
+
   useLayoutEffect(() => {
     const el = measureRef.current;
+
     if (!el) return;
+
     setCanExpand(el.scrollHeight > COLLAPSED_MAX_PX + 4);
   }, [html]);
+
   return (
     <div className={cn("mt-5 max-w-3xl", className)}>
       <div className="relative">

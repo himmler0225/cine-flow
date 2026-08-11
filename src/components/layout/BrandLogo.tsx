@@ -52,7 +52,9 @@ export function BrandLogo({
       </span>
     </span>
   );
+
   if (!linked) return content;
+
   return (
     <Link to="/" className="min-w-0 shrink" aria-label={alt}>
       {content}

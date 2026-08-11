@@ -16,12 +16,19 @@ export const SEARCH_QUICK_FILTERS: {
 
 export function matchesQuickFilter(movie: MovieListItem, filter: SearchQuickFilter): boolean {
   if (filter === "all") return true;
+
   const lang = (movie.lang ?? "").toLowerCase();
+
   const quality = (movie.quality ?? "").toUpperCase();
+
   if (filter === "vietsub") return lang.includes("vietsub");
+
   if (filter === "thuyetminh") return lang.includes("thuyết") || lang.includes("thuyet");
+
   if (filter === "longtieng") return lang.includes("lồng") || lang.includes("long");
+
   if (filter === "fhd") return quality === "FHD" || quality === "4K";
+
   return true;
 }
 
@@ -31,10 +38,14 @@ export function filterSearchResults(
   quickFilter: SearchQuickFilter,
 ): MovieListItem[] {
   const normQ = removeDiacritics(keyword.trim().toLowerCase());
+
   return items.filter((m) => {
     if (!matchesQuickFilter(m, quickFilter)) return false;
+
     if (!normQ) return true;
+
     const hay = removeDiacritics(`${m.name} ${m.origin_name ?? ""} ${m.slug}`.toLowerCase());
+
     return hay.includes(normQ);
   });
 }

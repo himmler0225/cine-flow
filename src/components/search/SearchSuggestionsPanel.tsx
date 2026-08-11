@@ -30,10 +30,14 @@ export function SearchSuggestionsPanel({
   onResultClick,
 }: Props) {
   const { t } = useTranslation();
+
   const setQ = useSearchModalStore((s) => s.setQ);
+
   const { data: genres } = useGenres();
+
   if (recentSearches.length === 0 && suggestions.length === 0) {
     const chips = (genres ?? []).slice(0, 8);
+
     return (
       <div className="px-3 py-6 text-center">
         <p className="text-sm text-netflix-muted">{t("common.minChars")}</p>
@@ -60,6 +64,7 @@ export function SearchSuggestionsPanel({
       </div>
     );
   }
+
   return (
     <>
       {recentSearches.length > 0 && (

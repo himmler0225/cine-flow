@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Bot, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -7,17 +8,29 @@ import { ChatToolAction } from "@/components/chat/ChatToolAction";
 import { ChatMarkdown } from "@/components/chat/ChatMarkdown";
 import { ChatVideoPreviewList } from "@/components/chat/ChatVideoPreviewList";
 
+const NEAR_BOTTOM_THRESHOLD = 80;
+
 interface Props {
   messages: ChatMessage[];
 }
 
 export function ChatMessageList({ messages }: Props) {
   const { t } = useTranslation();
+
   const viewportRef = useRef<HTMLDivElement>(null);
+
+  const stickToBottomRef = useRef(true);
 
   useEffect(() => {
     const el = viewportRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+
+    if (!el || !stickToBottomRef.current) return;
+
+    const frame = requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+
+    return () => cancelAnimationFrame(frame);
   }, [messages]);
 
   if (messages.length === 0) {
@@ -35,13 +48,29 @@ export function ChatMessageList({ messages }: Props) {
   return (
     <div
       ref={viewportRef}
+      onScroll={(e) => {
+        const el = e.currentTarget;
+
+        const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+
+        stickToBottomRef.current = distanceFromBottom <= NEAR_BOTTOM_THRESHOLD;
+      }}
       className="h-full overflow-y-auto px-3 py-3 sm:px-4"
       style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.1) transparent" }}
     >
       <div className="space-y-4">
-        {messages.map((m) => (
-          <ChatMessageRow key={m.id} message={m} />
-        ))}
+        <AnimatePresence initial={false}>
+          {messages.map((m) => (
+            <motion.div
+              key={m.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              <ChatMessageRow message={m} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -49,7 +78,9 @@ export function ChatMessageList({ messages }: Props) {
 
 function ChatMessageRow({ message }: { message: ChatMessage }) {
   const { t } = useTranslation();
+
   const mine = message.role === "user";
+
   const showThinking =
     !mine && message.status !== "error" && message.actions.length === 0 && !message.text;
 
@@ -71,9 +102,19 @@ function ChatMessageRow({ message }: { message: ChatMessage }) {
       <div className={cn("max-w-[85%] flex-1 sm:max-w-[75%]", mine && "flex flex-col items-end")}>
         {message.actions.length > 0 && (
           <div className="mb-1.5 flex flex-wrap gap-1.5">
-            {message.actions.map((a) => (
-              <ChatToolAction key={a.id} action={a} />
-            ))}
+            <AnimatePresence initial={false}>
+              {message.actions.map((a) => (
+                <motion.div
+                  key={a.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                >
+                  <ChatToolAction action={a} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
 
@@ -94,7 +135,11 @@ function ChatMessageRow({ message }: { message: ChatMessage }) {
                 : "rounded-tl-sm bg-white/10",
             )}
           >
-            {mine ? message.text : <ChatMarkdown text={message.text} />}
+            {mine ? (
+              message.text
+            ) : (
+              <ChatMarkdown text={message.text} streaming={message.status === "streaming"} />
+            )}
           </div>
         )}
 

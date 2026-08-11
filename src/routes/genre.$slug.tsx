@@ -26,7 +26,9 @@ export const Route = createFileRoute("/genre/$slug")({
         queryFn: () => genresApi.getAll(),
         staleTime: CACHE_TTL.hour,
       });
+
       const found = genres?.find((g) => g.slug === params.slug);
+
       return { name: found?.name ?? prettifySlug(params.slug) };
     } catch {
       return { name: prettifySlug(params.slug) };
@@ -34,6 +36,7 @@ export const Route = createFileRoute("/genre/$slug")({
   },
   head: ({ params, loaderData }) => {
     const name = loaderData?.name ?? prettifySlug(params.slug);
+
     return buildListingHead({
       title: t("seo.genreTitle", { name }),
       description: t("seo.genreDescription", { name }),
@@ -45,20 +48,32 @@ export const Route = createFileRoute("/genre/$slug")({
 
 function CategoryPage() {
   const { t: tr } = useTranslation();
+
   const { slug } = Route.useParams();
+
   const search = Route.useSearch();
+
   const navigate = useNavigate({ from: Route.fullPath });
+
   const page = search.page ?? 1;
+
   const { data: genres } = useGenres();
+
   const [isPending, startTransition] = useTransition();
+
   const { data, isFetching, isPlaceholderData } = usePagedByGenre(slug, page, search);
+
   const items = data?.items ?? [];
+
   const totalPages = data?.pagination?.totalPages ?? 0;
+
   const title = useMemo(
     () => genres?.find((g) => g.slug === slug)?.name ?? prettifySlug(slug),
     [genres, slug],
   );
+
   useScrollToTopOnChange(page);
+
   const jsonLd = useMemo(
     () =>
       items.length > 0
@@ -71,6 +86,7 @@ function CategoryPage() {
         : null,
     [items, title, slug, tr],
   );
+
   return (
     <div className="pt-24 pb-4 md:pb-8">
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />}

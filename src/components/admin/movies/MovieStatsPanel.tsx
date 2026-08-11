@@ -22,29 +22,44 @@ interface MovieStatsPanelProps {
 
 export function MovieStatsPanel({ movie, onClose }: MovieStatsPanelProps) {
   const { t, i18n } = useTranslation();
+
   const { getDateFrom, dateRange } = useAdminStore();
+
   const locale = getIntlLocale(i18n.language);
+
   const data = useAdminMovieStats(movie?.slug ?? "", dateRange, getDateFrom(), !!movie);
+
   const byDay: {
     date: string;
     views: number;
   }[] = [];
+
   const byEp = new Map<string, number>();
+
   const byServer = new Map<string, number>();
+
   data.data?.forEach((r) => {
     const k = r.started_at.slice(0, 10);
+
     const i = byDay.findIndex((d) => d.date === k);
+
     if (i >= 0) byDay[i].views++;
     else byDay.push({ date: k.slice(5), views: 1 });
+
     if (r.episode_name) byEp.set(r.episode_name, (byEp.get(r.episode_name) ?? 0) + 1);
+
     if (r.server_name) byServer.set(r.server_name, (byServer.get(r.server_name) ?? 0) + 1);
   });
+
   byDay.sort((a, b) => a.date.localeCompare(b.date));
+
   const epData = [...byEp.entries()]
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
+
   const serverData = [...byServer.entries()].map(([name, value]) => ({ name, value }));
+
   return (
     <SlidePanel
       open={!!movie}

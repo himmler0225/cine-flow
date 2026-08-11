@@ -17,11 +17,14 @@ interface ProfileTabBarProps {
 
 export function ProfileTabBar({ active, onChange }: ProfileTabBarProps) {
   const { t } = useTranslation();
+
   return (
     <div className="mt-6 flex gap-1 overflow-x-auto border-b border-white/10">
       {TABS.map((tab) => {
         const Icon = tab.icon;
+
         const isActive = active === tab.id;
+
         return (
           <button
             key={tab.id}

@@ -8,8 +8,11 @@ const LAST_UPDATED = new Date("2026-08-07");
 
 export function LegalPage({ titleKey, sectionsKey }: { titleKey: string; sectionsKey: string }) {
   const { t, i18n } = useTranslation();
+
   const title = t(titleKey);
+
   const sections = t(sectionsKey, { returnObjects: true }) as LegalSection[];
+
   return (
     <div className="pt-24 pb-16">
       <div className="mx-auto max-w-3xl px-4 md:px-12">

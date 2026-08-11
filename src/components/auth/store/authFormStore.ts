@@ -77,10 +77,15 @@ export const useAuthFormStore = create<AuthFormState>((set, get) => ({
   patchRegister: (patch) => set((state) => ({ register: { ...state.register, ...patch } })),
   submitLogin: async () => {
     const { login } = get();
+
     const fieldErrors = validateLogin(login, t);
+
     set({ apiError: "", fieldErrors });
+
     if (Object.keys(fieldErrors).length) return;
+
     set({ loading: true });
+
     try {
       await useAuthStore.getState().signInWithEmail(login.email, login.password);
     } catch (error) {
@@ -93,14 +98,20 @@ export const useAuthFormStore = create<AuthFormState>((set, get) => ({
   },
   submitRegister: async () => {
     const { register } = get();
+
     const fieldErrors = validateRegister(register, t);
+
     set({ apiError: "", fieldErrors });
+
     if (Object.keys(fieldErrors).length) return;
+
     set({ loading: true });
+
     try {
       await useAuthStore
         .getState()
         .signUpWithEmail(register.email, register.password, register.username.trim());
+
       set({ signupSuccess: register.email });
     } catch (error) {
       set({
@@ -112,6 +123,7 @@ export const useAuthFormStore = create<AuthFormState>((set, get) => ({
   },
   submitGoogle: async () => {
     set({ apiError: "", loading: true });
+
     try {
       await useAuthStore.getState().signInWithGoogle();
     } catch (error) {
