@@ -67,4 +67,7 @@ export const queryKeys = {
     analyticsLangQuality: (dateRange: string) => ["admin", "an-lq", dateRange] as const,
   },
   episodeNotifications: (slugsKey: string) => ["episode-notifications", slugsKey] as const,
+  chat: {
+    conversations: (userId: string) => ["chat", "conversations", userId] as const,
+  },
 };

@@ -965,6 +965,12 @@
     "you": "Bạn",
     "assistant": "Trợ lý AI",
     "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
-    "rateLimited": "Bạn gửi hơi nhanh — vui lòng chờ một chút."
+    "rateLimited": "Bạn gửi hơi nhanh — vui lòng chờ một chút.",
+    "conversations": "Cuộc trò chuyện",
+    "untitledChat": "Cuộc trò chuyện mới",
+    "noConversations": "Chưa có cuộc trò chuyện nào",
+    "loadingConversations": "Đang tải...",
+    "deleteConversation": "Xoá cuộc trò chuyện",
+    "deleteConfirm": "Xoá cuộc trò chuyện này?"
   }
 }

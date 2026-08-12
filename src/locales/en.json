@@ -965,6 +965,12 @@
     "you": "You",
     "assistant": "AI Assistant",
     "genericError": "Something went wrong. Please try again.",
-    "rateLimited": "Too many messages — please wait a moment."
+    "rateLimited": "Too many messages — please wait a moment.",
+    "conversations": "Conversations",
+    "untitledChat": "New conversation",
+    "noConversations": "No conversations yet",
+    "loadingConversations": "Loading...",
+    "deleteConversation": "Delete conversation",
+    "deleteConfirm": "Delete this conversation?"
   }
 }
