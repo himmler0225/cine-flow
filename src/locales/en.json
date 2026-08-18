@@ -954,6 +954,7 @@
     "title": "AI Assistant",
     "subtitle": "Ask about any movie",
     "triggerAria": "Open AI assistant",
+    "triggerGreeting": "Hi there, how can I help you?",
     "closeAria": "Close",
     "placeholder": "Ask about a movie, actor, or review...",
     "send": "Send",
@@ -965,6 +966,12 @@
     "you": "You",
     "assistant": "AI Assistant",
     "genericError": "Something went wrong. Please try again.",
-    "rateLimited": "Too many messages — please wait a moment."
+    "rateLimited": "Too many messages — please wait a moment.",
+    "conversations": "Conversations",
+    "untitledChat": "New conversation",
+    "noConversations": "No conversations yet",
+    "loadingConversations": "Loading...",
+    "deleteConversation": "Delete conversation",
+    "deleteConfirm": "Delete this conversation?"
   }
 }

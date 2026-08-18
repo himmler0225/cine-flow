@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import { streamChat } from "@/lib/chat/streamChat";
-import type { ChatMessage, ChatToolAction } from "@/types/chat";
+import { aiChatApi } from "@/services/platform/aiChat.service";
+import { queryKeys } from "@/constants/queryKeys";
+import { getAppQueryClient } from "@/lib/queryClientHolder";
+import { useAuthStore } from "@/store/authStore";
+import type { AiChatMessageRecord, ChatMessage, ChatToolAction } from "@/types/chat";
 
 function newId(): string {
   return typeof crypto !== "undefined" && crypto.randomUUID
@@ -8,16 +12,40 @@ function newId(): string {
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function mapRecordToMessage(record: AiChatMessageRecord): ChatMessage {
+  return {
+    id: record.id,
+    role: record.role === "user" ? "user" : "assistant",
+    text: record.content,
+    actions: [],
+    videos: record.videos ?? [],
+    status: "done",
+    createdAt: new Date(record.created_at).getTime(),
+  };
+}
+
+function invalidateConversations() {
+  const userId = useAuthStore.getState().user?.id;
+
+  if (!userId) return;
+
+  void getAppQueryClient()?.invalidateQueries({
+    queryKey: queryKeys.chat.conversations(userId),
+  });
+}
+
 interface ChatState {
   isOpen: boolean;
   messages: ChatMessage[];
   isStreaming: boolean;
+  conversationId: string | null;
   open: () => void;
   close: () => void;
   toggle: () => void;
   reset: () => void;
   sendMessage: (task: string, lang: string) => Promise<void>;
   stop: () => void;
+  loadConversation: (id: string) => Promise<void>;
 }
 
 let abortController: AbortController | null = null;
@@ -26,6 +54,7 @@ export const useChatStore = create<ChatState>()((set, get) => ({
   isOpen: false,
   messages: [],
   isStreaming: false,
+  conversationId: null,
 
   open: () => set({ isOpen: true }),
   close: () => set({ isOpen: false }),
@@ -33,7 +62,18 @@ export const useChatStore = create<ChatState>()((set, get) => ({
   reset: () => {
     abortController?.abort();
 
-    set({ messages: [], isStreaming: false });
+    set({ messages: [], isStreaming: false, conversationId: null });
+  },
+  loadConversation: async (id: string) => {
+    abortController?.abort();
+
+    const records = await aiChatApi.listMessages(id);
+
+    set({
+      messages: records.map(mapRecordToMessage),
+      isStreaming: false,
+      conversationId: id,
+    });
   },
   stop: () => {
     abortController?.abort();
@@ -75,6 +115,27 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     };
 
     set((s) => ({ messages: [...s.messages, userMessage, assistantMessage], isStreaming: true }));
+
+    let conversationId = get().conversationId;
+
+    if (!conversationId) {
+      try {
+        const conversation = await aiChatApi.createConversation();
+
+        conversationId = conversation.id;
+
+        set({ conversationId });
+      } catch (err) {
+        console.error("[chat] failed to create conversation", err);
+      }
+    }
+
+    if (conversationId) {
+      aiChatApi
+        .appendMessage(conversationId, { role: "user", content: trimmed })
+        .then(invalidateConversations)
+        .catch((err) => console.error("[chat] failed to persist user message", err));
+    }
 
     abortController = new AbortController();
 
@@ -235,6 +296,20 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       abortController = null;
 
       set({ isStreaming: false });
+
+      const finalMessage = get().messages.find((m) => m.id === assistantId);
+
+      if (conversationId && finalMessage?.text) {
+        aiChatApi
+          .appendMessage(conversationId, {
+            role: "assistant",
+            content: finalMessage.text,
+            actions: finalMessage.actions,
+            videos: finalMessage.videos,
+          })
+          .then(invalidateConversations)
+          .catch((err) => console.error("[chat] failed to persist assistant message", err));
+      }
     }
   },
 }));

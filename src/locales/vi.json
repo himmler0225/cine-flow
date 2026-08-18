@@ -954,6 +954,7 @@
     "title": "Trợ lý AI",
     "subtitle": "Hỏi bất cứ điều gì về phim",
     "triggerAria": "Mở trợ lý AI",
+    "triggerGreeting": "Xin chào, tôi có thể giúp gì cho bạn?",
     "closeAria": "Đóng",
     "placeholder": "Hỏi về phim, diễn viên, đánh giá...",
     "send": "Gửi",
@@ -965,6 +966,12 @@
     "you": "Bạn",
     "assistant": "Trợ lý AI",
     "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
-    "rateLimited": "Bạn gửi hơi nhanh — vui lòng chờ một chút."
+    "rateLimited": "Bạn gửi hơi nhanh — vui lòng chờ một chút.",
+    "conversations": "Cuộc trò chuyện",
+    "untitledChat": "Cuộc trò chuyện mới",
+    "noConversations": "Chưa có cuộc trò chuyện nào",
+    "loadingConversations": "Đang tải...",
+    "deleteConversation": "Xoá cuộc trò chuyện",
+    "deleteConfirm": "Xoá cuộc trò chuyện này?"
   }
 }

@@ -46,3 +46,20 @@ export interface ChatMessage {
   errorMessage?: string;
   createdAt: number;
 }
+
+export interface AiConversation {
+  id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AiChatMessageRecord {
+  id: string;
+  conversation_id: string;
+  role: string;
+  content: string;
+  actions: ChatToolAction[] | null;
+  videos: ChatVideoPreview[] | null;
+  created_at: string;
+}
