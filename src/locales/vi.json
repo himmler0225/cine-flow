@@ -954,6 +954,7 @@
     "title": "Trợ lý AI",
     "subtitle": "Hỏi bất cứ điều gì về phim",
     "triggerAria": "Mở trợ lý AI",
+    "triggerGreeting": "Xin chào, tôi có thể giúp gì cho bạn?",
     "closeAria": "Đóng",
     "placeholder": "Hỏi về phim, diễn viên, đánh giá...",
     "send": "Gửi",

@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/authStore";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { ChatTriggerButton } from "@/components/chat/ChatTriggerButton";
 import { useNavbarUiStore } from "@/components/layout/store/navbarUiStore";
 
 type Props = {
@@ -38,7 +37,6 @@ export function NavToolbar({ isAuthenticated }: Props) {
       >
         <Search className="h-5 w-5" />
       </button>
-      {isAuthenticated && <ChatTriggerButton />}
       <div className="hidden shrink-0 md:block">{isAuthenticated && <NotificationBell />}</div>
       {isAuthenticated ? (
         <UserMenu />

@@ -954,6 +954,7 @@
     "title": "AI Assistant",
     "subtitle": "Ask about any movie",
     "triggerAria": "Open AI assistant",
+    "triggerGreeting": "Hi there, how can I help you?",
     "closeAria": "Close",
     "placeholder": "Ask about a movie, actor, or review...",
     "send": "Send",
