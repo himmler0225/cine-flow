@@ -46,6 +46,9 @@ function AuthCallbackPage() {
           const messages: Record<string, string> = {
             oauth_denied: "Đăng nhập Google bị hủy.",
             oauth_failed: "Đăng nhập Google thất bại.",
+            account_pending:
+              "Tài khoản của bạn đang chờ quản trị viên duyệt. Vui lòng đăng nhập lại sau khi được duyệt.",
+            account_rejected: "Yêu cầu đăng ký của bạn đã bị từ chối.",
             oauth_not_configured:
               "Chưa cấu hình Google OAuth trên backend. Thêm GOOGLE_CLIENT_ID và GOOGLE_CLIENT_SECRET vào .env của movie-aggregator-api.",
           };
