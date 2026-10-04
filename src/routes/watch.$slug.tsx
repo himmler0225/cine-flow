@@ -14,7 +14,7 @@ import { MovieRating } from "@/components/movie/MovieRating";
 import { MovieDescription } from "@/components/movie/MovieDescription";
 import { MovieRow } from "@/components/movie/MovieRow";
 import { useAuthStore } from "@/store/authStore";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { invalidateHistoryRefetchCache } from "@/utils/historyRefetchCache";
 import { useWatchPage } from "@/hooks/useWatchPage";
@@ -141,9 +141,8 @@ function WatchPage() {
     movie,
     servers,
     serverIdx,
-    setServerIdx,
     episodeIdx,
-    setEpisodeIdx,
+    selectEpisode,
     currentServer,
     currentEp,
     initialTime,
@@ -169,6 +168,11 @@ function WatchPage() {
   const relatedType = RELATED_TYPE_MAP[movie?.type ?? ""] ?? "phim-bo";
 
   const related = useMoviesByType(relatedType, 1);
+
+  const relatedMovies = useMemo(
+    () => related.data?.items?.filter((m) => m.slug !== slug),
+    [related.data, slug],
+  );
 
   useEffect(() => {
     invalidateHistoryRefetchCache(slug);
@@ -245,11 +249,7 @@ function WatchPage() {
                 progressByEpisode={progressByEpisode}
                 variant="tile"
                 hideEpisodeHeading
-                onSelect={(s, e) => {
-                  setServerIdx(s);
-
-                  setEpisodeIdx(e);
-                }}
+                onSelect={selectEpisode}
               />
             </div>
             <div className="border-t border-white/10 px-4 py-3">
@@ -312,7 +312,7 @@ function WatchPage() {
       <div className="border-t border-white/10 pt-4">
         <MovieRow
           title={tr("movie.recommendedForYou")}
-          movies={related.data?.items?.filter((m) => m.slug !== slug)}
+          movies={relatedMovies}
           isLoading={related.isLoading}
           href={{ to: "/catalog/$slug", params: { slug: relatedType } }}
         />

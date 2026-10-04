@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { attachHlsAdSkip } from "@/lib/hlsAdSkip";
+import { shouldUseNativeHls } from "@/lib/hlsEngine";
+import { useLatestRef } from "@/hooks/useLatestRef";
 import type { PlayerUiAction } from "@/hooks/player/playerReducer";
 
 export type HlsQualityLevel = {
@@ -37,6 +39,11 @@ export function usePlayerHlsSource(
 
   const hlsRef = useRef<Hls | null>(null);
 
+  // Read through refs so a new callback identity never tears down a playing hls.js instance.
+  const onErrorRef = useLatestRef(onError);
+
+  const onFallbackEmbedRef = useLatestRef(onFallbackEmbed);
+
   const [levels, setLevels] = useState<HlsQualityLevel[]>([]);
 
   const [subtitleTracks, setSubtitleTracks] = useState<HlsSubtitleTrack[]>([]);
@@ -71,7 +78,7 @@ export function usePlayerHlsSource(
     const startPosition =
       pendingSeekRef?.current != null && pendingSeekRef.current >= 0 ? pendingSeekRef.current : -1;
 
-    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    if (shouldUseNativeHls(video)) {
       video.src = src;
 
       const onMeta = () => {
@@ -192,7 +199,7 @@ export function usePlayerHlsSource(
       if (embedSrc) {
         if (pendingSeekRef) pendingSeekRef.current = null;
 
-        onFallbackEmbed?.();
+        onFallbackEmbedRef.current?.();
 
         dispatch({ type: "setHasError", hasError: false });
 
@@ -203,7 +210,7 @@ export function usePlayerHlsSource(
 
       dispatch({ type: "setHasError", hasError: true });
 
-      onError?.();
+      onErrorRef.current?.();
     });
 
     return () => {
@@ -211,7 +218,7 @@ export function usePlayerHlsSource(
 
       hls.destroy();
     };
-  }, [src, embedSrc, useEmbed, onError, videoRef, dispatch, pendingSeekRef, onFallbackEmbed]);
+  }, [src, embedSrc, useEmbed, onErrorRef, videoRef, dispatch, pendingSeekRef, onFallbackEmbedRef]);
 
   const selectQuality = (level: number) => {
     const hls = hlsRef.current;

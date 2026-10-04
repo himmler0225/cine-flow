@@ -11,12 +11,20 @@ import { isWatchFinished } from "@/utils/watchProgress";
 import { prefetchUrl } from "@/utils/prefetch";
 import { AUTO_ADVANCE_SECONDS, UI_DELAY_MS } from "@/constants/timing";
 
+const LIVE_PROGRESS_STEP_SEC = 5;
+
 export function useWatchPage(slug: string, tap: number, server: number, fromStart: boolean) {
   const navigate = useNavigate();
 
   const { data, isLoading } = useMovieDetail(slug);
 
-  const { saveProgress, getLastEpisode, getEpisodeProgress, history } = useWatchHistory();
+  const {
+    saveProgress,
+    getLastEpisode,
+    getEpisodeProgress,
+    history,
+    isLoading: historyLoading,
+  } = useWatchHistory();
 
   const resumeToastShown = useRef(false);
 
@@ -42,21 +50,37 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
 
   const stored = getLastEpisode(slug);
 
+  const lastEpisodeRestoredRef = useRef(false);
+
+  const userPickedEpisodeRef = useRef(false);
+
+  // Jump to the last-watched episode once, after both the episode list and the (possibly
+  // server-side) history are loaded — and never over an episode the viewer already picked.
   useEffect(() => {
-    if (servers.length === 0 || fromStart) return;
+    if (lastEpisodeRestoredRef.current || servers.length === 0 || historyLoading) return;
 
-    if (tap === 1 && server === 0 && stored) {
-      const sIdx = Math.min(Math.max(stored.server_index, 0), servers.length - 1);
+    lastEpisodeRestoredRef.current = true;
 
-      const eIdx = servers[sIdx]?.server_data.findIndex((e) => e.name === stored.episode_name);
+    if (fromStart || userPickedEpisodeRef.current || tap !== 1 || server !== 0 || !stored) return;
 
-      if (eIdx != null && eIdx >= 0) {
-        setServerIdx(sIdx);
+    const sIdx = Math.min(Math.max(stored.server_index, 0), servers.length - 1);
 
-        setEpisodeIdx(eIdx);
-      }
+    const eIdx = servers[sIdx]?.server_data.findIndex((e) => e.name === stored.episode_name);
+
+    if (eIdx != null && eIdx >= 0) {
+      setServerIdx(sIdx);
+
+      setEpisodeIdx(eIdx);
     }
-  }, [servers.length, fromStart]);
+  }, [servers, historyLoading, fromStart, tap, server, stored]);
+
+  const selectEpisode = useCallback((s: number, e: number) => {
+    userPickedEpisodeRef.current = true;
+
+    setServerIdx(s);
+
+    setEpisodeIdx(e);
+  }, []);
 
   const currentServer = servers[serverIdx];
 
@@ -104,7 +128,7 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
     return out;
   }, [history, slug, liveProgress]);
 
-  const initialTime = useMemo(() => {
+  const liveInitialTime = useMemo(() => {
     if (fromStart || !episodeProgress) return 0;
 
     const { progress_sec, duration_sec } = episodeProgress;
@@ -115,6 +139,19 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
 
     return progress_sec;
   }, [fromStart, episodeProgress]);
+
+  // The resume point is read once per episode (after history loads). Passing the live value
+  // made the player seek back to the last saved second on every progress save (~3s) and
+  // reloaded the embed iframe each time.
+  const resumeKey = currentEp ? `${slug}|${serverIdx}|${currentEp.slug || currentEp.name}` : "";
+
+  const frozenResumeRef = useRef<{ key: string; time: number } | null>(null);
+
+  if (resumeKey && !historyLoading && frozenResumeRef.current?.key !== resumeKey) {
+    frozenResumeRef.current = { key: resumeKey, time: liveInitialTime };
+  }
+
+  const initialTime = frozenResumeRef.current?.key === resumeKey ? frozenResumeRef.current.time : 0;
 
   const showResumeToast = useCallback((sec: number) => {
     if (resumeToastShown.current || sec < 10) return;
@@ -132,9 +169,12 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
     });
   }, []);
 
-  const handleResumeApplied = (sec: number) => {
-    showResumeToast(sec);
-  };
+  const handleResumeApplied = useCallback(
+    (sec: number) => {
+      showResumeToast(sec);
+    },
+    [showResumeToast],
+  );
 
   useEffect(() => {
     resumeToastShown.current = false;
@@ -178,10 +218,23 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
 
       if (!Number.isFinite(cur) || !Number.isFinite(dur) || dur <= 0) return;
 
-      setLiveProgress({
-        episodeName: currentEp.name,
-        progressSec: Math.max(0, cur),
-        durationSec: dur,
+      const episodeName = currentEp.name;
+
+      const progressSec = Math.max(0, cur);
+
+      // timeupdate fires ~4x/s; only re-render the page when the visible progress moves.
+      setLiveProgress((prev) => {
+        if (
+          prev &&
+          prev.episodeName === episodeName &&
+          prev.durationSec === dur &&
+          Math.abs(prev.progressSec - progressSec) < LIVE_PROGRESS_STEP_SEC &&
+          isWatchFinished(prev.progressSec, dur) === isWatchFinished(progressSec, dur)
+        ) {
+          return prev;
+        }
+
+        return { episodeName, progressSec, durationSec: dur };
       });
     },
     [currentEp],
@@ -335,6 +388,7 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
     setServerIdx,
     episodeIdx,
     setEpisodeIdx,
+    selectEpisode,
     currentServer,
     currentEp,
     initialTime,

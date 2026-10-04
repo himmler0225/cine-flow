@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import Hls from "hls.js";
+import { shouldUseNativeHls } from "@/lib/hlsEngine";
 
 export function useSyncedHlsSource(
   videoRef: React.RefObject<HTMLVideoElement | null>,
@@ -25,7 +26,7 @@ export function useSyncedHlsSource(
 
     v.addEventListener("loadedmetadata", onNativeReady);
 
-    if (v.canPlayType("application/vnd.apple.mpegurl")) {
+    if (shouldUseNativeHls(v)) {
       v.src = src;
     } else if (Hls.isSupported()) {
       hls = new Hls({ enableWorker: true });

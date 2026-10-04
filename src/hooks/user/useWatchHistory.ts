@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { watchHistoryApi } from "@/services/platform/watchHistory.service";
 import { useAuthStore } from "@/store/authStore";
@@ -17,26 +17,28 @@ import { getWatchProgressPercent, isWatchFinished } from "@/utils/watchProgress"
 
 export type { WatchHistoryItem };
 
-export function useWatchHistory() {
-  const user = useAuthStore((s) => s.user);
+const EMPTY_HISTORY: WatchHistoryItem[] = [];
 
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+export function useWatchHistory() {
+  const userId = useAuthStore((s) => (s.isAuthenticated ? s.user?.id : undefined));
 
   const queryClient = useQueryClient();
 
-  const key =
-    isAuthenticated && user
-      ? queryKeys.watchHistory.byUser(user.id)
-      : queryKeys.watchHistory.guest();
+  // Stable identity: every callback below depends on it, and the watch page passes those
+  // callbacks into long-lived player effects.
+  const key = useMemo(
+    () => (userId ? queryKeys.watchHistory.byUser(userId) : queryKeys.watchHistory.guest()),
+    [userId],
+  );
 
   const {
-    data: history = [],
+    data: history = EMPTY_HISTORY,
     isLoading,
     refetch,
   } = useQuery<WatchHistoryItem[]>({
     queryKey: key,
     queryFn: async () => {
-      if (isAuthenticated && user) {
+      if (userId) {
         return watchHistoryApi.fetch();
       }
 
@@ -101,7 +103,7 @@ export function useWatchHistory() {
         return [normalizedItem, ...old].slice(0, 50);
       });
 
-      if (isAuthenticated && user) {
+      if (userId) {
         try {
           await watchHistoryApi.upsertProgress(normalizedItem);
         } catch (error) {
@@ -109,7 +111,7 @@ export function useWatchHistory() {
         }
       }
     },
-    [isAuthenticated, user, key, queryClient],
+    [userId, key, queryClient],
   );
 
   const deleteItem = useCallback(
@@ -120,13 +122,13 @@ export function useWatchHistory() {
         old.filter((h) => !(h.movie_slug === movieSlug && h.episode_name === episodeName)),
       );
 
-      if (isAuthenticated && user) {
+      if (userId) {
         await watchHistoryApi.deleteItem(movieSlug, episodeName);
       }
 
       void invalidate();
     },
-    [isAuthenticated, user, invalidate, key, queryClient],
+    [userId, invalidate, key, queryClient],
   );
 
   const clearAll = useCallback(async () => {
@@ -134,12 +136,12 @@ export function useWatchHistory() {
 
     queryClient.setQueryData<WatchHistoryItem[]>(key, []);
 
-    if (isAuthenticated && user) {
+    if (userId) {
       await watchHistoryApi.clear();
     }
 
     void invalidate();
-  }, [isAuthenticated, user, invalidate, key, queryClient]);
+  }, [userId, invalidate, key, queryClient]);
 
   const getProgress = useCallback(
     (movieSlug: string, episodeName: string) => {

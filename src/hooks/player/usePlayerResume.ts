@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { PlayerUiAction } from "@/hooks/player/playerReducer";
 import type { SeekLock } from "@/hooks/player/usePlayerTelemetry";
+import { useLatestRef } from "@/hooks/useLatestRef";
 
 export function usePlayerResume(
   videoRef: React.RefObject<HTMLVideoElement | null>,
@@ -13,6 +14,8 @@ export function usePlayerResume(
   seekLockRef?: React.MutableRefObject<SeekLock | null>,
 ) {
   const resumeAppliedRef = useRef(false);
+
+  const onResumeAppliedRef = useLatestRef(onResumeApplied);
 
   useEffect(() => {
     resumeAppliedRef.current = false;
@@ -62,7 +65,7 @@ export function usePlayerResume(
 
           resumeAppliedRef.current = true;
 
-          onResumeApplied?.(pending);
+          onResumeAppliedRef.current?.(pending);
         }
 
         return;
@@ -75,7 +78,7 @@ export function usePlayerResume(
       if (target >= 10 && applySeek(target)) {
         resumeAppliedRef.current = true;
 
-        onResumeApplied?.(target);
+        onResumeAppliedRef.current?.(target);
       }
     };
 
@@ -93,7 +96,7 @@ export function usePlayerResume(
   }, [
     initialTime,
     useEmbed,
-    onResumeApplied,
+    onResumeAppliedRef,
     src,
     videoRef,
     dispatch,

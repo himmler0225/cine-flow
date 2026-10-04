@@ -60,9 +60,17 @@
           post("error", { message: "missing url" });
           return;
         }
-        if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        // Native HLS only on Apple WebKit (or without MSE): Chrome reports canPlayType(m3u8)
+        // = "maybe" but fails on many MPEG-TS streams. Mirrors src/lib/hlsEngine.ts.
+        const ua = navigator.userAgent;
+        const appleWebKit =
+          /iP(hone|ad|od)/.test(ua) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) ||
+          /^((?!chrome|chromium|crios|fxios|edg|android).)*safari/i.test(ua);
+        const hlsJs = window.Hls && Hls.isSupported();
+        if (video.canPlayType("application/vnd.apple.mpegurl") && (appleWebKit || !hlsJs)) {
           video.src = src;
-        } else if (window.Hls && Hls.isSupported()) {
+        } else if (hlsJs) {
           hls = new Hls();
           hls.loadSource(src);
           hls.attachMedia(video);

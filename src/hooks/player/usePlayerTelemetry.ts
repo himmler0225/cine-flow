@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLatestRef } from "@/hooks/useLatestRef";
 import { skipAdRangesAtTime } from "@/lib/hlsAdSkip";
 import type { PlayerUiAction } from "@/hooks/player/playerReducer";
 
@@ -41,6 +42,17 @@ export function usePlayerTelemetry({
   onProgress,
   onLiveTime,
 }: Args) {
+  // Callbacks are read through refs: re-running this effect on every new callback identity
+  // made its cleanup flush() -> onLiveTime -> parent setState -> new callbacks -> re-run,
+  // an infinite render loop (React #185) as soon as playback started.
+  const onEndedRef = useLatestRef(onEnded);
+
+  const onErrorRef = useLatestRef(onError);
+
+  const onProgressRef = useLatestRef(onProgress);
+
+  const onLiveTimeRef = useLatestRef(onLiveTime);
+
   useEffect(() => {
     const v = videoRef.current;
 
@@ -51,7 +63,9 @@ export function usePlayerTelemetry({
     const flush = () => {
       if (!v.duration || !Number.isFinite(v.duration)) return;
 
-      onLiveTime?.(v.currentTime, v.duration);
+      onLiveTimeRef.current?.(v.currentTime, v.duration);
+
+      const onProgress = onProgressRef.current;
 
       if (onProgress && v.currentTime > 5) {
         onProgress(v.currentTime, v.duration);
@@ -92,9 +106,13 @@ export function usePlayerTelemetry({
         });
       }
 
+      const onLiveTime = onLiveTimeRef.current;
+
       if (onLiveTime && v.duration && Number.isFinite(v.duration)) {
         onLiveTime(cur, v.duration);
       }
+
+      const onProgress = onProgressRef.current;
 
       const now = Date.now();
 
@@ -117,6 +135,8 @@ export function usePlayerTelemetry({
       enforceLock();
 
       const cur = Number.isFinite(v.currentTime) ? v.currentTime : 0;
+
+      const onProgress = onProgressRef.current;
 
       if (onProgress && v.duration && Number.isFinite(v.duration) && cur > 5) {
         onProgress(cur, v.duration);
@@ -146,11 +166,13 @@ export function usePlayerTelemetry({
     };
 
     const onEnd = () => {
+      const onProgress = onProgressRef.current;
+
       if (onProgress && v.duration && Number.isFinite(v.duration)) {
         onProgress(v.duration, v.duration);
       }
 
-      onEnded?.();
+      onEndedRef.current?.();
     };
 
     const onVidError = () => {
@@ -167,7 +189,7 @@ export function usePlayerTelemetry({
       if (!useEmbed) {
         dispatch({ type: "setHasError", hasError: true });
 
-        onError?.();
+        onErrorRef.current?.();
       }
     };
 
@@ -221,10 +243,10 @@ export function usePlayerTelemetry({
       flush();
     };
   }, [
-    onEnded,
-    onProgress,
-    onLiveTime,
-    onError,
+    onEndedRef,
+    onErrorRef,
+    onProgressRef,
+    onLiveTimeRef,
     embedSrc,
     useEmbed,
     videoRef,
