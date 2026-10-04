@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Play, Info, Plus, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { MovieListItem } from "@/types/movie";
-import { getImageUrl, getImageWebp } from "@/lib/movie/movieImages";
+import { getImageProxyUrl, getImageUrl } from "@/lib/movie/movieImages";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuthStore } from "@/store/authStore";
 import { useMovieDetail } from "@/hooks/useMovieDetail";
@@ -72,7 +72,7 @@ export function HeroBanner({ movies }: Props) {
     return () => window.clearTimeout(nextTimer);
   }, [featured.length, idx, firstLoaded, paused]);
 
-  const firstSrc = featured[0] ? getImageWebp(featured[0].thumb_url || featured[0].poster_url) : "";
+  const firstSrc = featured[0] ? getImageUrl(featured[0].thumb_url || featured[0].poster_url) : "";
 
   if (featured.length === 0) {
     return (
@@ -133,7 +133,7 @@ export function HeroBanner({ movies }: Props) {
             style={{ opacity: isCurrent ? 1 : 0 }}
           >
             <img
-              src={getImageWebp(slide.thumb_url || slide.poster_url)}
+              src={getImageUrl(slide.thumb_url || slide.poster_url)}
               alt=""
               fetchPriority={i === 0 ? "high" : "auto"}
               loading={i === 0 ? "eager" : "lazy"}
@@ -153,7 +153,7 @@ export function HeroBanner({ movies }: Props) {
                 if (step === "0") {
                   img.dataset.fallback = "1";
 
-                  img.src = getImageUrl(slide.thumb_url || slide.poster_url);
+                  img.src = getImageProxyUrl(slide.thumb_url || slide.poster_url);
                 } else if (step === "1" && slide.poster_url) {
                   img.dataset.fallback = "2";
 

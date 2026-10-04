@@ -7,7 +7,7 @@ import { useMoviesByType } from "@/hooks/useMovies";
 import { moviesApi } from "@/services/movies";
 import { queryKeys } from "@/constants/queryKeys";
 import { CACHE_TTL } from "@/constants/timing";
-import { getImageUrl, getImageWebp } from "@/lib/movie/movieImages";
+import { getImageProxyUrl, getImageUrl } from "@/lib/movie/movieImages";
 import { MetaBadges } from "@/components/movie/MetaBadges";
 import type { MovieListItem } from "@/types/movie";
 import { cn } from "@/lib/utils";
@@ -79,7 +79,7 @@ export function useTop10(): {
 }
 
 function posterSrc(m: MovieListItem) {
-  return getImageWebp(m.poster_url || m.thumb_url);
+  return getImageUrl(m.poster_url || m.thumb_url);
 }
 
 function handlePosterError(e: SyntheticEvent<HTMLImageElement>, m: MovieListItem) {
@@ -88,7 +88,7 @@ function handlePosterError(e: SyntheticEvent<HTMLImageElement>, m: MovieListItem
   if (img.dataset.f !== "1") {
     img.dataset.f = "1";
 
-    img.src = getImageUrl(m.poster_url || m.thumb_url);
+    img.src = getImageProxyUrl(m.poster_url || m.thumb_url);
   }
 }
 

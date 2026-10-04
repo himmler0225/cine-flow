@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Heart, Play } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { MovieListItem } from "@/types/movie";
-import { getImageUrl, getImageWebp } from "@/lib/movie/movieImages";
+import { getImageProxyUrl, getImageUrl } from "@/lib/movie/movieImages";
 import { moviesApi } from "@/services/movies";
 import { queryKeys } from "@/constants/queryKeys";
 import { CACHE_TTL } from "@/constants/timing";
@@ -73,7 +73,7 @@ function MovieCardImpl({ movie, className, priority = false }: Props) {
               <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-netflix-surface via-white/5 to-netflix-surface" />
             )}
             <img
-              src={getImageWebp(movie.poster_url || movie.thumb_url)}
+              src={getImageUrl(movie.poster_url || movie.thumb_url)}
               alt={t("movie.posterAlt", { title })}
               loading={priority ? "eager" : "lazy"}
               decoding="async"
@@ -91,7 +91,7 @@ function MovieCardImpl({ movie, className, priority = false }: Props) {
                 if (img.dataset.fallback !== "1") {
                   img.dataset.fallback = "1";
 
-                  img.src = getImageUrl(movie.poster_url || movie.thumb_url);
+                  img.src = getImageProxyUrl(movie.poster_url || movie.thumb_url);
                 } else if (img.dataset.fallback === "1" && movie.thumb_url) {
                   img.dataset.fallback = "2";
 

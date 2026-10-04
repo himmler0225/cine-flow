@@ -41,7 +41,12 @@ export const getImageUrl = (url?: string): string => {
   return MOVIE_IMAGE_URLS.kkphim + clean;
 };
 
-export const getImageWebp = (url?: string): string => {
+/**
+ * Same image through our API (/api/movies/image/webp). Fallback only: phimimg already serves
+ * WebP with a 30-day immutable cache, while the proxy re-downloads the file on every request
+ * and sends no cache headers — using it first made every poster ~250ms slower and uncached.
+ */
+export const getImageProxyUrl = (url?: string): string => {
   const abs = getImageUrl(url);
 
   if (!abs) return "";
@@ -67,7 +72,7 @@ export const getImageCandidates = (
 
   if (options.skipWebp) return [orig];
 
-  const webp = getImageWebp(url ?? undefined);
+  const proxied = getImageProxyUrl(url ?? undefined);
 
-  return webp && webp !== orig ? [webp, orig] : [orig];
+  return proxied && proxied !== orig ? [orig, proxied] : [orig];
 };
