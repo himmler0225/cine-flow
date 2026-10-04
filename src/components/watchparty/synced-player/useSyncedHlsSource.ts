@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Hls from "hls.js";
 import { shouldUseNativeHls } from "@/lib/hlsEngine";
+import { useLatestRef } from "@/hooks/useLatestRef";
 
 export function useSyncedHlsSource(
   videoRef: React.RefObject<HTMLVideoElement | null>,
@@ -9,6 +10,12 @@ export function useSyncedHlsSource(
   onHlsFailed: () => void,
   onReady?: () => void,
 ) {
+  // Read through refs: SyncedPlayer passes an inline onHlsFailed, so depending on it tore
+  // down and reloaded the stream on every room re-render (chat, presence, sync ticks).
+  const onHlsFailedRef = useLatestRef(onHlsFailed);
+
+  const onReadyRef = useLatestRef(onReady);
+
   useEffect(() => {
     if (useIframe) return;
 
@@ -18,9 +25,9 @@ export function useSyncedHlsSource(
 
     let hls: Hls | null = null;
 
-    const onNativeError = () => onHlsFailed();
+    const onNativeError = () => onHlsFailedRef.current();
 
-    const onNativeReady = () => onReady?.();
+    const onNativeReady = () => onReadyRef.current?.();
 
     v.addEventListener("error", onNativeError);
 
@@ -35,10 +42,10 @@ export function useSyncedHlsSource(
 
       hls.attachMedia(v);
 
-      hls.on(Hls.Events.MANIFEST_PARSED, () => onReady?.());
+      hls.on(Hls.Events.MANIFEST_PARSED, () => onReadyRef.current?.());
 
       hls.on(Hls.Events.ERROR, (_e, data) => {
-        if (data.fatal) onHlsFailed();
+        if (data.fatal) onHlsFailedRef.current();
       });
     } else {
       v.src = src;
@@ -51,5 +58,5 @@ export function useSyncedHlsSource(
 
       hls?.destroy();
     };
-  }, [src, useIframe, videoRef, onHlsFailed, onReady]);
+  }, [src, useIframe, videoRef, onHlsFailedRef, onReadyRef]);
 }
