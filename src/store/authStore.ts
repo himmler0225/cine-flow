@@ -10,6 +10,7 @@ import { watchlistApi } from "@/services/platform/watchlist.service";
 import type { Profile } from "@/types/database";
 import { goToAuth } from "@/lib/auth/authNavigation";
 import { STORAGE_KEYS } from "@/constants/storage";
+import { clearAuthTokens } from "@/lib/auth/authToken";
 
 export type { Profile };
 
@@ -67,6 +68,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
 
         void watchlistApi.migrateLocalToServer();
+      }
+
+      // Another tab signed out (or its refresh was rejected) and removed the shared refresh
+      // token: drop this tab's in-memory session too instead of staying "logged in".
+      if (typeof window !== "undefined") {
+        window.addEventListener("storage", (event) => {
+          if (event.key !== STORAGE_KEYS.refreshToken || event.newValue !== null) return;
+
+          if (!get().isAuthenticated) return;
+
+          clearAuthTokens();
+
+          set({ session: null, user: null, profile: null, isAuthenticated: false });
+        });
       }
 
       authApi.onAuthStateChange(async (event, newSession) => {

@@ -4,8 +4,6 @@ import { isPublicBrowsePath, isPublicPath, isPublicAuthPath } from "./authRoutes
 
 describe("auth public paths", () => {
   it("exposes browse routes without login", () => {
-    assert.equal(isPublicBrowsePath("/"), true);
-
     assert.equal(isPublicBrowsePath("/movie/abc"), true);
 
     assert.equal(isPublicBrowsePath("/search"), true);
@@ -13,5 +11,11 @@ describe("auth public paths", () => {
     assert.equal(isPublicPath("/watch/abc"), false);
 
     assert.equal(isPublicAuthPath("/login"), true);
+  });
+
+  it("requires login for home", () => {
+    assert.equal(isPublicPath("/"), false);
+
+    assert.equal(isPublicBrowsePath("/"), false);
   });
 });

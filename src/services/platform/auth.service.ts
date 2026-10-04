@@ -1,4 +1,4 @@
-import { platformFetch } from "@/lib/platformApi";
+import { PlatformApiError, platformFetch } from "@/lib/platformApi";
 import {
   applySessionTokens,
   clearAuthTokens,
@@ -45,6 +45,32 @@ type AuthCallback = (event: string, session: Session | null) => void;
 
 let refreshInFlight: Promise<Session | null> | null = null;
 
+const REFRESH_LOCK_NAME = "cineflow-auth-refresh";
+
+/** Backoff between retries when the refresh call fails for a non-auth reason. */
+const REFRESH_RETRY_DELAYS_MS = [500, 1500];
+
+/** The server looked at the refresh token and refused it (vs. network / 5xx / 429). */
+function isRefreshRejected(error: unknown): boolean {
+  return error instanceof PlatformApiError && [400, 401, 403].includes(error.status);
+}
+
+/**
+ * Refresh tokens rotate on every use and live in localStorage shared by all tabs. Without a
+ * cross-tab lock, two tabs (e.g. Safari restoring several at once) refreshed with the same
+ * token: the slower one got 401 and then deleted the token the faster one had just stored,
+ * logging every tab out.
+ */
+function withRefreshLock<T>(fn: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator !== "undefined" ? navigator.locks : undefined;
+
+  if (!locks?.request) return fn();
+
+  return locks.request(REFRESH_LOCK_NAME, fn) as Promise<T>;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 class AuthApi {
   private readonly listeners = new Set<AuthCallback>();
   private emitAuthChange(event: string, session: Session | null) {
@@ -73,11 +99,19 @@ class AuthApi {
   async refreshSession(): Promise<Session | null> {
     if (refreshInFlight) return refreshInFlight;
 
-    refreshInFlight = (async () => {
-      const refreshToken = getRefreshToken();
+    refreshInFlight = withRefreshLock(() => this.rotateRefreshToken()).finally(() => {
+      refreshInFlight = null;
+    });
 
-      if (!refreshToken) return null;
+    return refreshInFlight;
+  }
+  private async rotateRefreshToken(): Promise<Session | null> {
+    // Read inside the lock: another tab may have rotated the token while we waited.
+    let refreshToken = getRefreshToken();
 
+    let transientFailures = 0;
+
+    while (refreshToken) {
       try {
         const session = await platformFetch<Session>("/api/auth/refresh", {
           method: "POST",
@@ -88,16 +122,34 @@ class AuthApi {
         applySessionTokens(session);
 
         return session;
-      } catch {
-        clearAuthTokens();
+      } catch (error) {
+        if (isRefreshRejected(error)) {
+          const latest = getRefreshToken();
 
-        return null;
-      } finally {
-        refreshInFlight = null;
+          // Replaced meanwhile (a tab without Web Locks): retry with the newer token.
+          if (latest && latest !== refreshToken) {
+            refreshToken = latest;
+
+            continue;
+          }
+
+          clearAuthTokens();
+
+          this.emitAuthChange("SIGNED_OUT", null);
+
+          return null;
+        }
+
+        // Network error / 5xx / 429 (e.g. during a deploy): keep the token, retry briefly.
+        if (transientFailures >= REFRESH_RETRY_DELAYS_MS.length) return null;
+
+        await sleep(REFRESH_RETRY_DELAYS_MS[transientFailures]);
+
+        transientFailures += 1;
       }
-    })();
+    }
 
-    return refreshInFlight;
+    return null;
   }
   async getSession(): Promise<Session | null> {
     this.hydrateLegacyAccessToken();
@@ -124,8 +176,8 @@ class AuthApi {
       applySessionTokens(session);
 
       return session;
-    } catch {
-      clearAuthTokens();
+    } catch (error) {
+      if (isRefreshRejected(error)) clearAuthTokens();
 
       return null;
     }

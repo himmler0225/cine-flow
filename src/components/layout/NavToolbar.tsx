@@ -14,6 +14,8 @@ export function NavToolbar({ isAuthenticated }: Props) {
 
   const requestAuth = useAuthStore((s) => s.requestAuth);
 
+  const authLoading = useAuthStore((s) => s.isLoading);
+
   const setOpenSearch = useNavbarUiStore((s) => s.setOpenSearch);
 
   return (
@@ -40,6 +42,9 @@ export function NavToolbar({ isAuthenticated }: Props) {
       <div className="hidden shrink-0 md:block">{isAuthenticated && <NotificationBell />}</div>
       {isAuthenticated ? (
         <UserMenu />
+      ) : authLoading ? (
+        // Session restore in flight: don't flash "Đăng Nhập" at a signed-in user.
+        <span aria-hidden className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-white/10" />
       ) : (
         <button
           type="button"

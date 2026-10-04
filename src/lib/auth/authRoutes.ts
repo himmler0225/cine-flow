@@ -1,7 +1,8 @@
 const PUBLIC_AUTH_PATHS = new Set(["/login", "/forgot-password", "/reset-password"]);
 
+// Home ("/") is deliberately not public: it requires login, enforced by the root route guard
+// (which also hides the navbar while the session is restored, instead of flashing "Đăng Nhập").
 const PUBLIC_BROWSE_PREFIXES = [
-  "/",
   "/movie/",
   "/catalog/",
   "/genre/",
@@ -18,10 +19,8 @@ export function isPublicAuthPath(pathname: string): boolean {
 }
 
 export function isPublicBrowsePath(pathname: string): boolean {
-  if (pathname === "/") return true;
-
   return PUBLIC_BROWSE_PREFIXES.some(
-    (p) => p !== "/" && (pathname === p.replace(/\/$/, "") || pathname.startsWith(p)),
+    (p) => pathname === p.replace(/\/$/, "") || pathname.startsWith(p),
   );
 }
 
