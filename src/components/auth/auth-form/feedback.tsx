@@ -1,5 +1,5 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import zxcvbn from "zxcvbn";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
@@ -11,12 +11,38 @@ export function AuthError({ message }: { message: string }) {
   );
 }
 
+type Zxcvbn = typeof import("zxcvbn");
+
+let zxcvbnPromise: Promise<Zxcvbn> | null = null;
+
+// zxcvbn ships an ~800KB dictionary: load it only once someone types a new password,
+// instead of on every visit to the login page.
+const loadZxcvbn = () => (zxcvbnPromise ??= import("zxcvbn").then((m) => m.default));
+
 export function PasswordStrength({ password }: { password: string }) {
   const { t } = useTranslation();
 
-  if (!password) return null;
+  const [score, setScore] = useState<number | null>(null);
 
-  const score = zxcvbn(password).score;
+  useEffect(() => {
+    if (!password) {
+      setScore(null);
+
+      return;
+    }
+
+    let cancelled = false;
+
+    void loadZxcvbn().then((zxcvbn) => {
+      if (!cancelled) setScore(zxcvbn(password).score);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [password]);
+
+  if (!password || score === null) return null;
 
   const colors = ["bg-red-500", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500"];
 

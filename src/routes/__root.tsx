@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import {
   QueryClient,
   QueryClientProvider,
@@ -22,7 +22,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { TopProgress } from "@/components/layout/TopProgress";
 import { ContinueWatchingBar } from "@/components/movie/ContinueWatchingBar";
-import { ChatModal } from "@/components/chat/ChatModal";
 import { ChatTriggerButton } from "@/components/chat/ChatTriggerButton";
 import { useWatchlistSync } from "@/hooks/useWatchlistSync";
 import { I18nProvider } from "@/components/common/I18nProvider";
@@ -30,6 +29,7 @@ import { PageSkeleton } from "@/components/common/PageSkeleton";
 import { registerAuthNavigator } from "@/lib/auth/authNavigation";
 import { buildLoginRedirect, isPublicAuthPath, isPublicPath } from "@/lib/auth/authRoutes";
 import { useAuthStore } from "@/store/authStore";
+import { useChatStore } from "@/store/chatStore";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import { serializeJsonLd } from "@/lib/seo/jsonLd";
 import i18n, { t } from "@/lib/i18n";
@@ -309,7 +309,7 @@ function RootComponent() {
         {!isAdmin && !isAuthRoute && !hideProtectedShell && <Footer />}
         {!isAdmin && !isAuthRoute && !hideProtectedShell && isAuthenticated && (
           <>
-            <ChatModal />
+            <LazyChatModal />
             <ChatTriggerButton />
           </>
         )}
@@ -317,6 +317,32 @@ function RootComponent() {
         <Toaster position="bottom-right" richColors theme="dark" duration={3000} />
       </I18nProvider>
     </QueryClientProvider>
+  );
+}
+
+const ChatModal = lazy(() =>
+  import("@/components/chat/ChatModal").then((m) => ({ default: m.ChatModal })),
+);
+
+/**
+ * Mount the chat (and its markdown renderer) only after it is first opened: it used to load
+ * on every page for signed-in users and fetch the conversation list each time.
+ */
+function LazyChatModal() {
+  const isOpen = useChatStore((s) => s.isOpen);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) setMounted(true);
+  }, [isOpen]);
+
+  if (!mounted) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <ChatModal />
+    </Suspense>
   );
 }
 
