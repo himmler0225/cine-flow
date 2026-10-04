@@ -113,7 +113,7 @@ export function ProfileWatchlistsTab() {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
             placeholder={t("profile.newListPlaceholder")}
-            className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white placeholder:text-zinc-500 focus:border-netflix-red focus:outline-none"
+            className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2 py-1.5 text-base sm:text-sm text-white placeholder:text-zinc-500 focus:border-netflix-red focus:outline-none"
           />
           <button
             type="button"

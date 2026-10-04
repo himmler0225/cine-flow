@@ -52,7 +52,7 @@ export function ChatComposer({ disabled, isStreaming, onSend, onStop }: Props) {
             border-white/15
             bg-black/40
             py-2
-            text-sm
+            text-base sm:text-sm
             text-white
             placeholder:text-netflix-muted
             focus-visible:border-netflix-red

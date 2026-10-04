@@ -221,8 +221,10 @@ function RootComponent() {
 
     let cleanup: (() => void) | undefined;
 
-    (async () => {
-      if (typeof window === "undefined") return;
+    let cancelled = false;
+
+    const restorePersistedCache = async () => {
+      if (cancelled) return;
 
       const [{ persistQueryClient }, { createSyncStoragePersister }] = await Promise.all([
         import("@tanstack/react-query-persist-client"),
@@ -247,10 +249,34 @@ function RootComponent() {
         },
       });
 
-      cleanup = unsub;
-    })();
+      if (cancelled) unsub();
+      else cleanup = unsub;
+    };
+
+    // Restore only once the page has loaded and gone idle. Route components hydrate in their
+    // own Suspense passes after this effect; cached data showing up before that made their
+    // first render differ from the server HTML (React #418) for returning visitors, and
+    // React then discarded the SSR markup and re-rendered the whole page.
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    };
+
+    const scheduleRestore = () => {
+      if (idleWindow.requestIdleCallback) {
+        idleWindow.requestIdleCallback(() => void restorePersistedCache(), { timeout: 3000 });
+      } else {
+        window.setTimeout(() => void restorePersistedCache(), 500);
+      }
+    };
+
+    if (document.readyState === "complete") scheduleRestore();
+    else window.addEventListener("load", scheduleRestore, { once: true });
 
     return () => {
+      cancelled = true;
+
+      window.removeEventListener("load", scheduleRestore);
+
       cleanup?.();
     };
   }, [initialize, queryClient]);

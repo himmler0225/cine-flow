@@ -122,7 +122,7 @@ export function MovieComments({
           onChange={(e) => setContent(e.target.value)}
           placeholder={placeholder}
           rows={3}
-          className="w-full resize-none rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder:text-netflix-muted focus:border-netflix-red focus:outline-none"
+          className="w-full resize-none rounded-md border border-white/10 bg-black/40 px-3 py-2 text-base sm:text-sm text-white placeholder:text-netflix-muted focus:border-netflix-red focus:outline-none"
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <label className="flex cursor-pointer items-center gap-2 text-xs text-netflix-muted">

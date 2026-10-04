@@ -87,7 +87,7 @@ export function ProfileHistoryTab() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={t("profile.searchMovies")}
-              className="rounded-md border border-white/10 bg-netflix-dark py-1.5 pl-8 pr-3 text-sm text-white"
+              className="rounded-md border border-white/10 bg-netflix-dark py-1.5 pl-8 pr-3 text-base sm:text-sm text-white"
             />
           </div>
           <button

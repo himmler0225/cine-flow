@@ -3,6 +3,7 @@ import { Film } from "lucide-react";
 import { getImageCandidates } from "@/lib/movie/movieImages";
 import { cn } from "@/lib/utils";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useHydrated } from "@/hooks/useHydrated";
 
 function buildPosterCandidates(poster?: string, thumb?: string, dataSaver = false): string[] {
   const raw = [poster, thumb].filter(Boolean) as string[];
@@ -35,7 +36,9 @@ export function DetailPoster({
   priority = false,
   variant = "poster",
 }: DetailPosterProps) {
-  const dataSaver = useSettingsStore((s) => s.dataSaver);
+  const hydrated = useHydrated();
+
+  const dataSaver = useSettingsStore((s) => s.dataSaver) && hydrated;
 
   const candidates = useMemo(
     () =>

@@ -11,6 +11,7 @@ import type { MovieListItem } from "@/types/movie";
 import { getImageUrl } from "@/lib/movie/movieImages";
 import { setEpisodeSnapshot } from "@/utils/episodeSnapshots";
 import { getAppQueryClient } from "@/lib/queryClientHolder";
+import { useHydrated } from "@/hooks/useHydrated";
 
 export function invalidateFavoritesQueries(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -69,14 +70,23 @@ export function useFavoriteCount(userId: string | undefined) {
   });
 }
 
+const EMPTY_LOCAL_FAVS: MovieListItem[] = [];
+
 export function useFavorites() {
   const userId = useAuthStore((s) => s.user?.id);
 
-  const localFavs = useFavoriteStore((s) => s.favorites);
+  // Guest favourites come from localStorage: ignore them until hydrated (see useHydrated).
+  const hydrated = useHydrated();
+
+  const storedFavs = useFavoriteStore((s) => s.favorites);
+
+  const localFavs = hydrated ? storedFavs : EMPTY_LOCAL_FAVS;
 
   const localToggle = useFavoriteStore((s) => s.toggle);
 
-  const localHas = useFavoriteStore((s) => s.has);
+  const storeHas = useFavoriteStore((s) => s.has);
+
+  const localHas = useCallback((slug: string) => hydrated && storeHas(slug), [hydrated, storeHas]);
 
   const queryClient = useQueryClient();
 

@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { watchHistoryApi } from "@/services/platform/watchHistory.service";
 import { useAuthStore } from "@/store/authStore";
+import { useHydrated } from "@/hooks/useHydrated";
 import { queryKeys } from "@/constants/queryKeys";
 import { CACHE_TTL } from "@/constants/timing";
 import {
@@ -31,9 +32,11 @@ export function useWatchHistory() {
     [userId],
   );
 
+  const hydrated = useHydrated();
+
   const {
-    data: history = EMPTY_HISTORY,
-    isLoading,
+    data: historyData = EMPTY_HISTORY,
+    isLoading: queryLoading,
     refetch,
   } = useQuery<WatchHistoryItem[]>({
     queryKey: key,
@@ -52,6 +55,12 @@ export function useWatchHistory() {
     refetchInterval: false,
     refetchIntervalInBackground: false,
   });
+
+  // History lives in localStorage / the persisted cache: hide it until hydrated so SSR'd
+  // pages (watch %, episode ticks) render the same HTML as the server first.
+  const history = hydrated ? historyData : EMPTY_HISTORY;
+
+  const isLoading = !hydrated || queryLoading;
 
   const invalidate = useCallback(
     () => queryClient.invalidateQueries({ queryKey: key }),

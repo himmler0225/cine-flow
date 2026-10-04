@@ -5,6 +5,7 @@ import { ratingsApi } from "@/services/platform/ratings.service";
 import { useAuthStore } from "@/store/authStore";
 import { useRatingStore } from "@/store/ratingStore";
 import { CACHE_TTL } from "@/constants/timing";
+import { useHydrated } from "@/hooks/useHydrated";
 
 const ratingKeys = {
   aggregate: (slug: string) => ["ratings", "aggregate", slug] as const,
@@ -21,7 +22,12 @@ export function useMovieRating(slug: string) {
 
   const requestAuth = useAuthStore((s) => s.requestAuth);
 
-  const localScore = useRatingStore((s) => s.ratings[slug] ?? null);
+  const hydrated = useHydrated();
+
+  const storedScore = useRatingStore((s) => s.ratings[slug] ?? null);
+
+  // Persisted in localStorage: not part of the server render (see useHydrated).
+  const localScore = hydrated ? storedScore : null;
 
   const setLocal = useRatingStore((s) => s.set);
 

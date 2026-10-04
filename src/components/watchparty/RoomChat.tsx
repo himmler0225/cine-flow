@@ -195,7 +195,7 @@ export function RoomChat({ messages, meId, onSend, onReact, disabled }: Props) {
             placeholder={disabled ? t("watchparty.loginToChat") : t("watchparty.chatPlaceholder")}
             rows={1}
             disabled={disabled}
-            className="min-h-0 flex-1 resize-none border-white/15 bg-black/40 py-2 text-sm text-white placeholder:text-netflix-muted focus-visible:border-netflix-red focus-visible:ring-0 disabled:opacity-50"
+            className="min-h-0 flex-1 resize-none border-white/15 bg-black/40 py-2 text-base sm:text-sm text-white placeholder:text-netflix-muted focus-visible:border-netflix-red focus-visible:ring-0 disabled:opacity-50"
           />
           <Button
             type="button"
