@@ -7,9 +7,11 @@ function isAppleWebKit(): boolean {
 
   const ua = navigator.userAgent;
 
+  // iPadOS reports a Mac UA; tell it apart by touch. Desktop Chrome ("Chrome/") on a
+  // touch-enabled Mac is not an iPad (Chrome on iPad says "CriOS/").
   const iOS =
     /iP(hone|ad|od)/.test(ua) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1 && !/Chrome\//.test(ua));
 
   const desktopSafari = /^((?!chrome|chromium|crios|fxios|edg|android).)*safari/i.test(ua);
 

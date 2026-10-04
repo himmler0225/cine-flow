@@ -65,7 +65,9 @@
         const ua = navigator.userAgent;
         const appleWebKit =
           /iP(hone|ad|od)/.test(ua) ||
-          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) ||
+          (navigator.platform === "MacIntel" &&
+            navigator.maxTouchPoints > 1 &&
+            !/Chrome\//.test(ua)) ||
           /^((?!chrome|chromium|crios|fxios|edg|android).)*safari/i.test(ua);
         const hlsJs = window.Hls && Hls.isSupported();
         if (video.canPlayType("application/vnd.apple.mpegurl") && (appleWebKit || !hlsJs)) {

@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useHydrated } from "@/hooks/useHydrated";
 import { usePremium } from "@/hooks/usePremium";
 import {
   isEmbedUrl,
@@ -37,7 +38,10 @@ export function useVideoPlayer({
 
   const { isPremium } = usePremium();
 
-  const dataSaver = useSettingsStore((s) => s.dataSaver);
+  const hydrated = useHydrated();
+
+  // Persisted setting: keep the server-rendered player until hydrated (see useHydrated).
+  const dataSaver = useSettingsStore((s) => s.dataSaver) && hydrated;
 
   const playableSrc = resolvePlayableSrc(src, embed);
 
@@ -264,7 +268,8 @@ export function useVideoPlayer({
     selectSubtitle: hls.selectSubtitle,
     toggleFullscreen: controls.toggleFullscreen,
     togglePiP: controls.togglePiP,
-    seek: controls.seek,
+    seekTo: controls.seekTo,
+    seekBy: controls.seekBy,
     setSpeedVal: controls.setSpeedVal,
     togglePlay: controls.togglePlay,
     toggleMute: controls.toggleMute,

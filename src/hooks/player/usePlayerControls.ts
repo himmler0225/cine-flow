@@ -1,6 +1,25 @@
 import type { Dispatch } from "react";
 import type { PlayerUiAction, PlayerUiState } from "@/hooks/player/playerReducer";
 
+export type WebkitPresentationVideo = HTMLVideoElement & {
+  webkitSupportsPresentationMode?: (mode: string) => boolean;
+  webkitPresentationMode?: string;
+  webkitSetPresentationMode?: (mode: string) => void;
+  webkitEnterFullscreen?: () => void;
+};
+
+/** PiP through the standard API or iOS Safari's presentation modes. */
+export function canUsePictureInPicture(video: HTMLVideoElement | null): boolean {
+  if (typeof document === "undefined" || !video) return false;
+
+  const v = video as WebkitPresentationVideo;
+
+  return (
+    Boolean(document.pictureInPictureEnabled) ||
+    Boolean(v.webkitSupportsPresentationMode?.("picture-in-picture"))
+  );
+}
+
 export function createPlayerControls(
   videoRef: React.RefObject<HTMLVideoElement | null>,
   containerRef: React.RefObject<HTMLDivElement | null>,
@@ -10,40 +29,54 @@ export function createPlayerControls(
   onSeekCommit?: (currentSec: number, durationSec: number) => void,
 ) {
   const togglePiP = async () => {
-    const v = videoRef.current;
+    const v = videoRef.current as WebkitPresentationVideo | null;
 
     if (!v) return;
 
     try {
       if (document.pictureInPictureElement) {
         await document.exitPictureInPicture();
-      } else {
-        await (
-          v as HTMLVideoElement & {
-            requestPictureInPicture(): Promise<PictureInPictureWindow>;
-          }
-        ).requestPictureInPicture();
+      } else if (
+        document.pictureInPictureEnabled &&
+        typeof v.requestPictureInPicture === "function"
+      ) {
+        await v.requestPictureInPicture();
+      } else if (v.webkitSetPresentationMode) {
+        // iOS Safari without the standard API.
+        v.webkitSetPresentationMode(
+          v.webkitPresentationMode === "picture-in-picture" ? "inline" : "picture-in-picture",
+        );
       }
     } catch (err) {
       console.error(err);
     }
   };
 
-  const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /**
+   * Absolute seek, committed once (the scrubber calls it on release). The old range input
+   * seeked and saved progress to the API on every drag frame.
+   */
+  const seekTo = (time: number) => {
     const v = videoRef.current;
 
-    if (!v) return;
+    if (!v || !Number.isFinite(time)) return;
 
-    const next = Number(e.target.value);
+    const dur = Number.isFinite(v.duration) && v.duration > 0 ? v.duration : state.duration;
 
-    v.currentTime = next;
+    const next = dur ? Math.min(Math.max(0, time), Math.max(0, dur - 0.25)) : Math.max(0, time);
+
+    try {
+      v.currentTime = next;
+    } catch {
+      return;
+    }
 
     dispatch({ type: "setProgress", progress: next });
 
-    if (v.duration && Number.isFinite(v.duration)) {
-      onSeekCommit?.(next, v.duration);
-    }
+    if (dur && Number.isFinite(dur)) onSeekCommit?.(next, dur);
   };
+
+  const seekBy = (deltaSec: number) => seekTo((videoRef.current?.currentTime ?? 0) + deltaSec);
 
   const setSpeedVal = (s: number) => {
     const v = videoRef.current;
@@ -111,7 +144,8 @@ export function createPlayerControls(
   return {
     toggleFullscreen,
     togglePiP,
-    seek,
+    seekTo,
+    seekBy,
     setSpeedVal,
     togglePlay,
     toggleMute,

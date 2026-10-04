@@ -26,7 +26,13 @@ export const UI_DELAY_MS = {
   copyFeedback: 2000,
   reaction: 2800,
   heroSlide: 12000,
+  playerControlsHide: 3000,
+  doubleTap: 280,
+  seekFlash: 650,
 } as const;
+
+/** Step for the ±10s buttons, double-tap and ←/→ keys. */
+export const PLAYER_SEEK_STEP_SEC = 10;
 
 export const QUERY_RETRY = {
   attempts: 2,

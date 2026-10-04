@@ -7,15 +7,23 @@ import {
   Maximize,
   PictureInPicture2,
   RotateCcw,
+  RotateCw,
   SkipForward,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { PLAYBACK_SPEEDS } from "@/utils/player";
 import { formatTime } from "@/utils/formatTime";
+import { PLAYER_SEEK_STEP_SEC } from "@/constants/timing";
+import { SeekBar } from "@/components/player/SeekBar";
 import type { HlsQualityLevel, HlsSubtitleTrack } from "@/hooks/player/usePlayerHlsSource";
 
 interface VideoPlayerControlsProps {
+  /** Shown (and interactive). Hidden controls ignore taps so they reach the video surface. */
+  visible: boolean;
+  canPiP: boolean;
+  /** Any press on the controls keeps them from auto-hiding. */
+  onInteract?: () => void;
   playing: boolean;
   muted: boolean;
   volume: number;
@@ -27,7 +35,7 @@ interface VideoPlayerControlsProps {
   skipAds: boolean;
   isPremium: boolean;
   activeAd?: boolean;
-  hasNextEpisode: boolean;
+  hasNextEpisode?: boolean;
   levels: HlsQualityLevel[];
   subtitleTracks: HlsSubtitleTrack[];
   currentLevel: number;
@@ -35,7 +43,9 @@ interface VideoPlayerControlsProps {
   onTogglePlay: () => void;
   onToggleMute: () => void;
   onVolumeChange: (val: number) => void;
-  onSeek: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSeek: (timeSec: number) => void;
+  onSeekBy: (deltaSec: number) => void;
+  onScrubChange?: (scrubbing: boolean) => void;
   onToggleSpeedMenu: () => void;
   onSetSpeed: (s: number) => void;
   onToggleSkipAds: () => void;
@@ -47,6 +57,9 @@ interface VideoPlayerControlsProps {
 }
 
 export function VideoPlayerControls({
+  visible,
+  canPiP,
+  onInteract,
   playing,
   muted,
   volume,
@@ -66,6 +79,8 @@ export function VideoPlayerControls({
   onToggleMute,
   onVolumeChange,
   onSeek,
+  onSeekBy,
+  onScrubChange,
   onToggleSpeedMenu,
   onSetSpeed,
   onToggleSkipAds,
@@ -127,7 +142,7 @@ export function VideoPlayerControls({
   useEffect(() => {
     if (!showSpeed) return;
 
-    const onClickOutside = (e: MouseEvent) => {
+    const onClickOutside = (e: PointerEvent) => {
       const target = e.target as Node;
 
       if (speedMenuRef.current?.contains(target) || speedButtonRef.current?.contains(target)) {
@@ -137,45 +152,36 @@ export function VideoPlayerControls({
       onToggleSpeedMenu();
     };
 
-    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("pointerdown", onClickOutside);
 
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("pointerdown", onClickOutside);
   }, [showSpeed, onToggleSpeedMenu]);
 
   return (
+    // The bar itself never takes pointer events (taps on its gradient reach the video
+    // surface); its children do while visible. The old version only enabled them on
+    // :hover, which touch screens don't have, so taps on the seek bar hit the video.
     <div
+      onPointerDownCapture={onInteract}
       className={cn(
-        "pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3 transition-opacity focus-within:opacity-100 group-hover/player:opacity-100 group-focus-within/player:opacity-100 group-hover/player:[&>*]:pointer-events-auto group-focus-within/player:[&>*]:pointer-events-auto",
-        activeAd ? "opacity-100 [&>*]:pointer-events-auto" : "opacity-100 md:opacity-0",
+        "pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 pb-1.5 pt-8 transition-opacity duration-200 sm:px-3 sm:pb-2",
+        visible || activeAd
+          ? "opacity-100 [&>*]:pointer-events-auto"
+          : "opacity-0 focus-within:opacity-100 focus-within:[&>*]:pointer-events-auto",
       )}
     >
-      <div className="relative">
-        <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded bg-white/20">
-          <div
-            className="absolute left-0 top-0 h-full rounded bg-white/40"
-            style={{ width: duration ? `${(buffered / duration) * 100}%` : 0 }}
-          />
-          <div
-            className="absolute left-0 top-0 h-full rounded bg-netflix-red"
-            style={{ width: duration ? `${(progress / duration) * 100}%` : 0 }}
-          />
-        </div>
-        <input
-          type="range"
-          min={0}
-          max={duration || 0}
-          value={progress}
-          step={0.1}
-          onChange={onSeek}
-          aria-label={t("player.seekAria")}
-          aria-valuetext={formatTime(progress)}
-          className="relative h-1 w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-netflix-red"
-        />
-      </div>
-      <div className="flex items-center gap-3 text-white">
+      <SeekBar
+        progress={progress}
+        buffered={buffered}
+        duration={duration}
+        label={t("player.seekAria")}
+        onSeek={onSeek}
+        onScrubChange={onScrubChange}
+      />
+      <div className="flex min-w-0 items-center gap-1 text-white sm:gap-2">
         <button
           onClick={onTogglePlay}
-          className="rounded p-1 hover:bg-white/10"
+          className="shrink-0 rounded p-1.5 hover:bg-white/10"
           aria-label={t("player.playPauseAria")}
         >
           {playing ? (
@@ -184,8 +190,40 @@ export function VideoPlayerControls({
             <Play className="h-6 w-6 fill-current" />
           )}
         </button>
-        <div className="flex items-center gap-2">
-          <button onClick={onToggleMute} aria-label={muted ? t("player.unmute") : t("player.mute")}>
+        <button
+          type="button"
+          onClick={() => onSeekBy(-PLAYER_SEEK_STEP_SEC)}
+          className="relative shrink-0 rounded p-1.5 hover:bg-white/10"
+          aria-label={t("player.rewindSeconds", { seconds: PLAYER_SEEK_STEP_SEC })}
+        >
+          <RotateCcw className="h-5 w-5" />
+          <span
+            aria-hidden
+            className="absolute inset-0 flex items-center justify-center pt-px text-[8px] font-bold"
+          >
+            {PLAYER_SEEK_STEP_SEC}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onSeekBy(PLAYER_SEEK_STEP_SEC)}
+          className="relative shrink-0 rounded p-1.5 hover:bg-white/10"
+          aria-label={t("player.forwardSeconds", { seconds: PLAYER_SEEK_STEP_SEC })}
+        >
+          <RotateCw className="h-5 w-5" />
+          <span
+            aria-hidden
+            className="absolute inset-0 flex items-center justify-center pt-px text-[8px] font-bold"
+          >
+            {PLAYER_SEEK_STEP_SEC}
+          </span>
+        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            onClick={onToggleMute}
+            className="rounded p-1.5 hover:bg-white/10"
+            aria-label={muted ? t("player.unmute") : t("player.mute")}
+          >
             {muted || volume === 0 ? (
               <VolumeX className="h-5 w-5" />
             ) : (
@@ -203,7 +241,7 @@ export function VideoPlayerControls({
             className="hidden h-1 w-20 cursor-pointer appearance-none rounded bg-white/30 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white sm:block"
           />
         </div>
-        <span className="text-xs tabular-nums text-white/80">
+        <span className="min-w-0 truncate text-[11px] tabular-nums text-white/80 sm:text-xs">
           {formatTime(progress)} / {formatTime(duration)}
         </span>
         {activeAd && onSkipCurrentAd && (
@@ -216,7 +254,7 @@ export function VideoPlayerControls({
             {t("player.skipAdNow")}
           </button>
         )}
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
           {levels.length > 1 && (
             <label className="sr-only" htmlFor="player-quality">
               {t("player.quality")}
@@ -258,7 +296,7 @@ export function VideoPlayerControls({
             <button
               ref={speedButtonRef}
               onClick={onToggleSpeedMenu}
-              className="rounded px-2 py-1 text-xs font-medium hover:bg-white/10"
+              className="rounded px-2 py-1.5 text-xs font-medium hover:bg-white/10"
               aria-label={t("player.speed")}
               aria-expanded={showSpeed}
               aria-haspopup="menu"
@@ -283,7 +321,7 @@ export function VideoPlayerControls({
                       speedButtonRef.current?.focus();
                     }}
                     className={cn(
-                      "px-3 py-1 text-xs hover:bg-white/10 focus-visible:bg-white/15 focus-visible:outline-none",
+                      "px-4 py-2 text-xs hover:bg-white/10 focus-visible:bg-white/15 focus-visible:outline-none sm:px-3 sm:py-1",
                       s === speed && "text-netflix-red",
                     )}
                   >
@@ -296,7 +334,7 @@ export function VideoPlayerControls({
           <button
             onClick={onToggleSkipAds}
             className={cn(
-              "rounded p-1 hover:bg-white/10",
+              "hidden rounded p-1.5 hover:bg-white/10 sm:block",
               skipAds ? "text-netflix-red" : "text-white/70",
               !isPremium && "opacity-60",
             )}
@@ -317,16 +355,18 @@ export function VideoPlayerControls({
           >
             <SkipForward className="h-5 w-5" />
           </button>
-          <button
-            onClick={onTogglePiP}
-            className="rounded p-1 hover:bg-white/10"
-            aria-label={t("player.pip")}
-          >
-            <PictureInPicture2 className="h-5 w-5" />
-          </button>
+          {canPiP && (
+            <button
+              onClick={onTogglePiP}
+              className="hidden rounded p-1.5 hover:bg-white/10 sm:block"
+              aria-label={t("player.pip")}
+            >
+              <PictureInPicture2 className="h-5 w-5" />
+            </button>
+          )}
           <button
             onClick={onToggleFullscreen}
-            className="rounded p-1 hover:bg-white/10"
+            className="rounded p-1.5 hover:bg-white/10"
             aria-label={t("player.fullscreen")}
           >
             <Maximize className="h-5 w-5" />

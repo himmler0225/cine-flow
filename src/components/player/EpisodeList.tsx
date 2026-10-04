@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { EpisodeServer } from "@/types/movie";
 import { cn } from "@/lib/utils";
@@ -39,6 +40,26 @@ export function EpisodeList({
   variant = "compact",
 }: Props) {
   const { t } = useTranslation();
+
+  const listRef = useRef<HTMLDivElement>(null);
+
+  // Long series: keep the current episode in view inside the list (scrolls the list only,
+  // never the page — scrollIntoView would also move the page on phones).
+  useEffect(() => {
+    const list = listRef.current;
+
+    const active = list?.querySelector<HTMLElement>('[aria-current="true"]');
+
+    if (!list || !active || list.scrollHeight <= list.clientHeight) return;
+
+    const top = active.offsetTop;
+
+    const bottom = top + active.offsetHeight;
+
+    if (top >= list.scrollTop && bottom <= list.scrollTop + list.clientHeight) return;
+
+    list.scrollTo({ top: Math.max(0, top - list.clientHeight / 2 + active.offsetHeight / 2) });
+  }, [serverIdx, episodeIdx]);
 
   if (!servers?.length) return null;
 
@@ -99,8 +120,9 @@ export function EpisodeList({
           </p>
         )}
         <div
+          ref={listRef}
           className={cn(
-            "grid gap-2 overflow-y-auto pr-1",
+            "relative grid gap-2 overflow-y-auto pr-1",
             tile
               ? "max-h-[min(56vh,560px)] grid-cols-[repeat(auto-fill,minmax(88px,1fr))] gap-2.5"
               : stacked
