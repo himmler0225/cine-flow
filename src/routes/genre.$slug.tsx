@@ -9,6 +9,7 @@ import { FilterBar } from "@/components/filters/FilterBar";
 import { Pagination } from "@/components/filters/Pagination";
 import { filterSearchSchema, optionalPage, hasActiveFilters } from "@/lib/filterSearch";
 import { buildItemListJsonLd, buildListingHead } from "@/lib/seo/seo";
+import { serializeJsonLd } from "@/lib/seo/jsonLd";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { prettifySlug } from "@/utils/prettifySlug";
 import { useScrollToTopOnChange } from "@/hooks/useScrollToTopOnChange";
@@ -77,7 +78,7 @@ function CategoryPage() {
   const jsonLd = useMemo(
     () =>
       items.length > 0
-        ? JSON.stringify(
+        ? serializeJsonLd(
             buildItemListJsonLd(items, {
               name: tr("listing.itemListGenre", { name: title }),
               url: `/genre/${slug}`,

@@ -1,7 +1,8 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { htmlToParagraphs } from "@/utils/htmlText";
 
 const COLLAPSED_MAX_PX = 72;
 
@@ -18,6 +19,9 @@ export function MovieDescription({ html, className }: Props) {
   const [canExpand, setCanExpand] = useState(false);
 
   const measureRef = useRef<HTMLDivElement>(null);
+
+  // Third-party HTML: render its text only (no injected markup / event handlers).
+  const paragraphs = useMemo(() => htmlToParagraphs(html), [html]);
 
   useLayoutEffect(() => {
     const el = measureRef.current;
@@ -36,8 +40,11 @@ export function MovieDescription({ html, className }: Props) {
             "prose-invert text-sm leading-relaxed text-netflix-text/90 [&_p]:mb-2 [&_p:last-child]:mb-0",
             !expanded && canExpand && "max-h-[72px] overflow-hidden",
           )}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        >
+          {paragraphs.map((p, i) => (
+            <p key={i}>{p}</p>
+          ))}
+        </div>
 
         {!expanded && canExpand && (
           <div

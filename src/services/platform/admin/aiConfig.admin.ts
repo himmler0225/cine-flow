@@ -1,3 +1,5 @@
+import { authorizedFetch } from "@/lib/auth/authorizedFetch";
+
 export type AiConfigLabel = string | Record<string, string> | null | undefined;
 
 export interface AiConfigMeta {
@@ -35,7 +37,7 @@ export class AiConfigApiError extends Error {
 }
 
 async function call<T>(path: string, method: "GET" | "PATCH", body?: unknown): Promise<T> {
-  const res = await fetch(path, {
+  const res = await authorizedFetch(path, {
     method,
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined,

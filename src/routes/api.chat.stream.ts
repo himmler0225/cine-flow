@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { checkRateLimit } from "@/lib/chat/rateLimit";
+import { requireUser } from "@/lib/server/requireUser";
 
 const MAX_TASK_LENGTH = 2000;
 
@@ -13,18 +14,16 @@ function jsonError(status: number, message: string, extra?: Record<string, unkno
   });
 }
 
-function clientKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-
-  if (forwarded) return forwarded.split(",")[0]!.trim();
-
-  return request.headers.get("x-real-ip") || "unknown";
-}
-
 export const Route = createFileRoute("/api/chat/stream")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Signed-in (approved) users only; rate-limit per account. The old per-IP key read the
+        // client-controlled first X-Forwarded-For entry, so anyone could bypass it.
+        const auth = await requireUser(request);
+
+        if (!auth.ok) return jsonError(auth.status, auth.message);
+
         const aiLayerUrl = process.env.AI_LAYER_URL;
 
         const aiLayerApiKey = process.env.AI_LAYER_API_KEY;
@@ -35,9 +34,7 @@ export const Route = createFileRoute("/api/chat/stream")({
           return jsonError(503, "AI chat is not configured on this server.");
         }
 
-        const key = clientKey(request);
-
-        const rate = checkRateLimit(key, RATE_LIMIT.limit, RATE_LIMIT.windowMs);
+        const rate = checkRateLimit(`user:${auth.user.id}`, RATE_LIMIT.limit, RATE_LIMIT.windowMs);
 
         if (!rate.ok) {
           return jsonError(429, "Too many messages — please wait a moment.", {

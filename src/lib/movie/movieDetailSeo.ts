@@ -1,5 +1,6 @@
 import { getImageUrl } from "@/lib/movie/movieImages";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
+import { serializeJsonLd } from "@/lib/seo/jsonLd";
 import { EXTERNAL_URLS } from "@/constants/urls";
 import { stripHtml } from "@/utils/stripHtml";
 import { t } from "@/lib/i18n";
@@ -94,8 +95,8 @@ export function buildMovieDetailHead(slug: string, movie: MovieDetail | null | u
     ],
     links: [{ rel: "canonical", href: url }],
     scripts: [
-      { type: "application/ld+json", children: JSON.stringify(movieLd) },
-      { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+      { type: "application/ld+json", children: serializeJsonLd(movieLd) },
+      { type: "application/ld+json", children: serializeJsonLd(breadcrumb) },
     ],
   };
 }

@@ -1,4 +1,5 @@
 import type { AgentSSEEvent } from "@/types/chat";
+import { authorizedFetch } from "@/lib/auth/authorizedFetch";
 
 async function readErrorMessage(res: Response, fallback: string): Promise<string> {
   try {
@@ -27,7 +28,7 @@ export async function* streamChat({
   lang,
   signal,
 }: StreamChatParams): AsyncGenerator<AgentSSEEvent> {
-  const res = await fetch("/api/chat/stream", {
+  const res = await authorizedFetch("/api/chat/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ task, lang }),

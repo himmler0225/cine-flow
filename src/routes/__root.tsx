@@ -31,6 +31,7 @@ import { registerAuthNavigator } from "@/lib/auth/authNavigation";
 import { buildLoginRedirect, isPublicAuthPath, isPublicPath } from "@/lib/auth/authRoutes";
 import { useAuthStore } from "@/store/authStore";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
+import { serializeJsonLd } from "@/lib/seo/jsonLd";
 import i18n, { t } from "@/lib/i18n";
 import { EXTERNAL_URLS, MOVIE_IMAGE_ORIGINS } from "@/constants/urls";
 import { CACHE_TTL } from "@/constants/timing";
@@ -152,7 +153,7 @@ export const Route = createRootRouteWithContext<{
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
+        children: serializeJsonLd({
           "@context": EXTERNAL_URLS.schemaContext,
           "@type": "WebSite",
           name: "Cine-Flow",

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { requireUser } from "@/lib/server/requireUser";
 
 function jsonError(status: number, message: string) {
   return new Response(JSON.stringify({ success: false, error: message }), {
@@ -9,6 +10,11 @@ function jsonError(status: number, message: string) {
 }
 
 async function proxy(request: Request, method: "GET" | "PATCH"): Promise<Response> {
+  // Reads and rewrites the AI layer's admin config with the service key: admins only.
+  const auth = await requireUser(request, { admin: true });
+
+  if (!auth.ok) return jsonError(auth.status, auth.message);
+
   const aiLayerUrl = process.env.AI_LAYER_URL;
 
   const aiLayerApiKey = process.env.AI_LAYER_API_KEY;

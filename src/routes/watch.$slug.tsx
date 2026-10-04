@@ -27,6 +27,7 @@ import { queryKeys } from "@/constants/queryKeys";
 import { moviesApi } from "@/services/movies";
 import { prettifySlug } from "@/utils/prettifySlug";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
+import { serializeJsonLd } from "@/lib/seo/jsonLd";
 import { stripHtml } from "@/utils/stripHtml";
 import { EXTERNAL_URLS } from "@/constants/urls";
 import { CACHE_TTL } from "@/constants/timing";
@@ -106,8 +107,8 @@ export const Route = createFileRoute("/watch/$slug")({
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(videoLd) },
-        { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+        { type: "application/ld+json", children: serializeJsonLd(videoLd) },
+        { type: "application/ld+json", children: serializeJsonLd(breadcrumb) },
       ],
     };
   },
