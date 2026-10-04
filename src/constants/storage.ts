@@ -67,7 +67,19 @@ export function writeStorageKey(key: keyof typeof STORAGE_KEYS, value: string | 
     return;
   }
 
-  localStorage.setItem(current, value);
+  try {
+    localStorage.setItem(current, value);
+  } catch {
+    // Quota exceeded (Safari ~5MB): the persisted query cache is the only large, disposable
+    // entry. Dropping it beats failing to store a rotated refresh token (= logged out).
+    localStorage.removeItem(STORAGE_KEYS.reactQueryCache);
+
+    try {
+      localStorage.setItem(current, value);
+    } catch (error) {
+      console.warn(`[storage] could not persist ${current}`, error);
+    }
+  }
 
   if (legacy) localStorage.removeItem(legacy);
 }

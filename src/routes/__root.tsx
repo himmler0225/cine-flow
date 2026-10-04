@@ -239,11 +239,11 @@ function RootComponent() {
         queryClient,
         persister,
         maxAge: CACHE_TTL.day,
-        buster: "v4",
+        // v5: drops caches persisted before details/searches were excluded (could be MBs).
+        buster: "v5",
         dehydrateOptions: {
           shouldDehydrateQuery: (query) =>
-            defaultShouldDehydrateQuery(query) &&
-            !(query.queryKey[0] === "favorites" && query.queryKey[1] === "slugs"),
+            defaultShouldDehydrateQuery(query) && shouldPersistQuery(query.queryKey),
         },
       });
 
@@ -344,6 +344,24 @@ function LazyChatModal() {
       <ChatModal />
     </Suspense>
   );
+}
+
+/**
+ * Persist small, frequently reused lists only. Movie details (full episode lists, up to
+ * ~100KB each), searches and admin data piled up in localStorage until writes such as the
+ * refresh token started failing with QuotaExceededError.
+ */
+function shouldPersistQuery(queryKey: readonly unknown[]): boolean {
+  const [scope, kind] = queryKey;
+
+  if (scope === "favorites" && kind === "slugs") return false;
+
+  if (scope === "admin" || scope === "wp-detail") return false;
+
+  if (scope === "movies" && ["detail", "search", "search-inf", "list-page"].includes(String(kind)))
+    return false;
+
+  return true;
 }
 
 function AuthGateLoader() {

@@ -64,7 +64,7 @@ function CategoryPage() {
 
   const { data, isFetching, isPlaceholderData } = usePagedByGenre(slug, page, search);
 
-  const items = data?.items ?? [];
+  const items = useMemo(() => data?.items ?? [], [data]);
 
   const totalPages = data?.pagination?.totalPages ?? 0;
 
