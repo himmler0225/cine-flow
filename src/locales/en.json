@@ -539,8 +539,7 @@
       "movies": "Movies & Views",
       "rooms": "Watch Party Rooms",
       "comments": "Comments",
-      "analytics": "Analytics",
-      "aiConfig": "AI Settings"
+      "analytics": "Analytics"
     },
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -699,89 +698,6 @@
       "noRoomsInPeriod": "No rooms in this period",
       "movieLanguage": "Movie language distribution",
       "movieQuality": "🎞 Movie quality distribution"
-    },
-    "aiConfig": {
-      "title": "AI Settings",
-      "subtitle": "Manage ai-layer's models, prompts, and limits",
-      "groups": {
-        "models": "AI Models",
-        "agent": "Agent Behavior",
-        "limits": "Rate Limits",
-        "prompts": "Prompts",
-        "services": "Connected Services",
-        "miner": "Data Miner"
-      },
-      "showSecret": "Show",
-      "hideSecret": "Hide",
-      "secretHidden": "Hidden — contains live API keys",
-      "invalidJson": "Invalid JSON",
-      "unsavedBadge": "Unsaved",
-      "lastUpdated": "Last updated {{time}}",
-      "save": "Save changes",
-      "saving": "Saving...",
-      "discard": "Discard changes",
-      "confirmTitle": "Save AI configuration?",
-      "confirmMessage": "This updates ai-layer's live configuration immediately for all users.",
-      "saveSuccess": "Configuration saved",
-      "saveError": "Failed to save configuration",
-      "loadError": "Failed to load configuration",
-      "empty": "No config keys available",
-      "prompts": {
-        "empty": "No prompt groups found in this value.",
-        "groups": {
-          "agent": "Agent",
-          "review_summary": "Review Summary",
-          "aspect_group": "Aspect Grouping",
-          "aspect_summary": "Aspect Summary"
-        },
-        "fields": {
-          "system": "System prompt",
-          "synth_system": "Synthesis system prompt",
-          "prompt": "Prompt template"
-        }
-      },
-      "models": {
-        "empty": "No providers found in this value.",
-        "activeProvider": "Active provider",
-        "noActive": "No provider is marked active — the agent has no model to call.",
-        "baseUrl": "Base URL",
-        "apiKey": "API key",
-        "model": "Model",
-        "maxTokens": "Max tokens",
-        "toolModel": "Tool-calling model",
-        "toolMaxTokens": "Tool-calling max tokens"
-      },
-      "agent": {
-        "fields": {
-          "max_iter": "Max iterations",
-          "max_comments": "Max comments per video",
-          "max_comment_len": "Max comment length",
-          "max_list_items": "Max list items",
-          "max_result_chars": "Max result characters",
-          "curated_top_n": "Curated reviews (top N)",
-          "include_review_summary": "Include review summary"
-        }
-      },
-      "rateLimit": {
-        "placeholder": "e.g. 60/minute"
-      },
-      "services": {
-        "empty": "No services found in this value."
-      },
-      "proxy": {
-        "empty": "No proxy pools configured.",
-        "key": "Key",
-        "countries": "Countries",
-        "value": "Value",
-        "url": "URL",
-        "method": "Method",
-        "query": "Query params",
-        "queryKey": "Key",
-        "queryValue": "Value",
-        "addQueryParam": "Add query param",
-        "addPool": "Add pool",
-        "remove": "Remove"
-      }
     }
   },
   "seo": {
@@ -952,29 +868,5 @@
         }
       ]
     }
-  },
-  "chat": {
-    "title": "AI Assistant",
-    "subtitle": "Ask about any movie",
-    "triggerAria": "Open AI assistant",
-    "triggerGreeting": "Hi there, how can I help you?",
-    "closeAria": "Close",
-    "placeholder": "Ask about a movie, actor, or review...",
-    "send": "Send",
-    "stop": "Stop",
-    "newChat": "New chat",
-    "emptyTitle": "Ask me anything about movies",
-    "emptyHint": "Reviews, comparisons, recommendations — I'll search YouTube and TikTok for you.",
-    "loginRequired": "Please sign in to chat with the AI assistant",
-    "you": "You",
-    "assistant": "AI Assistant",
-    "genericError": "Something went wrong. Please try again.",
-    "rateLimited": "Too many messages — please wait a moment.",
-    "conversations": "Conversations",
-    "untitledChat": "New conversation",
-    "noConversations": "No conversations yet",
-    "loadingConversations": "Loading...",
-    "deleteConversation": "Delete conversation",
-    "deleteConfirm": "Delete this conversation?"
   }
 }

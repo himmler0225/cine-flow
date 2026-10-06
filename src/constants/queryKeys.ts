@@ -38,7 +38,6 @@ export const queryKeys = {
   },
   admin: {
     all: () => ["admin"] as const,
-    aiConfig: () => ["admin", "ai-config"] as const,
     stats: (dateRange: string) => ["admin", "stats", dateRange] as const,
     line: (dateRange: string) => ["admin", "line", dateRange] as const,
     pageType: (dateRange: string) => ["admin", "pagetype", dateRange] as const,
@@ -67,7 +66,4 @@ export const queryKeys = {
     analyticsLangQuality: (dateRange: string) => ["admin", "an-lq", dateRange] as const,
   },
   episodeNotifications: (slugsKey: string) => ["episode-notifications", slugsKey] as const,
-  chat: {
-    conversations: (userId: string) => ["chat", "conversations", userId] as const,
-  },
 };

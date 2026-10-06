@@ -8,7 +8,6 @@ import {
   PartyPopper,
   MessageSquare,
   TrendingUp,
-  Bot,
   LogOut,
   ArrowLeft,
   ShieldCheck,
@@ -25,7 +24,6 @@ const NAV = [
   { to: "/admin/rooms", labelKey: "admin.nav.rooms", icon: PartyPopper },
   { to: "/admin/comments", labelKey: "admin.nav.comments", icon: MessageSquare },
   { to: "/admin/analytics", labelKey: "admin.nav.analytics", icon: TrendingUp },
-  { to: "/admin/ai-config", labelKey: "admin.nav.aiConfig", icon: Bot },
 ] as const;
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

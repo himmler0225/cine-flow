@@ -539,8 +539,7 @@
       "movies": "Phim & Lượt xem",
       "rooms": "Phòng Watch Party",
       "comments": "Bình luận",
-      "analytics": "Phân tích",
-      "aiConfig": "Cấu hình AI"
+      "analytics": "Phân tích"
     },
     "confirm": "Xác nhận",
     "cancel": "Hủy",
@@ -699,89 +698,6 @@
       "noRoomsInPeriod": "Chưa có phòng trong kỳ",
       "movieLanguage": "Ngôn ngữ phim được xem",
       "movieQuality": "Chất lượng phim được xem"
-    },
-    "aiConfig": {
-      "title": "Cấu hình AI",
-      "subtitle": "Quản lý model, prompt và giới hạn của ai-layer",
-      "groups": {
-        "models": "Model AI",
-        "agent": "Hành vi Agent",
-        "limits": "Giới hạn tần suất",
-        "prompts": "Prompt",
-        "services": "Dịch vụ kết nối",
-        "miner": "Data Miner"
-      },
-      "showSecret": "Hiện",
-      "hideSecret": "Ẩn",
-      "secretHidden": "Đang ẩn — chứa API key thật",
-      "invalidJson": "JSON không hợp lệ",
-      "unsavedBadge": "Chưa lưu",
-      "lastUpdated": "Cập nhật lần cuối {{time}}",
-      "save": "Lưu thay đổi",
-      "saving": "Đang lưu...",
-      "discard": "Hủy thay đổi",
-      "confirmTitle": "Lưu cấu hình AI?",
-      "confirmMessage": "Thao tác này áp dụng ngay cho toàn bộ người dùng đang dùng ai-layer.",
-      "saveSuccess": "Đã lưu cấu hình",
-      "saveError": "Lưu cấu hình thất bại",
-      "loadError": "Tải cấu hình thất bại",
-      "empty": "Không có key cấu hình nào",
-      "prompts": {
-        "empty": "Không tìm thấy nhóm prompt nào trong giá trị này.",
-        "groups": {
-          "agent": "Agent",
-          "review_summary": "Tóm tắt đánh giá",
-          "aspect_group": "Gom nhóm khía cạnh",
-          "aspect_summary": "Tóm tắt khía cạnh"
-        },
-        "fields": {
-          "system": "Prompt hệ thống",
-          "synth_system": "Prompt hệ thống (tổng hợp)",
-          "prompt": "Mẫu prompt"
-        }
-      },
-      "models": {
-        "empty": "Không tìm thấy provider nào trong giá trị này.",
-        "activeProvider": "Provider đang hoạt động",
-        "noActive": "Chưa có provider nào được đánh dấu hoạt động — agent sẽ không có model để gọi.",
-        "baseUrl": "Base URL",
-        "apiKey": "API key",
-        "model": "Model",
-        "maxTokens": "Max tokens",
-        "toolModel": "Model gọi tool",
-        "toolMaxTokens": "Max tokens (gọi tool)"
-      },
-      "agent": {
-        "fields": {
-          "max_iter": "Số vòng lặp tối đa",
-          "max_comments": "Số comment tối đa / video",
-          "max_comment_len": "Độ dài comment tối đa",
-          "max_list_items": "Số item tối đa trong danh sách",
-          "max_result_chars": "Số ký tự kết quả tối đa",
-          "curated_top_n": "Số review chọn lọc (top N)",
-          "include_review_summary": "Kèm tóm tắt đánh giá"
-        }
-      },
-      "rateLimit": {
-        "placeholder": "vd 60/minute"
-      },
-      "services": {
-        "empty": "Không tìm thấy dịch vụ nào trong giá trị này."
-      },
-      "proxy": {
-        "empty": "Chưa có proxy pool nào.",
-        "key": "Key",
-        "countries": "Quốc gia",
-        "value": "Giá trị",
-        "url": "URL",
-        "method": "Method",
-        "query": "Tham số query",
-        "queryKey": "Key",
-        "queryValue": "Giá trị",
-        "addQueryParam": "Thêm tham số query",
-        "addPool": "Thêm pool",
-        "remove": "Xóa"
-      }
     }
   },
   "seo": {
@@ -952,29 +868,5 @@
         }
       ]
     }
-  },
-  "chat": {
-    "title": "Trợ lý AI",
-    "subtitle": "Hỏi bất cứ điều gì về phim",
-    "triggerAria": "Mở trợ lý AI",
-    "triggerGreeting": "Xin chào, tôi có thể giúp gì cho bạn?",
-    "closeAria": "Đóng",
-    "placeholder": "Hỏi về phim, diễn viên, đánh giá...",
-    "send": "Gửi",
-    "stop": "Dừng",
-    "newChat": "Cuộc trò chuyện mới",
-    "emptyTitle": "Hỏi mình bất cứ điều gì về phim",
-    "emptyHint": "Đánh giá, so sánh, gợi ý phim — mình sẽ tìm trên YouTube và TikTok giúp bạn.",
-    "loginRequired": "Vui lòng đăng nhập để trò chuyện với trợ lý AI",
-    "you": "Bạn",
-    "assistant": "Trợ lý AI",
-    "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại.",
-    "rateLimited": "Bạn gửi hơi nhanh — vui lòng chờ một chút.",
-    "conversations": "Cuộc trò chuyện",
-    "untitledChat": "Cuộc trò chuyện mới",
-    "noConversations": "Chưa có cuộc trò chuyện nào",
-    "loadingConversations": "Đang tải...",
-    "deleteConversation": "Xoá cuộc trò chuyện",
-    "deleteConfirm": "Xoá cuộc trò chuyện này?"
   }
 }
