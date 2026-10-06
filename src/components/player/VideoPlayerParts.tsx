@@ -34,7 +34,6 @@ interface VideoPlayerControlsProps {
   showSpeed: boolean;
   skipAds: boolean;
   isPremium: boolean;
-  activeAd?: boolean;
   hasNextEpisode?: boolean;
   levels: HlsQualityLevel[];
   subtitleTracks: HlsSubtitleTrack[];
@@ -49,7 +48,6 @@ interface VideoPlayerControlsProps {
   onToggleSpeedMenu: () => void;
   onSetSpeed: (s: number) => void;
   onToggleSkipAds: () => void;
-  onSkipCurrentAd?: () => void;
   onTogglePiP: () => void;
   onToggleFullscreen: () => void;
   onSelectQuality: (level: number) => void;
@@ -70,7 +68,6 @@ export function VideoPlayerControls({
   showSpeed,
   skipAds,
   isPremium,
-  activeAd = false,
   levels,
   subtitleTracks,
   currentLevel,
@@ -84,7 +81,6 @@ export function VideoPlayerControls({
   onToggleSpeedMenu,
   onSetSpeed,
   onToggleSkipAds,
-  onSkipCurrentAd,
   onTogglePiP,
   onToggleFullscreen,
   onSelectQuality,
@@ -165,7 +161,7 @@ export function VideoPlayerControls({
       onPointerDownCapture={onInteract}
       className={cn(
         "pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 pb-1.5 pt-8 transition-opacity duration-200 sm:px-3 sm:pb-2",
-        visible || activeAd
+        visible
           ? "opacity-100 [&>*]:pointer-events-auto"
           : "opacity-0 focus-within:opacity-100 focus-within:[&>*]:pointer-events-auto",
       )}
@@ -244,16 +240,6 @@ export function VideoPlayerControls({
         <span className="min-w-0 truncate text-[11px] tabular-nums text-white/80 sm:text-xs">
           {formatTime(progress)} / {formatTime(duration)}
         </span>
-        {activeAd && onSkipCurrentAd && (
-          <button
-            type="button"
-            onClick={onSkipCurrentAd}
-            className="inline-flex items-center gap-1.5 rounded bg-netflix-red px-2.5 py-1 text-xs font-semibold text-white hover:bg-netflix-red/90"
-          >
-            <SkipForward className="h-3.5 w-3.5" />
-            {t("player.skipAdNow")}
-          </button>
-        )}
         <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
           {levels.length > 1 && (
             <label className="sr-only" htmlFor="player-quality">

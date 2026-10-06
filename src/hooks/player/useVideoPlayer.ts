@@ -19,7 +19,7 @@ import { usePlayerTelemetry, type SeekLock } from "@/hooks/player/usePlayerTelem
 import { usePlayerResume, usePlayerSeekEvent } from "@/hooks/player/usePlayerResume";
 import { usePlayerKeyboard } from "@/hooks/player/usePlayerKeyboard";
 import { createPlayerControls } from "@/hooks/player/usePlayerControls";
-import { DEFAULT_MIDROLL_AD, getActiveAdRange } from "@/lib/hlsAdSkip";
+import { findActiveAdRange } from "@/lib/adRanges";
 
 export function useVideoPlayer({
   src,
@@ -97,15 +97,12 @@ export function useVideoPlayer({
     dispatch({ type: "setForceEmbed", forceEmbed: true });
   }, []);
 
+  // The profile (and so isPremium) loads after the player mounts: apply the saved
+  // preference once it is known. The old effect wrote state.skipAds back to storage as soon
+  // as isPremium flipped, overwriting the saved "on" with the initial "off" on every visit.
   useEffect(() => {
-    if (!isPremium && state.skipAds) {
-      dispatch({ type: "setSkipAds", skipAds: false });
-    }
-  }, [isPremium, state.skipAds]);
-
-  useEffect(() => {
-    if (isPremium) writeSkipAdsPreference(state.skipAds);
-  }, [state.skipAds, isPremium]);
+    dispatch({ type: "setSkipAds", skipAds: isPremium && readSkipAdsPreference() });
+  }, [isPremium]);
 
   usePlayerEmbedMode(
     videoRef,
@@ -193,39 +190,26 @@ export function useVideoPlayer({
     }
 
     controls.setSkipAds(next);
+
+    // Persist only explicit choices.
+    if (isPremium) writeSkipAdsPreference(next);
   };
 
-  const activeAd = getActiveAdRange(state.progress, hls.adRangesRef.current);
+  const activeAd = findActiveAdRange(state.progress, hls.adRangesRef.current);
 
   const skipCurrentAd = () => {
-    const end = DEFAULT_MIDROLL_AD.end;
-
     const video = videoRef.current;
 
-    if (state.useEmbed || !video || !playableSrc) return;
+    const active = video ? findActiveAdRange(video.currentTime, hls.adRangesRef.current) : null;
 
-    seekLockRef.current = { minTime: end, until: Date.now() + 10000 };
-
-    pendingSeekRef.current = null;
+    if (state.useEmbed || !video || !active) return;
 
     dispatch({ type: "incrementAdsSkipped", count: 1 });
 
-    dispatch({ type: "setProgress", progress: end });
-
-    const dur =
-      video.duration && Number.isFinite(video.duration)
-        ? video.duration
-        : Math.max(end + 1, state.duration || 0);
-
-    try {
-      video.currentTime = Math.min(end, Math.max(0, dur - 0.25));
-    } catch {}
+    // Jump to the end of *this* ad break (used to always jump to a hard-coded 16:00).
+    controls.seekTo(active.end + 0.1);
 
     void video.play().catch(() => {});
-
-    onLiveTime?.(end, dur);
-
-    onProgress?.(end, dur);
   };
 
   return {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
-import { attachHlsAdSkip } from "@/lib/hlsAdSkip";
+import { attachHlsAdDetection, detectAdRangesFromUrl, type AdRange } from "@/lib/hlsAdSkip";
 import { shouldUseNativeHls } from "@/lib/hlsEngine";
 import { useLatestRef } from "@/hooks/useLatestRef";
 import type { PlayerUiAction } from "@/hooks/player/playerReducer";
@@ -28,12 +28,8 @@ export function usePlayerHlsSource(
   pendingSeekRef?: React.MutableRefObject<number | null>,
   onFallbackEmbed?: () => void,
 ) {
-  const adRangesRef = useRef<
-    {
-      start: number;
-      end: number;
-    }[]
-  >([]);
+  // Ad breaks of the current source; always detected, only auto-skipped when skipAds is on.
+  const adRangesRef = useRef<AdRange[]>([]);
 
   const skipAdsRef = useRef(skipAds);
 
@@ -54,8 +50,6 @@ export function usePlayerHlsSource(
 
   useEffect(() => {
     skipAdsRef.current = skipAds;
-
-    if (!skipAds) adRangesRef.current = [];
   }, [skipAds]);
 
   useEffect(() => {
@@ -78,8 +72,22 @@ export function usePlayerHlsSource(
     const startPosition =
       pendingSeekRef?.current != null && pendingSeekRef.current >= 0 ? pendingSeekRef.current : -1;
 
+    const detectNatively = () => {
+      const controller = new AbortController();
+
+      void detectAdRangesFromUrl(src, controller.signal)
+        .then((ranges) => {
+          adRangesRef.current = ranges;
+        })
+        .catch(() => {});
+
+      return controller;
+    };
+
     if (shouldUseNativeHls(video)) {
       video.src = src;
+
+      const adDetection = detectNatively();
 
       const onMeta = () => {
         if (startPosition >= 0) {
@@ -92,6 +100,8 @@ export function usePlayerHlsSource(
       video.addEventListener("loadedmetadata", onMeta);
 
       return () => {
+        adDetection.abort();
+
         video.removeEventListener("loadedmetadata", onMeta);
 
         video.removeAttribute("src");
@@ -103,7 +113,11 @@ export function usePlayerHlsSource(
     if (!Hls.isSupported()) {
       video.src = src;
 
+      const adDetection = detectNatively();
+
       return () => {
+        adDetection.abort();
+
         video.removeAttribute("src");
 
         video.load();
@@ -123,16 +137,9 @@ export function usePlayerHlsSource(
 
     hls.attachMedia(video);
 
-    attachHlsAdSkip(
-      hls,
-      adRangesRef,
-      (count) =>
-        dispatch({
-          type: "incrementAdsSkipped",
-          count: typeof count === "number" ? count : 0,
-        }),
-      skipAdsRef,
-    );
+    attachHlsAdDetection(hls, (ranges) => {
+      adRangesRef.current = ranges;
+    });
 
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       setLevels(

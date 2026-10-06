@@ -54,5 +54,3 @@ export const VIMEO_HOST_PATTERN = /(^|\.)vimeo\.com$/;
 export const YOUTUBE_ORIGIN_PATTERN = /^https?:\/\/(www\.)?youtube(-nocookie)?\.com$/;
 
 export const VIMEO_ORIGIN_PATTERN = /^https?:\/\/player\.vimeo\.com$/;
-
-export const HLS_AD_URL_PATTERN = /(\/ads?\/|\/advert|googlevideo|doubleclick|adserver|preroll)/i;

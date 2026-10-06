@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "node --experimental-strip-types --test src/lib/auth/authRoutes.test.ts src/lib/auth/authTokenMemory.test.ts src/utils/watchProgress.test.ts src/utils/localHistory.test.ts src/lib/watchParty/watchPartySyncMath.test.ts src/utils/htmlText.test.ts",
+    "test": "node --experimental-strip-types --test src/lib/auth/authRoutes.test.ts src/lib/auth/authTokenMemory.test.ts src/utils/watchProgress.test.ts src/utils/localHistory.test.ts src/lib/watchParty/watchPartySyncMath.test.ts src/utils/htmlText.test.ts src/lib/adRanges.test.ts",
     "check:contract": "node --experimental-strip-types scripts/check-api-contract.ts"
   },
   "dependencies": {

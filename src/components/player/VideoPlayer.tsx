@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pause, Play } from "lucide-react";
+import { Pause, Play, SkipForward } from "lucide-react";
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { usePlayerChrome } from "@/hooks/player/usePlayerChrome";
 import { canUsePictureInPicture } from "@/hooks/player/usePlayerControls";
@@ -34,7 +34,7 @@ export function VideoPlayer(props: Props) {
 
   const chrome = usePlayerChrome({
     playing: player.playing,
-    keepVisible: player.showSpeed || !!player.activeAd,
+    keepVisible: player.showSpeed,
     togglePlay: player.togglePlay,
     seekBy: player.seekBy,
     toggleFullscreen: player.toggleFullscreen,
@@ -138,6 +138,23 @@ export function VideoPlayer(props: Props) {
             )}
           </button>
         )}
+        {player.activeAd && (
+          <button
+            type="button"
+            onClick={() => {
+              player.skipCurrentAd();
+
+              chrome.reveal();
+            }}
+            className="absolute right-3 top-3 z-30 inline-flex items-center gap-1.5 rounded-md bg-black/75 px-3 py-2 text-sm font-semibold text-white ring-1 ring-white/25 backdrop-blur-sm hover:bg-black/90 sm:bottom-28 sm:top-auto sm:px-3.5"
+          >
+            {t("player.skipAdNow")}
+            <span className="tabular-nums text-white/70">
+              {Math.max(1, Math.ceil(player.activeAd.end - player.progress))}s
+            </span>
+            <SkipForward className="h-4 w-4" />
+          </button>
+        )}
         {player.isPremium && player.skipAds && player.adsSkipped > 0 && (
           <div className="absolute right-3 top-3 z-30 rounded bg-black/70 px-2 py-1 text-xs font-medium text-white ring-1 ring-white/10">
             {t("player.adsSkipped", { count: player.adsSkipped })}
@@ -167,7 +184,6 @@ export function VideoPlayer(props: Props) {
           showSpeed={player.showSpeed}
           skipAds={player.skipAds}
           isPremium={player.isPremium}
-          activeAd={!!player.activeAd}
           hasNextEpisode={!!props.onNextEpisode}
           levels={player.levels}
           subtitleTracks={player.subtitleTracks}
@@ -183,7 +199,6 @@ export function VideoPlayer(props: Props) {
           onToggleSpeedMenu={() => player.setShowSpeed((s) => !s)}
           onSetSpeed={player.setSpeedVal}
           onToggleSkipAds={() => player.setSkipAds((v) => !v)}
-          onSkipCurrentAd={player.skipCurrentAd}
           onTogglePiP={player.togglePiP}
           onToggleFullscreen={player.toggleFullscreen}
           onSelectQuality={player.selectQuality}

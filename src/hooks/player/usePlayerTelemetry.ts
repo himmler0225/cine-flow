@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLatestRef } from "@/hooks/useLatestRef";
-import { skipAdRangesAtTime } from "@/lib/hlsAdSkip";
+import { skipAdAt, type AdRange } from "@/lib/hlsAdSkip";
 import type { PlayerUiAction } from "@/hooks/player/playerReducer";
 
 export type SeekLock = {
@@ -12,12 +12,7 @@ type Args = {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   useEmbed: boolean;
   embedSrc: string;
-  adRangesRef: React.MutableRefObject<
-    {
-      start: number;
-      end: number;
-    }[]
-  >;
+  adRangesRef: React.MutableRefObject<AdRange[]>;
   skipAdsRef: React.MutableRefObject<boolean>;
   seekLockRef?: React.MutableRefObject<SeekLock | null>;
   blockEmbedFallbackRef?: React.MutableRefObject<boolean>;
@@ -122,10 +117,8 @@ export function usePlayerTelemetry({
         onProgress(cur, v.duration);
       }
 
-      if (skipAdsRef.current) {
-        skipAdRangesAtTime(v, adRangesRef.current, () =>
-          dispatch({ type: "incrementAdsSkipped", count: 1 }),
-        );
+      if (skipAdsRef.current && skipAdAt(v, adRangesRef.current)) {
+        dispatch({ type: "incrementAdsSkipped", count: 1 });
       }
     };
 
