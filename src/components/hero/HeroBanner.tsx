@@ -18,6 +18,8 @@ interface Props {
   movies: MovieListItem[];
 }
 
+const MISSING_DESCRIPTION_PATTERN = /^phim (chưa|không) có nội dung\.?$/i;
+
 export function HeroBanner({ movies }: Props) {
   const { t } = useTranslation();
 
@@ -95,7 +97,13 @@ export function HeroBanner({ movies }: Props) {
 
   const movieDetail = detail.data?.movie;
 
-  const description = stripHtml(movieDetail?.content) || m.origin_name;
+  const rawDescription = stripHtml(movieDetail?.content);
+
+  // kkphim ships "Phim chưa có nội dung." as the description of movies without one.
+  const description =
+    rawDescription && !MISSING_DESCRIPTION_PATTERN.test(rawDescription)
+      ? rawDescription
+      : m.origin_name;
 
   return (
     <div

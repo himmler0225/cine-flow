@@ -23,6 +23,8 @@ export const isLikelyImageUrl = (url?: string | null): boolean => {
   return u.includes("/");
 };
 
+const TRUNCATED_FOREIGN_URL_PATTERN = /^(?!uploads\/)[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}\//i;
+
 export const getImageUrl = (url?: string): string => {
   if (!url?.trim()) return "";
 
@@ -31,6 +33,11 @@ export const getImageUrl = (url?: string): string => {
   if (u.startsWith("//")) return `https:${u}`;
 
   if (u.startsWith("http://") || u.startsWith("https://")) return u;
+
+  // Foreign URLs whose host was cut off upstream ("danviet.vn/files/…" for
+  // https://i.ex-cdn.com/danviet.vn/…) can't be recovered; treating them as CDN paths
+  // gave https://phimimg.com/danviet.vn/… (404). Return nothing so callers use the other image.
+  if (TRUNCATED_FOREIGN_URL_PATTERN.test(u)) return "";
 
   const clean = u.replace(LEADING_SLASH_PATTERN, "");
 

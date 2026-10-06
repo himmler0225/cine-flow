@@ -181,13 +181,7 @@ function LoginPage() {
               }
             />
 
-            <div className="flex items-center justify-between gap-4">
-              <AuthCheckboxField
-                id="remember"
-                checked={login.remember}
-                onCheckedChange={(remember) => patchLogin({ remember })}
-                label={tr("auth.rememberMe")}
-              />
+            <div className="flex items-center justify-end gap-4">
               <Link
                 to="/forgot-password"
                 className="shrink-0 text-xs text-netflix-red hover:underline"

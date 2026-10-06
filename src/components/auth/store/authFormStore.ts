@@ -9,7 +9,6 @@ type LoginForm = {
   email: string;
   password: string;
   showPassword: boolean;
-  remember: boolean;
 };
 
 type RegisterForm = {
@@ -44,7 +43,6 @@ const emptyLogin = (): LoginForm => ({
   email: "",
   password: "",
   showPassword: false,
-  remember: true,
 });
 
 const emptyRegister = (): RegisterForm => ({

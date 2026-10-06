@@ -29,6 +29,8 @@ export function ProfileTabBar({ active, onChange }: ProfileTabBarProps) {
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
+            aria-label={t(`profile.tabs.${tab.id}`)}
+            aria-current={isActive ? "page" : undefined}
             className={cn(
               "relative flex shrink-0 items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
               isActive ? "text-white" : "text-netflix-muted hover:text-white",

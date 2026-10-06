@@ -65,10 +65,15 @@ class WatchPartyApi {
       error: ApiErrorPayload | null;
     }>(`/api/watch-party/rooms/${encodeURIComponent(code)}/preview`, { auth: false });
   }
-  fetchRoomFull(code: string): Promise<WatchRoom | null> {
-    return platformFetch<WatchRoom | null>(`/api/watch-party/rooms/${encodeURIComponent(code)}`, {
-      auth: false,
-    });
+  async fetchRoomFull(code: string): Promise<WatchRoom | null> {
+    // The API answers 200 with an empty body for unknown codes; React Query rejects
+    // `undefined` data, which retried and kept the page on a skeleton before "not found".
+    const room = await platformFetch<WatchRoom | null>(
+      `/api/watch-party/rooms/${encodeURIComponent(code)}`,
+      { auth: false },
+    );
+
+    return room ?? null;
   }
   fetchMembers(roomId: string): Promise<RoomMemberRow[]> {
     return platformFetch<RoomMemberRow[]>(`/api/watch-party/rooms/${roomId}/members`);

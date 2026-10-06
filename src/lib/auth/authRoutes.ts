@@ -1,5 +1,8 @@
 const PUBLIC_AUTH_PATHS = new Set(["/login", "/forgot-password", "/reset-password"]);
 
+/** Legal pages must be readable without an account (also required by Google OAuth). */
+const PUBLIC_INFO_PATHS = new Set(["/privacy", "/terms"]);
+
 // Home ("/") is deliberately not public: it requires login, enforced by the root route guard
 // (which also hides the navbar while the session is restored, instead of flashing "Đăng Nhập").
 const PUBLIC_BROWSE_PREFIXES = [
@@ -19,6 +22,8 @@ export function isPublicAuthPath(pathname: string): boolean {
 }
 
 export function isPublicBrowsePath(pathname: string): boolean {
+  if (PUBLIC_INFO_PATHS.has(pathname)) return true;
+
   return PUBLIC_BROWSE_PREFIXES.some(
     (p) => pathname === p.replace(/\/$/, "") || pathname.startsWith(p),
   );

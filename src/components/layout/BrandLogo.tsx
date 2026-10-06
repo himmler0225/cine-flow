@@ -1,18 +1,23 @@
+import { useId } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
 const BRAND_NAME = "Cine-Flow";
 
 function BrandMark({ className }: { className?: string }) {
+  // The logo renders several times per page (navbar, drawer, footer): a shared id made
+  // url(#…) resolve to whichever copy came first, losing the gradient if that one was hidden.
+  const gradientId = `cf-brand-g-${useId().replace(/:/g, "")}`;
+
   return (
     <svg viewBox="0 0 48 48" role="img" aria-hidden className={cn("w-auto shrink-0", className)}>
       <defs>
-        <linearGradient id="cf-brand-g" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#F5222D" />
           <stop offset="1" stopColor="#9B0710" />
         </linearGradient>
       </defs>
-      <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#cf-brand-g)" />
+      <rect x="2" y="2" width="44" height="44" rx="13" fill={`url(#${gradientId})`} />
       <g fill="#000" opacity="0.28">
         <rect x="7.5" y="9" width="4" height="6" rx="1.4" />
         <rect x="7.5" y="21" width="4" height="6" rx="1.4" />

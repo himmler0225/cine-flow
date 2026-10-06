@@ -12,6 +12,7 @@ import {
   useRouter,
   useNavigate,
   useLocation,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -289,7 +290,12 @@ function RootComponent() {
 
   const isAuthRoute = isPublicAuthPath(location.pathname);
 
-  const isPublic = isPublicPath(location.pathname);
+  // Unknown URLs render the 404 page for everyone instead of bouncing guests to /login.
+  const isNotFound = useRouterState({
+    select: (s) => s.matches.some((m) => m.globalNotFound || m.status === "notFound"),
+  });
+
+  const isPublic = isNotFound || isPublicPath(location.pathname);
 
   const authBlocked = !isPublic && authLoading;
 

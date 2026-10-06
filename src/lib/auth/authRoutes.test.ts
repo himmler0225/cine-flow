@@ -13,6 +13,12 @@ describe("auth public paths", () => {
     assert.equal(isPublicAuthPath("/login"), true);
   });
 
+  it("keeps legal pages public", () => {
+    assert.equal(isPublicPath("/privacy"), true);
+
+    assert.equal(isPublicPath("/terms"), true);
+  });
+
   it("requires login for home", () => {
     assert.equal(isPublicPath("/"), false);
 

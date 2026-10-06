@@ -85,10 +85,17 @@ function posterSrc(m: MovieListItem) {
 function handlePosterError(e: SyntheticEvent<HTMLImageElement>, m: MovieListItem) {
   const img = e.currentTarget;
 
-  if (img.dataset.f !== "1") {
+  const step = img.dataset.f ?? "0";
+
+  if (step === "0") {
     img.dataset.f = "1";
 
     img.src = getImageProxyUrl(m.poster_url || m.thumb_url);
+  } else if (step === "1" && m.thumb_url && m.thumb_url !== m.poster_url) {
+    // The poster itself is bad (not just the CDN): try the thumbnail before giving up.
+    img.dataset.f = "2";
+
+    img.src = getImageUrl(m.thumb_url);
   }
 }
 
