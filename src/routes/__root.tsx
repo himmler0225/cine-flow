@@ -37,6 +37,7 @@ import { EXTERNAL_URLS, MOVIE_IMAGE_ORIGINS } from "@/constants/urls";
 import { CACHE_TTL } from "@/constants/timing";
 import { STORAGE_KEYS } from "@/constants/storage";
 import { setAppQueryClient } from "@/lib/queryClientHolder";
+import { registerServiceWorker } from "@/lib/pwa";
 import { initMonitoring, reportError, setMonitoringUser } from "@/lib/monitoring";
 import { analyticsApi, pageTypeFromPath } from "@/services/platform/analytics.service";
 
@@ -116,6 +117,10 @@ export const Route = createRootRouteWithContext<{
         content: t("seo.defaultDescription"),
       },
       { name: "theme-color", content: "#0a0a0a" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Cine-Flow" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black" },
       { property: "og:site_name", content: "Cine-Flow" },
       { property: "og:type", content: "website" },
       { property: "og:title", content: t("seo.defaultTitle") },
@@ -148,7 +153,7 @@ export const Route = createRootRouteWithContext<{
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
-      { rel: "apple-touch-icon", href: "/favicon.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/icons/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       ...MOVIE_IMAGE_ORIGINS.flatMap((href) => [
         { rel: "preconnect", href, crossOrigin: "anonymous" as const },
@@ -228,6 +233,8 @@ function RootComponent() {
   }, [userId]);
 
   useEffect(() => {
+    registerServiceWorker();
+
     void import("@/lib/envCheck").then((m) => m.runStartupEnvCheck());
 
     void initialize();
