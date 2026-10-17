@@ -60,6 +60,37 @@ function ListPage() {
           onChange={(next) =>
             startTransition(() => navigate({ search: { ...next, page: undefined }, replace: true }))
           }
+          typeValue={slug}
+          allowAllTypes={!!(search.category || search.country || search.year)}
+          onTypeChange={(type) => {
+            const { category, country, year, ...rest } = search;
+
+            if (type) {
+              void navigate({
+                to: "/catalog/$slug",
+                params: { slug: type },
+                search: { ...search, page: undefined },
+              });
+            } else if (category) {
+              void navigate({
+                to: "/genre/$slug",
+                params: { slug: category },
+                search: { ...rest, country, year, page: undefined },
+              });
+            } else if (country) {
+              void navigate({
+                to: "/country/$slug",
+                params: { slug: country },
+                search: { ...rest, year, page: undefined },
+              });
+            } else if (year) {
+              void navigate({
+                to: "/year/$year",
+                params: { year },
+                search: { ...rest, page: undefined },
+              });
+            }
+          }}
         />
       </div>
       <div className={isPending ? "pointer-events-none opacity-60 transition-opacity" : ""}>

@@ -521,7 +521,9 @@
     "voiceOver": "Lồng tiếng",
     "pagination": "Phân trang",
     "prevPage": "Trang trước",
-    "nextPage": "Trang sau"
+    "nextPage": "Trang sau",
+    "type": "Loại phim",
+    "allTypes": "Tất cả loại"
   },
   "notifications": {
     "bellAria": "Thông báo tập mới",

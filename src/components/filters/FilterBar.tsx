@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { MOVIE_TYPES } from "@/constants/movie";
+import { getMovieListLabel } from "@/constants/movieLists";
 import {
   Select,
   SelectContent,
@@ -25,11 +27,30 @@ type Props = {
   value: MovieFilters;
   onChange: (next: MovieFilters) => void;
   hide?: Array<keyof MovieFilters>;
+  /** Movie type (phim bộ / lẻ / …): shown when the page can switch to a /catalog/<type> list. */
+  typeValue?: string;
+  onTypeChange?: (type: string | undefined) => void;
+  /** Whether "all types" is selectable (catalog pages need another filter to fall back to). */
+  allowAllTypes?: boolean;
 };
+
+export const FILTERABLE_MOVIE_TYPES = [
+  MOVIE_TYPES.PHIM_BO,
+  MOVIE_TYPES.PHIM_LE,
+  MOVIE_TYPES.HOAT_HINH,
+  MOVIE_TYPES.TV_SHOWS,
+] as const;
 
 const ALL = "__all__";
 
-export function FilterBar({ value, onChange, hide = [] }: Props) {
+export function FilterBar({
+  value,
+  onChange,
+  hide = [],
+  typeValue,
+  onTypeChange,
+  allowAllTypes = true,
+}: Props) {
   const { t } = useTranslation();
 
   const { data: genres } = useGenres();
@@ -84,6 +105,19 @@ export function FilterBar({ value, onChange, hide = [] }: Props) {
   return (
     <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:rounded-2xl sm:p-4 md:p-5">
       <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-4 md:grid-cols-3 lg:grid-cols-6">
+        {onTypeChange && (
+          <FilterSelect
+            label={t("filters.type")}
+            value={typeValue ?? ALL}
+            onValueChange={(v) => onTypeChange(v === ALL ? undefined : v)}
+            placeholder={t("filters.allTypes")}
+            hideAllOption={!allowAllTypes}
+            options={FILTERABLE_MOVIE_TYPES.map((type) => ({
+              value: type,
+              label: getMovieListLabel(type),
+            }))}
+          />
+        )}
         {shouldShow("category") && (
           <FilterSelect
             label={t("filters.genre")}
@@ -156,6 +190,7 @@ function FilterSelect({
   onValueChange,
   options,
   placeholder,
+  hideAllOption = false,
 }: {
   label: string;
   value: string;
@@ -165,6 +200,7 @@ function FilterSelect({
     label: string;
   }>;
   placeholder: string;
+  hideAllOption?: boolean;
 }) {
   const active = value !== ALL;
 
@@ -193,9 +229,14 @@ function FilterSelect({
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent className="border-white/10 bg-netflix-black/95 text-white backdrop-blur-md">
-          <SelectItem value={ALL} className="text-netflix-muted focus:bg-white/10 focus:text-white">
-            {placeholder}
-          </SelectItem>
+          {!hideAllOption && (
+            <SelectItem
+              value={ALL}
+              className="text-netflix-muted focus:bg-white/10 focus:text-white"
+            >
+              {placeholder}
+            </SelectItem>
+          )}
           {options.map((o) => (
             <SelectItem
               key={o.value}

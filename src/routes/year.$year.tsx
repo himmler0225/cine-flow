@@ -52,6 +52,16 @@ function YearPage() {
           value={search}
           onChange={(next) => navigate({ search: { ...next, page: undefined }, replace: true })}
           hide={["year"]}
+          onTypeChange={(type) => {
+            if (!type) return;
+
+            // Narrow to one movie type: the catalog list keeps this page's filter.
+            void navigate({
+              to: "/catalog/$slug",
+              params: { slug: type },
+              search: { ...search, year: String(year), page: undefined },
+            });
+          }}
         />
       </div>
       <MovieGrid

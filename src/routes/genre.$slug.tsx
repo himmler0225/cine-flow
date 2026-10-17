@@ -108,6 +108,16 @@ function CategoryPage() {
             startTransition(() => navigate({ search: { ...next, page: undefined }, replace: true }))
           }
           hide={["category"]}
+          onTypeChange={(type) => {
+            if (!type) return;
+
+            // Narrow to one movie type: the catalog list keeps this page's filter.
+            void navigate({
+              to: "/catalog/$slug",
+              params: { slug: type },
+              search: { ...search, category: String(slug), page: undefined },
+            });
+          }}
         />
       </div>
       <div className={isPending ? "pointer-events-none opacity-60 transition-opacity" : ""}>

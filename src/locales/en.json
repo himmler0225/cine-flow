@@ -521,7 +521,9 @@
     "voiceOver": "Voice-over",
     "pagination": "Pagination",
     "prevPage": "Previous page",
-    "nextPage": "Next page"
+    "nextPage": "Next page",
+    "type": "Type",
+    "allTypes": "All types"
   },
   "notifications": {
     "bellAria": "New episode notifications",
