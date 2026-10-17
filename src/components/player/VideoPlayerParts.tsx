@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Play,
   Pause,
@@ -8,6 +8,7 @@ import {
   PictureInPicture2,
   RotateCcw,
   RotateCw,
+  SmilePlus,
   SkipForward,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -16,6 +17,11 @@ import { PLAYBACK_SPEEDS } from "@/utils/player";
 import { formatTime } from "@/utils/formatTime";
 import { PLAYER_SEEK_STEP_SEC } from "@/constants/timing";
 import { SeekBar } from "@/components/player/SeekBar";
+import {
+  REACTION_EMOJIS,
+  type MomentsHeatmap,
+  type ReactionEmoji,
+} from "@/services/platform/moments.service";
 import type { HlsQualityLevel, HlsSubtitleTrack } from "@/hooks/player/usePlayerHlsSource";
 
 interface VideoPlayerControlsProps {
@@ -52,6 +58,9 @@ interface VideoPlayerControlsProps {
   onToggleFullscreen: () => void;
   onSelectQuality: (level: number) => void;
   onSelectSubtitle: (id: number) => void;
+  heatmap?: MomentsHeatmap;
+  /** Present when reactions can be sent (signed-in viewer). */
+  onReact?: (emoji: ReactionEmoji) => void;
 }
 
 export function VideoPlayerControls({
@@ -85,7 +94,11 @@ export function VideoPlayerControls({
   onToggleFullscreen,
   onSelectQuality,
   onSelectSubtitle,
+  heatmap,
+  onReact,
 }: VideoPlayerControlsProps) {
+  const [showReactions, setShowReactions] = useState(false);
+
   const { t } = useTranslation();
 
   const speedButtonRef = useRef<HTMLButtonElement>(null);
@@ -173,6 +186,7 @@ export function VideoPlayerControls({
         label={t("player.seekAria")}
         onSeek={onSeek}
         onScrubChange={onScrubChange}
+        heatmap={heatmap}
       />
       <div className="flex min-w-0 items-center gap-1 text-white sm:gap-2">
         <button
@@ -277,6 +291,34 @@ export function VideoPlayerControls({
                 </option>
               ))}
             </select>
+          )}
+          {onReact && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowReactions((v) => !v)}
+                className="rounded p-1.5 hover:bg-white/10"
+                aria-label={t("player.react")}
+                aria-expanded={showReactions}
+              >
+                <SmilePlus className="h-5 w-5" />
+              </button>
+              {showReactions && (
+                <div className="absolute bottom-full right-0 mb-2 flex gap-0.5 rounded-full bg-black/90 px-1.5 py-1 ring-1 ring-white/10">
+                  {REACTION_EMOJIS.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => onReact(emoji)}
+                      className="rounded-full p-1.5 text-lg leading-none transition-transform hover:scale-125 active:scale-95"
+                      aria-label={emoji}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
           <div className="relative">
             <button

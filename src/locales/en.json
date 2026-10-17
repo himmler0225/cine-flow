@@ -245,7 +245,8 @@
     "seekAria": "Seek",
     "volumeAria": "Volume",
     "nextEpisodeIn": "Next episode in {{seconds}}s",
-    "playNextNow": "Play now"
+    "playNextNow": "Play now",
+    "react": "React"
   },
   "hero": {
     "goToSlide": "Go to slide {{index}}"

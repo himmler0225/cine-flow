@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pause, Play, SkipForward } from "lucide-react";
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { usePlayerChrome } from "@/hooks/player/usePlayerChrome";
 import { canUsePictureInPicture } from "@/hooks/player/usePlayerControls";
+import { useMoments } from "@/hooks/player/useMoments";
+import { useAuthStore } from "@/store/authStore";
+import type { ReactionEmoji } from "@/services/platform/moments.service";
 import { VideoPlayerControls, VideoPlayerError } from "@/components/player/VideoPlayerParts";
 import { VideoPlayerEmbed } from "@/components/player/VideoPlayerEmbed";
 import { NextEpisodeOverlay } from "@/components/player/NextEpisodeOverlay";
@@ -27,6 +30,8 @@ interface Props {
   onCancelAutoAdvance?: () => void;
   /** Movie slug, for per-movie preferences and moments. */
   prefsKey?: string;
+  /** Episode name: enables the reaction heatmap and reactions for this episode. */
+  momentsEpisode?: string;
 }
 
 export function VideoPlayer(props: Props) {
@@ -43,6 +48,32 @@ export function VideoPlayer(props: Props) {
   });
 
   const [canPiP, setCanPiP] = useState(false);
+
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  const { heatmap, react } = useMoments(props.prefsKey, props.momentsEpisode);
+
+  const [floating, setFloating] = useState<{ id: number; emoji: ReactionEmoji; left: number }[]>(
+    [],
+  );
+
+  const floatIdRef = useRef(0);
+
+  const sendReaction = (emoji: ReactionEmoji) => {
+    const v = player.videoRef.current;
+
+    if (!v) return;
+
+    react(emoji, v.currentTime);
+
+    const id = ++floatIdRef.current;
+
+    setFloating((f) => [...f.slice(-7), { id, emoji, left: 60 + Math.random() * 30 }]);
+
+    window.setTimeout(() => setFloating((f) => f.filter((x) => x.id !== id)), 1600);
+
+    chrome.reveal();
+  };
 
   const videoRef = player.videoRef;
 
@@ -140,6 +171,16 @@ export function VideoPlayer(props: Props) {
             )}
           </button>
         )}
+        {floating.map((f) => (
+          <span
+            key={f.id}
+            aria-hidden
+            className="pointer-events-none absolute bottom-24 z-30 text-3xl"
+            style={{ left: `${f.left}%`, animation: "cf-reaction-float 1.6s ease-out forwards" }}
+          >
+            {f.emoji}
+          </span>
+        ))}
         {player.activeAd && (
           <button
             type="button"
@@ -205,6 +246,8 @@ export function VideoPlayer(props: Props) {
           onToggleFullscreen={player.toggleFullscreen}
           onSelectQuality={player.selectQuality}
           onSelectSubtitle={player.selectSubtitle}
+          heatmap={heatmap}
+          onReact={isAuthenticated && props.momentsEpisode ? sendReaction : undefined}
         />
       </div>
     </div>

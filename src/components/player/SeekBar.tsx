@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { formatTime } from "@/utils/formatTime";
+import type { MomentsHeatmap } from "@/services/platform/moments.service";
 
 const KEY_STEP_SEC = 5;
 
@@ -11,6 +12,27 @@ interface Props {
   label: string;
   onSeek: (timeSec: number) => void;
   onScrubChange?: (scrubbing: boolean) => void;
+  /** Reaction heatmap: drawn above the track, hot moments marked on it. */
+  heatmap?: MomentsHeatmap;
+}
+
+const HEATMAP_HEIGHT = 18;
+
+/** Area path over the track (viewBox 0..1000 x 0..HEATMAP_HEIGHT) from bucket scores. */
+function heatmapPath(heatmap: MomentsHeatmap, duration: number): string | null {
+  const max = Math.max(0, ...heatmap.buckets.map((b) => b.score));
+
+  if (!duration || max <= 0) return null;
+
+  const x = (sec: number) => Math.min(1000, Math.max(0, (sec / duration) * 1000));
+
+  const y = (score: number) => HEATMAP_HEIGHT - (score / max) * (HEATMAP_HEIGHT - 2);
+
+  const points = heatmap.buckets
+    .filter((b) => b.start < duration)
+    .map((b) => `L${x(b.start + heatmap.bucket_seconds / 2).toFixed(1)},${y(b.score).toFixed(1)}`);
+
+  return `M0,${HEATMAP_HEIGHT} ${points.join(" ")} L1000,${HEATMAP_HEIGHT} Z`;
 }
 
 /**
@@ -19,7 +41,15 @@ interface Props {
  * timeupdate kept yanking the thumb back mid-drag. Tap or drag anywhere on a tall hit
  * area; the time preview follows the finger and the seek happens once, on release.
  */
-export function SeekBar({ progress, buffered, duration, label, onSeek, onScrubChange }: Props) {
+export function SeekBar({
+  progress,
+  buffered,
+  duration,
+  label,
+  onSeek,
+  onScrubChange,
+  heatmap,
+}: Props) {
   // Measured element: the inset track, so 0% / 100% sit fully inside the player.
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -58,6 +88,10 @@ export function SeekBar({ progress, buffered, duration, label, onSeek, onScrubCh
   const bufferedPct = duration ? Math.min(100, (buffered / duration) * 100) : 0;
 
   const scrubbing = scrubTime !== null;
+
+  const graph = heatmap ? heatmapPath(heatmap, duration) : null;
+
+  const hotMoments = (heatmap?.hot_moments ?? []).filter((m) => duration && m.start < duration);
 
   return (
     <div
@@ -110,6 +144,29 @@ export function SeekBar({ progress, buffered, duration, label, onSeek, onScrubCh
       }}
     >
       <div ref={trackRef} className="relative flex h-full w-full items-center">
+        {graph && (
+          <svg
+            aria-hidden
+            viewBox={`0 0 1000 ${HEATMAP_HEIGHT}`}
+            preserveAspectRatio="none"
+            className={cn(
+              "pointer-events-none absolute inset-x-0 bottom-1/2 mb-1 w-full transition-opacity",
+              scrubbing ? "opacity-70" : "opacity-35 group-hover/seek:opacity-70",
+            )}
+            style={{ height: HEATMAP_HEIGHT }}
+          >
+            <path d={graph} className="fill-white" />
+          </svg>
+        )}
+        {hotMoments.map((m) => (
+          <span
+            key={m.start}
+            aria-hidden
+            title={`${m.top_emoji ?? "🔥"} ${formatTime(m.start)}`}
+            className="pointer-events-none absolute top-1/2 z-[1] h-2 w-0.5 -translate-y-1/2 rounded-full bg-amber-300"
+            style={{ left: `${Math.min(100, (m.start / duration) * 100)}%` }}
+          />
+        ))}
         <div
           className={cn(
             "relative h-1 w-full overflow-hidden rounded-full bg-white/25 transition-[height] duration-150 group-focus-visible/seek:h-1.5",

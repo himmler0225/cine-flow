@@ -186,35 +186,18 @@
   }
 }
 
-@keyframes ai-trigger-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
-@keyframes ai-trigger-glow {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.85);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.2);
-  }
-}
-
-@keyframes ai-trigger-bubble-in {
+/* Reaction emoji rising over the player (watch page moments). */
+@keyframes cf-reaction-float {
   0% {
     opacity: 0;
-    transform: translateY(10px) scale(0.9);
+    transform: translateY(0) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-12px) scale(1.15);
   }
   100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+    opacity: 0;
+    transform: translateY(-120px) scale(1);
   }
 }

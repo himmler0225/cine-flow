@@ -245,7 +245,8 @@
     "seekAria": "Tua video",
     "volumeAria": "Âm lượng",
     "nextEpisodeIn": "Tập tiếp theo sau {{seconds}}s",
-    "playNextNow": "Xem ngay"
+    "playNextNow": "Xem ngay",
+    "react": "Thả cảm xúc"
   },
   "hero": {
     "goToSlide": "Chuyển slide {{index}}"

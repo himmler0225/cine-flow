@@ -223,6 +223,7 @@ function WatchPage() {
               // autoplay permission; the player handles source changes itself.
               key={slug}
               prefsKey={slug}
+              momentsEpisode={currentEp.name}
               src={currentEp.link_m3u8 || ""}
               embed={currentEp.link_embed || undefined}
               poster={getImageUrl(movie.thumb_url || movie.poster_url)}

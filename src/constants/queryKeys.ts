@@ -18,6 +18,9 @@ export const queryKeys = {
     byMovie: (slug: string, episodeName?: string | null) =>
       ["comments", slug, episodeName ?? "all"] as const,
   },
+  moments: {
+    heatmap: (slug: string, episode: string) => ["moments", "heatmap", slug, episode] as const,
+  },
   ratings: {
     aggregate: (slug: string) => ["ratings", "aggregate", slug] as const,
     user: (userId: string, slug: string) => ["ratings", "user", userId, slug] as const,
