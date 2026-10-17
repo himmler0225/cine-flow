@@ -37,6 +37,7 @@ import { EXTERNAL_URLS, MOVIE_IMAGE_ORIGINS } from "@/constants/urls";
 import { CACHE_TTL } from "@/constants/timing";
 import { STORAGE_KEYS } from "@/constants/storage";
 import { setAppQueryClient } from "@/lib/queryClientHolder";
+import { initMonitoring, reportError, setMonitoringUser } from "@/lib/monitoring";
 import { analyticsApi, pageTypeFromPath } from "@/services/platform/analytics.service";
 
 function NotFoundComponent() {
@@ -63,6 +64,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const { t } = useTranslation();
 
   console.error(error);
+
+  useEffect(() => {
+    reportError(error, { boundary: "root" });
+  }, [error]);
 
   const router = useRouter();
 
@@ -210,9 +215,17 @@ function RootComponent() {
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
+  const userId = useAuthStore((state) => state.user?.id ?? null);
+
   useEffect(() => {
     setAppQueryClient(queryClient);
   }, [queryClient]);
+
+  useEffect(() => {
+    initMonitoring();
+
+    setMonitoringUser(userId);
+  }, [userId]);
 
   useEffect(() => {
     void import("@/lib/envCheck").then((m) => m.runStartupEnvCheck());

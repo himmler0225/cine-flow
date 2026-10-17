@@ -117,6 +117,7 @@ Open `http://localhost:5173`. Requires [movie-aggregator-api](../movie-aggregato
 | -------------------- | ------------------------------------------------------------------------- |
 | `VITE_MOVIE_API_URL` | Base URL of `movie-aggregator-api` (defaults to a built-in URL if unset). |
 | `VITE_SITE_URL`      | Public site URL used for SEO tags, canonical links, and the sitemap.      |
+| `VITE_SENTRY_DSN`    | Optional Sentry DSN; when set, client errors are reported to Sentry.      |
 
 ---
 
