@@ -13,6 +13,14 @@ export interface CreateRoomInput {
   expiresHours?: number;
   isPrivate?: boolean;
   pin?: string | null;
+  /** ISO time; the API accepts up to 7 days ahead. */
+  scheduledAt?: string | null;
+  title?: string | null;
+}
+
+export interface MyReminder {
+  room: WatchRoom;
+  notified_at: string | null;
 }
 
 export interface RoomPlaybackState {
@@ -41,6 +49,8 @@ class WatchPartyApi {
         expires_hours: input.expiresHours,
         is_private: input.isPrivate,
         pin: input.pin,
+        ...(input.scheduledAt ? { scheduled_at: input.scheduledAt } : {}),
+        ...(input.title ? { title: input.title } : {}),
       }),
     });
   }
@@ -64,6 +74,17 @@ class WatchPartyApi {
       } | null;
       error: ApiErrorPayload | null;
     }>(`/api/watch-party/rooms/${encodeURIComponent(code)}/preview`, { auth: false });
+  }
+  remindMe(roomId: string) {
+    return platformFetch(`/api/watch-party/rooms/${roomId}/reminder`, { method: "PUT" });
+  }
+  cancelReminder(roomId: string) {
+    return platformFetch(`/api/watch-party/rooms/${roomId}/reminder`, { method: "DELETE" });
+  }
+  async myReminders(): Promise<MyReminder[]> {
+    const res = await platformFetch<{ data: MyReminder[] } | null>("/api/watch-party/reminders/me");
+
+    return res?.data ?? [];
   }
   async fetchRoomFull(code: string): Promise<WatchRoom | null> {
     // The API answers 200 with an empty body for unknown codes; React Query rejects

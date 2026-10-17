@@ -38,6 +38,7 @@ export const queryKeys = {
     room: (code: string) => ["watch-room", code] as const,
     members: (roomId: string) => ["room-members", roomId] as const,
     detail: (slug: string) => ["wp-detail", slug] as const,
+    reminders: () => ["watch-party", "reminders"] as const,
   },
   admin: {
     all: () => ["admin"] as const,

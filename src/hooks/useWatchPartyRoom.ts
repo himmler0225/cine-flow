@@ -145,15 +145,43 @@ export function useWatchPartyRoom(code: string) {
     [room?.id, me, refetchMembers],
   );
 
+  // Scheduled rooms open on a lobby screen until their start (or until the viewer chooses
+  // to enter early); joining is deferred until then.
+  const startsAtMs = room?.scheduled_at ? Date.parse(room.scheduled_at) : null;
+
+  const [startReached, setStartReached] = useState(false);
+
+  const [enteredEarly, setEnteredEarly] = useState(false);
+
+  useEffect(() => {
+    if (!startsAtMs) return;
+
+    const ms = startsAtMs - Date.now();
+
+    if (ms <= 0) {
+      setStartReached(true);
+
+      return;
+    }
+
+    const id = window.setTimeout(() => setStartReached(true), Math.min(ms, 2 ** 31 - 1));
+
+    return () => window.clearTimeout(id);
+  }, [startsAtMs]);
+
+  const upcoming = !!startsAtMs && !startReached && !enteredEarly && startsAtMs > Date.now();
+
+  const enterEarly = useCallback(() => setEnteredEarly(true), []);
+
   const joinAttemptedRef = useRef(false);
 
   useEffect(() => {
-    if (joinAttemptedRef.current || !room?.id || !user || !me) return;
+    if (joinAttemptedRef.current || !room?.id || !user || !me || upcoming) return;
 
     joinAttemptedRef.current = true;
 
     void attemptJoin();
-  }, [room?.id, user, me, attemptJoin]);
+  }, [room?.id, user, me, attemptJoin, upcoming]);
 
   const onBroadcast = useCallback(
     (ev: string, payload: Record<string, unknown>) => {
@@ -626,6 +654,8 @@ export function useWatchPartyRoom(code: string) {
   ]);
 
   return {
+    upcoming,
+    enterEarly,
     code,
     user,
     me,

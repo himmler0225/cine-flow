@@ -1,3 +1,4 @@
+import { WatchPartyScheduledGate } from "@/components/watchparty/WatchPartyScheduledGate";
 import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useWatchPartyRoom } from "@/hooks/useWatchPartyRoom";
@@ -51,6 +52,10 @@ function WatchPartyPage() {
         movieName={state.room.movie_name}
       />
     );
+  }
+
+  if (state.upcoming) {
+    return <WatchPartyScheduledGate room={state.room} onEnter={state.enterEarly} />;
   }
 
   if (state.joinStatus === "need-pin") {

@@ -13,6 +13,9 @@ export interface WatchRoom {
   expires_at: string;
   is_private?: boolean;
   has_pin?: boolean;
+  /** Scheduled start (ISO); null/absent for rooms that start right away. */
+  scheduled_at?: string | null;
+  title?: string | null;
 }
 
 export interface RoomMessage {

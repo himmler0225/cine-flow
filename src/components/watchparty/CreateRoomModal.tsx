@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, PartyPopper, Share2 } from "lucide-react";
+import { Check, PartyPopper, Share2, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
 import { UI_DELAY_MS } from "@/constants/timing";
 import { useTranslation } from "react-i18next";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { buildRoomUrl } from "@/lib/watchParty/watchParty";
+import { formatRoomStart, shareRoomInvite } from "@/lib/watchParty/shareInvite";
 
 interface Props {
   open: boolean;
@@ -20,25 +21,43 @@ interface Props {
   movieName: string;
   thumb?: string;
   onStart: () => void;
+  /** ISO start time of a scheduled room. */
+  scheduledAt?: string | null;
 }
 
-export function CreateRoomModal({ open, onClose, code, movieName, thumb, onStart }: Props) {
+export function CreateRoomModal({
+  open,
+  onClose,
+  code,
+  movieName,
+  thumb,
+  onStart,
+  scheduledAt,
+}: Props) {
   const { t } = useTranslation();
 
   const url = buildRoomUrl(code);
 
   const [copied, setCopied] = useState(false);
 
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(t("watchparty.inviteText", { movie: movieName, url }));
+  const startLabel = scheduledAt ? formatRoomStart(scheduledAt) : null;
 
+  const share = async () => {
+    const text = startLabel
+      ? t("watchparty.inviteTextScheduled", { movie: movieName, time: startLabel, url })
+      : t("watchparty.inviteText", { movie: movieName, url });
+
+    const result = await shareRoomInvite({ title: movieName, text, url });
+
+    if (result === "copied") {
       setCopied(true);
 
       toast.success(t("toast.copyInvite"));
 
       window.setTimeout(() => setCopied(false), UI_DELAY_MS.copyFeedback);
-    } catch {
+    } else if (result === "shared") {
+      toast.success(t("watchparty.inviteShared"));
+    } else if (result === "failed") {
       toast.error(t("toast.copyFailedShort"));
     }
   };
@@ -68,6 +87,12 @@ export function CreateRoomModal({ open, onClose, code, movieName, thumb, onStart
               {t("watchparty.movieLabel")}
             </p>
             <p className="font-semibold text-white">{movieName}</p>
+            {startLabel && (
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-amber-300">
+                <CalendarClock className="h-4 w-4" />
+                {t("watchparty.startsAt", { time: startLabel })}
+              </p>
+            )}
           </div>
 
           <div className="rounded-xl border border-white/10 bg-black/30 p-4">
@@ -81,7 +106,7 @@ export function CreateRoomModal({ open, onClose, code, movieName, thumb, onStart
               <Button
                 variant="outline"
                 size="sm"
-                onClick={copy}
+                onClick={() => void share()}
                 className="border-white/15 bg-transparent text-white hover:bg-white/10"
               >
                 {copied ? (
@@ -90,7 +115,7 @@ export function CreateRoomModal({ open, onClose, code, movieName, thumb, onStart
                   </>
                 ) : (
                   <>
-                    <Share2 className="h-3.5 w-3.5" /> {t("watchparty.copyLink")}
+                    <Share2 className="h-3.5 w-3.5" /> {t("watchparty.shareInvite")}
                   </>
                 )}
               </Button>
@@ -102,7 +127,7 @@ export function CreateRoomModal({ open, onClose, code, movieName, thumb, onStart
             onClick={onStart}
             className="w-full bg-netflix-red py-5 text-base font-semibold hover:bg-netflix-red/80"
           >
-            {t("watchparty.startWatching")}
+            {scheduledAt ? t("watchparty.enterRoom") : t("watchparty.startWatching")}
           </Button>
         </div>
       </DialogContent>

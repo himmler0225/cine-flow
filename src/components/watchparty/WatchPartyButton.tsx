@@ -10,7 +10,7 @@ import { usePremium } from "@/hooks/usePremium";
 import { generateRoomCode } from "@/lib/watchParty/watchParty";
 import { cn } from "@/lib/utils";
 import { CreateRoomModal } from "./CreateRoomModal";
-import { WatchPartySetupDialog } from "./WatchPartySetupDialog";
+import { WatchPartySetupDialog, type WatchPartySetupOptions } from "./WatchPartySetupDialog";
 
 interface WatchPartyButtonProps {
   movieSlug: string;
@@ -39,6 +39,8 @@ export function WatchPartyButton({
 
   const [code, setCode] = useState("");
 
+  const [scheduledAt, setScheduledAt] = useState<string | null>(null);
+
   const { isAuthenticated, user, profile, requestAuth } = useAuthStore();
 
   const { partyHours } = usePremium();
@@ -57,7 +59,7 @@ export function WatchPartyButton({
     setSetupOpen(true);
   };
 
-  const create = async (opts: { isPrivate: boolean; pin: string | null }) => {
+  const create = async (opts: WatchPartySetupOptions) => {
     if (!user) return;
 
     setLoading(true);
@@ -83,6 +85,8 @@ export function WatchPartyButton({
           expiresHours: partyHours,
           isPrivate: opts.isPrivate,
           pin: opts.pin,
+          scheduledAt: opts.scheduledAt,
+          title: opts.title,
         });
 
         if (!error && room) {
@@ -97,6 +101,11 @@ export function WatchPartyButton({
           );
 
           setCode(newCode);
+
+          setScheduledAt(opts.scheduledAt);
+
+          // The host of a scheduled room gets the same 5-minute reminder as guests.
+          if (opts.scheduledAt) void watchPartyApi.remindMe(room.id).catch(() => {});
 
           setSetupOpen(false);
 
@@ -177,6 +186,7 @@ export function WatchPartyButton({
         movieName={movieName}
         thumb={thumb}
         onStart={start}
+        scheduledAt={scheduledAt}
       />
     </>
   );

@@ -24,6 +24,7 @@ import { Footer } from "@/components/layout/Footer";
 import { TopProgress } from "@/components/layout/TopProgress";
 import { ContinueWatchingBar } from "@/components/movie/ContinueWatchingBar";
 import { useWatchlistSync } from "@/hooks/useWatchlistSync";
+import { useWatchPartyReminders } from "@/hooks/useWatchPartyReminders";
 import { I18nProvider } from "@/components/common/I18nProvider";
 import { PageSkeleton } from "@/components/common/PageSkeleton";
 import { registerAuthNavigator } from "@/lib/auth/authNavigation";
@@ -319,6 +320,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <WatchPartyReminders enabled={isAuthenticated} />
       <I18nProvider>
         <TopProgress />
         {!isAdmin && !isAuthRoute && !hideProtectedShell && <Navbar />}
@@ -354,12 +356,19 @@ function shouldPersistQuery(queryKey: readonly unknown[]): boolean {
 
   if (scope === "favorites" && kind === "slugs") return false;
 
-  if (scope === "admin" || scope === "wp-detail") return false;
+  if (scope === "admin" || scope === "wp-detail" || scope === "watch-party") return false;
 
   if (scope === "movies" && ["detail", "search", "search-inf", "list-page"].includes(String(kind)))
     return false;
 
   return true;
+}
+
+/** Inside QueryClientProvider: the reminder hook queries the API. */
+function WatchPartyReminders({ enabled }: { enabled: boolean }) {
+  useWatchPartyReminders(enabled);
+
+  return null;
 }
 
 function AuthGateLoader() {
