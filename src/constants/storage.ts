@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   settings: "cineflow-settings",
   favorites: "cineflow-favorites",
   watchPartyStatePrefix: "cineflow_wp_state:",
+  playerPrefs: "cineflow-player-prefs",
 } as const;
 
 export const LEGACY_STORAGE_KEYS: Record<keyof typeof STORAGE_KEYS, string | null> = {
@@ -26,6 +27,7 @@ export const LEGACY_STORAGE_KEYS: Record<keyof typeof STORAGE_KEYS, string | nul
   settings: "kkflix-settings",
   favorites: "kk-favorites",
   watchPartyStatePrefix: "kkflix_wp_state:",
+  playerPrefs: null,
 };
 
 export function readStorageKey(key: keyof typeof STORAGE_KEYS): string | null {

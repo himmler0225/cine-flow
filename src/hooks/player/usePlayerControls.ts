@@ -1,5 +1,6 @@
 import type { Dispatch } from "react";
 import type { PlayerUiAction, PlayerUiState } from "@/hooks/player/playerReducer";
+import { saveMoviePrefs, saveVolumePrefs } from "@/lib/player/playerPrefs";
 
 export type WebkitPresentationVideo = HTMLVideoElement & {
   webkitSupportsPresentationMode?: (mode: string) => boolean;
@@ -27,6 +28,7 @@ export function createPlayerControls(
   dispatch: Dispatch<PlayerUiAction>,
   toggleFullscreen: () => void,
   onSeekCommit?: (currentSec: number, durationSec: number) => void,
+  prefsKey?: string,
 ) {
   const togglePiP = async () => {
     const v = videoRef.current as WebkitPresentationVideo | null;
@@ -83,9 +85,13 @@ export function createPlayerControls(
 
     if (!v) return;
 
+    v.defaultPlaybackRate = s;
+
     v.playbackRate = s;
 
     dispatch({ type: "setSpeed", speed: s });
+
+    saveMoviePrefs(prefsKey, { speed: s });
 
     dispatch({ type: "setShowSpeed", showSpeed: false });
   };
@@ -107,6 +113,8 @@ export function createPlayerControls(
     v.muted = !v.muted;
 
     dispatch({ type: "setMuted", muted: v.muted });
+
+    saveVolumePrefs({ muted: v.muted });
   };
 
   const setVolumeVal = (val: number) => {
@@ -121,6 +129,8 @@ export function createPlayerControls(
     v.muted = val === 0;
 
     dispatch({ type: "setMuted", muted: val === 0 });
+
+    saveVolumePrefs({ volume: val, muted: val === 0 });
   };
 
   const retry = () => {

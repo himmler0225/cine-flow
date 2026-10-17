@@ -10,6 +10,7 @@ import { formatTime } from "@/utils/formatTime";
 import { isWatchFinished } from "@/utils/watchProgress";
 import { prefetchUrl } from "@/utils/prefetch";
 import { AUTO_ADVANCE_SECONDS, UI_DELAY_MS } from "@/constants/timing";
+import { getMoviePrefs, saveMoviePrefs } from "@/lib/player/playerPrefs";
 
 const LIVE_PROGRESS_STEP_SEC = 5;
 
@@ -61,7 +62,16 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
 
     lastEpisodeRestoredRef.current = true;
 
-    if (fromStart || userPickedEpisodeRef.current || tap !== 1 || server !== 0 || !stored) return;
+    if (fromStart || userPickedEpisodeRef.current || tap !== 1 || server !== 0) return;
+
+    if (!stored) {
+      // Never watched: still open the server tab the viewer chose last time for this movie.
+      const preferred = getMoviePrefs(slug).server;
+
+      if (preferred != null && preferred > 0 && servers[preferred]) setServerIdx(preferred);
+
+      return;
+    }
 
     const sIdx = Math.min(Math.max(stored.server_index, 0), servers.length - 1);
 
@@ -72,15 +82,20 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
 
       setEpisodeIdx(eIdx);
     }
-  }, [servers, historyLoading, fromStart, tap, server, stored]);
+  }, [servers, historyLoading, fromStart, tap, server, stored, slug]);
 
-  const selectEpisode = useCallback((s: number, e: number) => {
-    userPickedEpisodeRef.current = true;
+  const selectEpisode = useCallback(
+    (s: number, e: number) => {
+      userPickedEpisodeRef.current = true;
 
-    setServerIdx(s);
+      saveMoviePrefs(slug, { server: s });
 
-    setEpisodeIdx(e);
-  }, []);
+      setServerIdx(s);
+
+      setEpisodeIdx(e);
+    },
+    [slug],
+  );
 
   const currentServer = servers[serverIdx];
 

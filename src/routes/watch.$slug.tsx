@@ -219,7 +219,10 @@ function WatchPage() {
         <div className="mx-auto grid max-w-[1600px] grid-cols-1 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_360px]">
           <div className="min-w-0 bg-black">
             <VideoPlayer
-              key={`${slug}-${currentEp.slug || currentEp.name}-${serverIdx}`}
+              // Keyed by movie only: remounting per episode dropped fullscreen and the
+              // autoplay permission; the player handles source changes itself.
+              key={slug}
+              prefsKey={slug}
               src={currentEp.link_m3u8 || ""}
               embed={currentEp.link_embed || undefined}
               poster={getImageUrl(movie.thumb_url || movie.poster_url)}

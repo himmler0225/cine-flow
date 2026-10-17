@@ -15,6 +15,7 @@ import { createInitialPlayerUi, playerUiReducer } from "@/hooks/player/playerRed
 import type { UseVideoPlayerOptions } from "@/hooks/player/types";
 import { usePlayerEmbedMode } from "@/hooks/player/usePlayerEmbedMode";
 import { usePlayerHlsSource } from "@/hooks/player/usePlayerHlsSource";
+import { usePlayerContinuity } from "@/hooks/player/usePlayerContinuity";
 import { usePlayerTelemetry, type SeekLock } from "@/hooks/player/usePlayerTelemetry";
 import { usePlayerResume, usePlayerSeekEvent } from "@/hooks/player/usePlayerResume";
 import { usePlayerKeyboard } from "@/hooks/player/usePlayerKeyboard";
@@ -31,6 +32,7 @@ export function useVideoPlayer({
   onLiveTime,
   onResumeApplied,
   onNextEpisode,
+  prefsKey,
 }: UseVideoPlayerOptions) {
   const { t } = useTranslation();
 
@@ -114,6 +116,8 @@ export function useVideoPlayer({
     !preferNative,
   );
 
+  usePlayerContinuity(videoRef, playableSrc, prefsKey, dispatch);
+
   const hls = usePlayerHlsSource(
     videoRef,
     playableSrc,
@@ -173,6 +177,7 @@ export function useVideoPlayer({
 
       onProgress?.(cur, dur);
     },
+    prefsKey,
   );
 
   const setSkipAds = (updater: boolean | ((prev: boolean) => boolean)) => {

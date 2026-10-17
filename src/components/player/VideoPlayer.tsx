@@ -25,6 +25,8 @@ interface Props {
   nextEpisodeName?: string;
   onPlayNextNow?: () => void;
   onCancelAutoAdvance?: () => void;
+  /** Movie slug, for per-movie preferences and moments. */
+  prefsKey?: string;
 }
 
 export function VideoPlayer(props: Props) {
