@@ -269,49 +269,52 @@ function WatchPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1600px] px-4 py-5 md:px-8 lg:px-10">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white md:text-2xl">{movie.name}</h1>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <p className="text-sm font-medium text-netflix-red">
-                {currentEp.name} · {currentServer?.server_name}
-              </p>
-              <MovieRating slug={slug} compact />
+      {/* Same columns as the player row so the info block lines up with the video width. */}
+      <div className="mx-auto grid max-w-[1600px] grid-cols-1 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_360px]">
+        <div className="min-w-0 px-4 py-5 md:px-8 lg:px-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold text-white md:text-2xl">{movie.name}</h1>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <p className="text-sm font-medium text-netflix-red">
+                  {currentEp.name} · {currentServer?.server_name}
+                </p>
+                <MovieRating slug={slug} compact />
+              </div>
+            </div>
+
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void toggleFavorite(movie)}
+                className={cn(
+                  "inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition-colors",
+                  isFav
+                    ? "bg-netflix-red text-white ring-netflix-red"
+                    : "bg-white/5 text-white ring-white/15 hover:bg-white/10",
+                )}
+                aria-label={
+                  isFav
+                    ? tr("movie.removeFavoriteAria", { name: movie.name })
+                    : tr("movie.addFavoriteAria", { name: movie.name })
+                }
+              >
+                <Heart className={cn("h-4 w-4", isFav && "fill-current")} />
+              </button>
+              <ShareButton slug={slug} movieName={movie.name} variant="compact" />
+              <WatchPartyButton
+                movieSlug={slug}
+                movieName={movie.name}
+                thumb={movie.thumb_url || movie.poster_url}
+                episodeName={currentEp.name}
+                serverIndex={serverIdx}
+                className="h-10"
+              />
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => void toggleFavorite(movie)}
-              className={cn(
-                "inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition-colors",
-                isFav
-                  ? "bg-netflix-red text-white ring-netflix-red"
-                  : "bg-white/5 text-white ring-white/15 hover:bg-white/10",
-              )}
-              aria-label={
-                isFav
-                  ? tr("movie.removeFavoriteAria", { name: movie.name })
-                  : tr("movie.addFavoriteAria", { name: movie.name })
-              }
-            >
-              <Heart className={cn("h-4 w-4", isFav && "fill-current")} />
-            </button>
-            <ShareButton slug={slug} movieName={movie.name} variant="compact" />
-            <WatchPartyButton
-              movieSlug={slug}
-              movieName={movie.name}
-              thumb={movie.thumb_url || movie.poster_url}
-              episodeName={currentEp.name}
-              serverIndex={serverIdx}
-              className="h-10"
-            />
-          </div>
+          {movie.content && <MovieDescription html={movie.content} className="max-w-none" />}
         </div>
-
-        {movie.content && <MovieDescription html={movie.content} className="mt-5 max-w-3xl" />}
       </div>
 
       <div className="border-t border-white/10 pt-4">
