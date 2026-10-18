@@ -1,7 +1,7 @@
 import { platformFetch, platformMutate, type ApiMutationResult } from "@/lib/platformApi";
 import type { AdminProfileRow } from "@/types/admin";
 import type { Favorite } from "@/types/database";
-import type { WatchHistoryItem } from "@/utils/localHistory";
+import type { WatchHistoryItem } from "@/utils/watchHistoryMerge";
 import type { AdminUserFilter, UserRole } from "@/constants/roles";
 
 class AdminUsersApi {

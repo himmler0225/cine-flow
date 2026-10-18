@@ -4,13 +4,13 @@ import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import { useMovieDetail } from "@/hooks/useMovieDetail";
 import { useWatchHistory } from "@/hooks/user/useWatchHistory";
-import { usePlayerStore } from "@/store/playerStore";
 import { getImageUrl } from "@/lib/movie/movieImages";
 import { formatTime } from "@/utils/formatTime";
 import { isWatchFinished } from "@/utils/watchProgress";
 import { prefetchUrl } from "@/utils/prefetch";
 import { AUTO_ADVANCE_SECONDS, UI_DELAY_MS } from "@/constants/timing";
 import { getMoviePrefs, saveMoviePrefs } from "@/lib/player/playerPrefs";
+import { usePreferencesStore } from "@/store/preferencesStore";
 
 const LIVE_PROGRESS_STEP_SEC = 5;
 
@@ -53,12 +53,16 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
 
   const lastEpisodeRestoredRef = useRef(false);
 
+  // The per-movie server choice lives in the account preferences (loaded after sign-in).
+  const prefsReady = usePreferencesStore((st) => st.loaded || st.userId === null);
+
   const userPickedEpisodeRef = useRef(false);
 
   // Jump to the last-watched episode once, after both the episode list and the (possibly
   // server-side) history are loaded — and never over an episode the viewer already picked.
   useEffect(() => {
-    if (lastEpisodeRestoredRef.current || servers.length === 0 || historyLoading) return;
+    if (lastEpisodeRestoredRef.current || servers.length === 0 || historyLoading || !prefsReady)
+      return;
 
     lastEpisodeRestoredRef.current = true;
 
@@ -82,7 +86,7 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
 
       setEpisodeIdx(eIdx);
     }
-  }, [servers, historyLoading, fromStart, tap, server, stored, slug]);
+  }, [servers, historyLoading, prefsReady, fromStart, tap, server, stored, slug]);
 
   const selectEpisode = useCallback(
     (s: number, e: number) => {
@@ -213,17 +217,6 @@ export function useWatchPage(slug: string, tap: number, server: number, fromStar
       params: { slug },
       search: { tap: episodeIdx + 1, server: serverIdx, fromStart: false },
       replace: true,
-    });
-
-    usePlayerStore.getState().saveProgress({
-      slug,
-      name: movie.name,
-      poster: movie.poster_url || movie.thumb_url,
-      episodeSlug: currentEp.slug,
-      episodeName: currentEp.name,
-      serverIndex: serverIdx,
-      episodeIndex: episodeIdx,
-      updatedAt: Date.now(),
     });
   }, [serverIdx, episodeIdx, currentEp?.slug, movie, navigate, slug]);
 

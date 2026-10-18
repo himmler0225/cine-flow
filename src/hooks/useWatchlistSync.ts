@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import { useAuthStore } from "@/store/authStore";
-import { useWatchlistStore } from "@/store/watchlistStore";
+import { defaultWatchlists, useWatchlistStore } from "@/store/watchlistStore";
 import { watchlistApi } from "@/services/platform/watchlist.service";
 
 export function useWatchlistSync() {
@@ -16,27 +16,26 @@ export function useWatchlistSync() {
     if (!isAuthenticated || !userId) {
       hydratedRef.current = false;
 
+      useWatchlistStore.getState().replaceLists(defaultWatchlists());
+
       return;
     }
 
     let cancelled = false;
 
     (async () => {
-      await watchlistApi.migrateLocalToServer();
-
-      if (cancelled) return;
-
       try {
         const remote = await watchlistApi.fetch();
 
-        if (!cancelled && remote.length > 0) {
-          useWatchlistStore.getState().replaceLists(remote);
-        }
+        if (cancelled) return;
+
+        useWatchlistStore.getState().replaceLists(remote.length > 0 ? remote : defaultWatchlists());
+
+        hydratedRef.current = true;
       } catch (error) {
+        // Not hydrated: never save in-memory defaults over lists we could not read.
         console.warn("[watchlist] fetch failed during hydration", error);
       }
-
-      hydratedRef.current = true;
     })();
 
     return () => {
@@ -52,7 +51,12 @@ export function useWatchlistSync() {
     let snapshot = useWatchlistStore.getState().lists;
 
     const unsub = useWatchlistStore.subscribe((state) => {
-      if (!hydratedRef.current) return;
+      // The server copy arriving is not a user edit; remember it as the rollback point.
+      if (!hydratedRef.current) {
+        snapshot = state.lists;
+
+        return;
+      }
 
       clearTimeout(timer);
 
@@ -69,8 +73,6 @@ export function useWatchlistSync() {
           toast.error(t("toast.watchlistSaveFailed"));
         }
       }, 800);
-
-      void state;
     });
 
     return () => {

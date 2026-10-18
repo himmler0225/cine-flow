@@ -1,6 +1,5 @@
 import { platformFetch } from "@/lib/platformApi";
 import { getImageUrl } from "@/lib/movie/movieImages";
-import { useFavoriteStore } from "@/store/favoriteStore";
 import type { Favorite, FavoriteSlug, InsertFavoriteInput } from "@/types/database";
 import type { MovieListItem } from "@/types/movie";
 
@@ -61,37 +60,26 @@ class FavoritesApi {
   count(): Promise<number> {
     return platformFetch<number>("/api/favorites/count");
   }
-  async migrateLocalToServer(): Promise<void> {
-    const local = useFavoriteStore.getState().favorites;
-
+  /** One-off import of favourites saved in the browser by older app versions. */
+  async importItems(local: MovieListItem[]): Promise<void> {
     if (local.length === 0) return;
 
-    try {
-      const existing = await this.fetchSlugs();
+    const existing = await this.fetchSlugs();
 
-      const toInsert = local.filter((m) => !existing.has(m.slug));
+    const toInsert = local.filter((m) => m?.slug && !existing.has(m.slug));
 
-      if (toInsert.length === 0) {
-        useFavoriteStore.getState().clearAll();
+    if (toInsert.length === 0) return;
 
-        return;
-      }
-
-      await platformFetch("/api/favorites/batch", {
-        method: "POST",
-        body: JSON.stringify({
-          items: toInsert.map((m) => ({
-            movie_slug: m.slug,
-            movie_name: m.name,
-            thumb_url: getImageUrl(m.poster_url || m.thumb_url) || null,
-          })),
-        }),
-      });
-
-      useFavoriteStore.getState().clearAll();
-    } catch (e) {
-      console.error("[favorites] migration failed", e);
-    }
+    await platformFetch("/api/favorites/batch", {
+      method: "POST",
+      body: JSON.stringify({
+        items: toInsert.map((m) => ({
+          movie_slug: m.slug,
+          movie_name: m.name,
+          thumb_url: getImageUrl(m.poster_url || m.thumb_url) || null,
+        })),
+      }),
+    });
   }
 }
 

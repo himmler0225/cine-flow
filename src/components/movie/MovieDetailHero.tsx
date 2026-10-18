@@ -13,7 +13,7 @@ import { formatTime } from "@/utils/formatTime";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 import type { MovieDetail } from "@/types/movie";
-import type { WatchHistoryItem } from "@/utils/localHistory";
+import type { WatchHistoryItem } from "@/utils/watchHistoryMerge";
 
 const primaryActionClass = movieActionButtonVariants({
   intent: "primary",

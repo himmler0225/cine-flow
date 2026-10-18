@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { moviesApi } from "@/services/movies";
 import { useTrackedSeriesSlugs } from "@/hooks/useTrackedSeriesSlugs";
@@ -7,9 +7,9 @@ import { CACHE_TTL } from "@/constants/timing";
 import {
   getEpisodeSnapshots,
   setEpisodeSnapshot,
-  getNotificationsReadAt,
   markNotificationsRead,
 } from "@/utils/episodeSnapshots";
+import { usePreferencesStore } from "@/store/preferencesStore";
 
 export type EpisodeNotification = {
   id: string;
@@ -34,13 +34,17 @@ export function useEpisodeNotifications() {
 
   const qc = useQueryClient();
 
-  const [readAt, setReadAt] = useState(getNotificationsReadAt);
+  const readAt = usePreferencesStore((s) => s.prefs.notifReadAt ?? 0);
+
+  // Snapshots come from the server: comparing against an empty set would mark every
+  // followed series as "seen" and hide real new episodes.
+  const prefsLoaded = usePreferencesStore((s) => s.loaded && s.userId !== null);
 
   const slugsKey = trackedSlugs.slice(0, 20).join(",");
 
   const { data: notifications = [], refetch } = useQuery({
     queryKey: queryKeys.episodeNotifications(slugsKey),
-    enabled: trackedSlugs.length > 0,
+    enabled: prefsLoaded && trackedSlugs.length > 0,
     staleTime: CACHE_TTL.tenMinutes,
     refetchOnWindowFocus: true,
     queryFn: async (): Promise<EpisodeNotification[]> => {
@@ -93,16 +97,14 @@ export function useEpisodeNotifications() {
   const markRead = useCallback(() => {
     markNotificationsRead();
 
-    setReadAt(Date.now());
-
     void qc.invalidateQueries({ queryKey: ["episode-notifications"] });
   }, [qc]);
 
   useEffect(() => {
-    if (trackedSlugs.length === 0) return;
+    if (!prefsLoaded || trackedSlugs.length === 0) return;
 
     void refetch();
-  }, [trackedSlugs.length, slugsKey, refetch]);
+  }, [prefsLoaded, trackedSlugs.length, slugsKey, refetch]);
 
   return { notifications, unreadCount, markRead, refetch };
 }

@@ -3,9 +3,7 @@ import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import { ratingsApi } from "@/services/platform/ratings.service";
 import { useAuthStore } from "@/store/authStore";
-import { useRatingStore } from "@/store/ratingStore";
 import { CACHE_TTL } from "@/constants/timing";
-import { useHydrated } from "@/hooks/useHydrated";
 
 const ratingKeys = {
   aggregate: (slug: string) => ["ratings", "aggregate", slug] as const,
@@ -21,15 +19,6 @@ export function useMovieRating(slug: string) {
   const userId = useAuthStore((s) => s.user?.id);
 
   const requestAuth = useAuthStore((s) => s.requestAuth);
-
-  const hydrated = useHydrated();
-
-  const storedScore = useRatingStore((s) => s.ratings[slug] ?? null);
-
-  // Persisted in localStorage: not part of the server render (see useHydrated).
-  const localScore = hydrated ? storedScore : null;
-
-  const setLocal = useRatingStore((s) => s.set);
 
   const qc = useQueryClient();
 
@@ -47,15 +36,7 @@ export function useMovieRating(slug: string) {
   });
 
   const mutation = useMutation({
-    mutationFn: async (score: number) => {
-      if (!userId) {
-        setLocal(slug, score);
-
-        return;
-      }
-
-      await ratingsApi.upsert(slug, score);
-    },
+    mutationFn: (score: number) => ratingsApi.upsert(slug, score),
     onMutate: async (score: number) => {
       if (!userId) return { prevUser: null, prevAgg: null };
 
@@ -105,11 +86,12 @@ export function useMovieRating(slug: string) {
     },
   });
 
-  const userScore = userId ? (userQuery.data ?? null) : localScore;
+  const userScore = userId ? (userQuery.data ?? null) : null;
 
+  // Ratings are stored in the account only.
   const rate = (score: number): Promise<void> => {
     if (!userId) {
-      setLocal(slug, score);
+      requestAuth("login");
 
       return Promise.resolve();
     }

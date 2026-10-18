@@ -1,5 +1,5 @@
 import { platformFetch } from "@/lib/platformApi";
-import { type WatchHistoryItem, getLocalHistory, clearLocalHistory } from "@/utils/localHistory";
+import type { WatchHistoryItem } from "@/utils/watchHistoryMerge";
 
 class WatchHistoryApi {
   fetch(): Promise<WatchHistoryItem[]> {
@@ -24,21 +24,14 @@ class WatchHistoryApi {
 
     return { error: null };
   }
-  async migrateLocalToServer(): Promise<void> {
-    const local = getLocalHistory();
+  /** One-off import of history saved in the browser by older app versions. */
+  async importItems(items: WatchHistoryItem[]): Promise<void> {
+    if (items.length === 0) return;
 
-    if (local.length === 0) return;
-
-    try {
-      await platformFetch("/api/watch-history/batch", {
-        method: "POST",
-        body: JSON.stringify({ items: local }),
-      });
-
-      clearLocalHistory();
-    } catch (e) {
-      console.error("[watch_history] migration failed", e);
-    }
+    await platformFetch("/api/watch-history/batch", {
+      method: "POST",
+      body: JSON.stringify({ items }),
+    });
   }
 }
 

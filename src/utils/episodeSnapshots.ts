@@ -1,53 +1,52 @@
-import { readStorageKey, writeStorageKey } from "@/constants/storage";
+import type { EpisodeSnapshot } from "@/services/platform/preferences.service";
+import { usePreferencesStore } from "@/store/preferencesStore";
 
-export type EpisodeSnapshot = Record<
-  string,
-  {
-    episode: string;
-    at: number;
-  }
->;
+export type { EpisodeSnapshot };
+
+/** Followed series are capped so the stored document stays small. */
+const MAX_SNAPSHOTS = 200;
 
 export function getEpisodeSnapshots(): EpisodeSnapshot {
-  try {
-    const raw = readStorageKey("episodeSnapshots");
-
-    return raw ? (JSON.parse(raw) as EpisodeSnapshot) : {};
-  } catch {
-    return {};
-  }
+  return usePreferencesStore.getState().prefs.episodeSnapshots ?? {};
 }
 
 export function setEpisodeSnapshot(slug: string, episode: string): void {
-  try {
-    const all = getEpisodeSnapshots();
+  const current = getEpisodeSnapshots()[slug];
 
-    all[slug] = { episode, at: Date.now() };
+  if (current?.episode === episode) return;
 
-    writeStorageKey("episodeSnapshots", JSON.stringify(all));
-  } catch {}
+  usePreferencesStore.getState().set("episodeSnapshots", (prev = {}) => {
+    const next = { ...prev, [slug]: { episode, at: Date.now() } };
+
+    const slugs = Object.keys(next);
+
+    if (slugs.length > MAX_SNAPSHOTS) {
+      slugs
+        .sort((a, b) => next[a].at - next[b].at)
+        .slice(0, slugs.length - MAX_SNAPSHOTS)
+        .forEach((s) => delete next[s]);
+    }
+
+    return next;
+  });
 }
 
 export function removeEpisodeSnapshot(slug: string): void {
-  try {
-    const all = getEpisodeSnapshots();
+  if (!getEpisodeSnapshots()[slug]) return;
 
-    delete all[slug];
+  usePreferencesStore.getState().set("episodeSnapshots", (prev = {}) => {
+    const next = { ...prev };
 
-    writeStorageKey("episodeSnapshots", JSON.stringify(all));
-  } catch {}
+    delete next[slug];
+
+    return next;
+  });
 }
 
 export function getNotificationsReadAt(): number {
-  try {
-    return Number(readStorageKey("notifReadAt") || 0);
-  } catch {
-    return 0;
-  }
+  return usePreferencesStore.getState().prefs.notifReadAt ?? 0;
 }
 
 export function markNotificationsRead(): void {
-  try {
-    writeStorageKey("notifReadAt", String(Date.now()));
-  } catch {}
+  usePreferencesStore.getState().set("notifReadAt", () => Date.now());
 }

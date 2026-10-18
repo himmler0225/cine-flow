@@ -4,14 +4,12 @@ import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import { favoriteToMovieListItem, favoritesApi } from "@/services/platform/favorites.service";
 import { useAuthStore } from "@/store/authStore";
-import { useFavoriteStore } from "@/store/favoriteStore";
 import { queryKeys } from "@/constants/queryKeys";
 import { CACHE_TTL } from "@/constants/timing";
 import type { MovieListItem } from "@/types/movie";
 import { getImageUrl } from "@/lib/movie/movieImages";
 import { setEpisodeSnapshot } from "@/utils/episodeSnapshots";
 import { getAppQueryClient } from "@/lib/queryClientHolder";
-import { useHydrated } from "@/hooks/useHydrated";
 
 export function invalidateFavoritesQueries(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -70,23 +68,10 @@ export function useFavoriteCount(userId: string | undefined) {
   });
 }
 
-const EMPTY_LOCAL_FAVS: MovieListItem[] = [];
-
 export function useFavorites() {
   const userId = useAuthStore((s) => s.user?.id);
 
-  // Guest favourites come from localStorage: ignore them until hydrated (see useHydrated).
-  const hydrated = useHydrated();
-
-  const storedFavs = useFavoriteStore((s) => s.favorites);
-
-  const localFavs = hydrated ? storedFavs : EMPTY_LOCAL_FAVS;
-
-  const localToggle = useFavoriteStore((s) => s.toggle);
-
-  const storeHas = useFavoriteStore((s) => s.has);
-
-  const localHas = useCallback((slug: string) => hydrated && storeHas(slug), [hydrated, storeHas]);
+  const requestAuth = useAuthStore((s) => s.requestAuth);
 
   const queryClient = useQueryClient();
 
@@ -102,8 +87,8 @@ export function useFavorites() {
   const { data: remoteList = [] } = useFavoritesList(userId);
 
   const isFavorite = useCallback(
-    (slug: string) => (userId ? slugMap.has(slug) : localHas(slug)),
-    [userId, slugMap, localHas],
+    (slug: string) => (userId ? slugMap.has(slug) : false),
+    [userId, slugMap],
   );
 
   const setSlugMap = useCallback(
@@ -117,12 +102,9 @@ export function useFavorites() {
 
   const toggleFavorite = useCallback(
     async (movie: MovieListItem) => {
+      // Favourites are stored in the account only.
       if (!userId) {
-        const wasFav = localHas(movie.slug);
-
-        localToggle(movie);
-
-        toast.success(wasFav ? t("toast.favoriteRemoved") : t("toast.favoriteAdded"));
+        requestAuth("login");
 
         return;
       }
@@ -211,18 +193,15 @@ export function useFavorites() {
         }
       }
     },
-    [userId, slugMap, localHas, localToggle, setSlugMap, queryClient],
+    [userId, slugMap, requestAuth, setSlugMap, queryClient],
   );
 
   const favoritesList: MovieListItem[] = useMemo(
-    () => (userId ? remoteList.map(favoriteToMovieListItem) : localFavs),
-    [userId, remoteList, localFavs],
+    () => (userId ? remoteList.map(favoriteToMovieListItem) : []),
+    [userId, remoteList],
   );
 
-  const favoriteSlugs = useMemo(
-    () => (userId ? [...slugMap.keys()] : localFavs.map((f) => f.slug)),
-    [userId, slugMap, localFavs],
-  );
+  const favoriteSlugs = useMemo(() => (userId ? [...slugMap.keys()] : []), [userId, slugMap]);
 
   return {
     isFavorite,

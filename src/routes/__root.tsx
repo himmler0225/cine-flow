@@ -261,8 +261,8 @@ function RootComponent() {
         queryClient,
         persister,
         maxAge: CACHE_TTL.day,
-        // v5: drops caches persisted before details/searches were excluded (could be MBs).
-        buster: "v5",
+        // v6: drops caches persisted before account data (history, favourites) was excluded.
+        buster: "v6",
         dehydrateOptions: {
           shouldDehydrateQuery: (query) =>
             defaultShouldDehydrateQuery(query) && shouldPersistQuery(query.queryKey),
@@ -371,10 +371,20 @@ function RootComponent() {
  * ~100KB each), searches and admin data piled up in localStorage until writes such as the
  * refresh token started failing with QuotaExceededError.
  */
+/** Account data (history, favourites, ratings) lives in the database only. */
+const USER_DATA_SCOPES = new Set([
+  "watch_history",
+  "favorites",
+  "favorites-list",
+  "favorites-count",
+  "ratings",
+  "episode-notifications",
+]);
+
 function shouldPersistQuery(queryKey: readonly unknown[]): boolean {
   const [scope, kind] = queryKey;
 
-  if (scope === "favorites" && kind === "slugs") return false;
+  if (USER_DATA_SCOPES.has(String(scope))) return false;
 
   if (scope === "admin" || scope === "wp-detail" || scope === "watch-party") return false;
 

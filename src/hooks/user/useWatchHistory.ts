@@ -5,14 +5,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useHydrated } from "@/hooks/useHydrated";
 import { queryKeys } from "@/constants/queryKeys";
 import { CACHE_TTL } from "@/constants/timing";
-import {
-  type WatchHistoryItem,
-  getLocalHistory,
-  mergeWatchProgress,
-  saveLocalHistory,
-  removeLocalHistoryItem,
-  clearLocalHistory,
-} from "@/utils/localHistory";
+import { type WatchHistoryItem, mergeWatchProgress } from "@/utils/watchHistoryMerge";
 import { invalidateHistoryRefetchCache } from "@/utils/historyRefetchCache";
 import { getWatchProgressPercent, isWatchFinished } from "@/utils/watchProgress";
 
@@ -40,13 +33,8 @@ export function useWatchHistory() {
     refetch,
   } = useQuery<WatchHistoryItem[]>({
     queryKey: key,
-    queryFn: async () => {
-      if (userId) {
-        return watchHistoryApi.fetch();
-      }
-
-      return getLocalHistory();
-    },
+    // History lives only in the database; guests have none.
+    queryFn: () => (userId ? watchHistoryApi.fetch() : Promise.resolve(EMPTY_HISTORY)),
     staleTime: CACHE_TTL.fiveMinutes,
     gcTime: CACHE_TTL.thirtyMinutes,
     refetchOnWindowFocus: false,
@@ -56,8 +44,8 @@ export function useWatchHistory() {
     refetchIntervalInBackground: false,
   });
 
-  // History lives in localStorage / the persisted cache: hide it until hydrated so SSR'd
-  // pages (watch %, episode ticks) render the same HTML as the server first.
+  // Hide it until hydrated so SSR'd pages (watch %, episode ticks) render the same HTML as
+  // the server first.
   const history = hydrated ? historyData : EMPTY_HISTORY;
 
   const isLoading = !hydrated || queryLoading;
@@ -86,7 +74,7 @@ export function useWatchHistory() {
         return;
       }
 
-      saveLocalHistory(normalizedItem);
+      if (!userId) return;
 
       invalidateHistoryRefetchCache(item.movie_slug);
 
@@ -112,12 +100,10 @@ export function useWatchHistory() {
         return [normalizedItem, ...old].slice(0, 50);
       });
 
-      if (userId) {
-        try {
-          await watchHistoryApi.upsertProgress(normalizedItem);
-        } catch (error) {
-          console.error("[watch-history] upsert failed", error);
-        }
+      try {
+        await watchHistoryApi.upsertProgress(normalizedItem);
+      } catch (error) {
+        console.error("[watch-history] upsert failed", error);
       }
     },
     [userId, key, queryClient],
@@ -125,8 +111,6 @@ export function useWatchHistory() {
 
   const deleteItem = useCallback(
     async (movieSlug: string, episodeName: string) => {
-      removeLocalHistoryItem(movieSlug, episodeName);
-
       queryClient.setQueryData<WatchHistoryItem[]>(key, (old = []) =>
         old.filter((h) => !(h.movie_slug === movieSlug && h.episode_name === episodeName)),
       );
@@ -141,8 +125,6 @@ export function useWatchHistory() {
   );
 
   const clearAll = useCallback(async () => {
-    clearLocalHistory();
-
     queryClient.setQueryData<WatchHistoryItem[]>(key, []);
 
     if (userId) {

@@ -3,7 +3,7 @@ import { moviesApi } from "@/services/movies";
 import { queryKeys } from "@/constants/queryKeys";
 import { useWatchHistory } from "@/hooks/user/useWatchHistory";
 import { useFavorites } from "@/hooks/useFavorites";
-import { getRecentSearches } from "@/utils/searchHistory";
+import { usePreferencesStore } from "@/store/preferencesStore";
 import type { MovieListItem } from "@/types/movie";
 import { CACHE_TTL } from "@/constants/timing";
 
@@ -31,6 +31,8 @@ function toSuggestion(m: MovieListItem, source: SearchSuggestion["source"]): Sea
   };
 }
 
+const EMPTY_SEARCHES: string[] = [];
+
 export function useSearchSuggestions(enabled: boolean) {
   const { favoritesList } = useFavorites();
 
@@ -43,7 +45,7 @@ export function useSearchSuggestions(enabled: boolean) {
     queryFn: () => moviesApi.getNewMovies(1),
   });
 
-  const recentSearches = getRecentSearches();
+  const recentSearches = usePreferencesStore((s) => s.prefs.recentSearches) ?? EMPTY_SEARCHES;
 
   const suggestions = (() => {
     const seen = new Set<string>();

@@ -1,71 +1,40 @@
-import { readStorageKey, writeStorageKey } from "@/constants/storage";
+import type { MoviePlayerPrefs } from "@/services/platform/preferences.service";
+import { usePreferencesStore } from "@/store/preferencesStore";
 
-export type MoviePlayerPrefs = {
-  /** Server tab the viewer picked for this movie (e.g. Vietsub vs Thuyết minh). */
-  server?: number;
-  speed?: number;
-  updatedAt?: number;
-};
+export type { MoviePlayerPrefs };
 
-type StoredPrefs = {
-  volume?: number;
-  muted?: boolean;
-  movies?: Record<string, MoviePlayerPrefs>;
-};
-
-/** Oldest movies are forgotten past this many entries. */
-const MAX_MOVIES = 200;
-
-function read(): StoredPrefs {
-  try {
-    const raw = readStorageKey("playerPrefs");
-
-    return raw ? (JSON.parse(raw) as StoredPrefs) : {};
-  } catch {
-    return {};
-  }
-}
-
-function write(prefs: StoredPrefs): void {
-  writeStorageKey("playerPrefs", JSON.stringify(prefs));
-}
+/** Oldest movies are forgotten past this many entries (keeps the DB document small). */
+const MAX_MOVIES = 150;
 
 export function getMoviePrefs(slug: string | undefined): MoviePlayerPrefs {
   if (!slug) return {};
 
-  return read().movies?.[slug] ?? {};
+  return usePreferencesStore.getState().prefs.moviePrefs?.[slug] ?? {};
 }
 
 export function saveMoviePrefs(slug: string | undefined, patch: MoviePlayerPrefs): void {
-  if (!slug || typeof window === "undefined") return;
+  if (!slug) return;
 
-  const prefs = read();
+  usePreferencesStore.getState().set("moviePrefs", (prev = {}) => {
+    const movies = { ...prev, [slug]: { ...prev[slug], ...patch, updatedAt: Date.now() } };
 
-  const movies = {
-    ...prefs.movies,
-    [slug]: { ...prefs.movies?.[slug], ...patch, updatedAt: Date.now() },
-  };
+    const slugs = Object.keys(movies);
 
-  const slugs = Object.keys(movies);
+    if (slugs.length > MAX_MOVIES) {
+      slugs
+        .sort((a, b) => (movies[a].updatedAt ?? 0) - (movies[b].updatedAt ?? 0))
+        .slice(0, slugs.length - MAX_MOVIES)
+        .forEach((s) => delete movies[s]);
+    }
 
-  if (slugs.length > MAX_MOVIES) {
-    slugs
-      .sort((a, b) => (movies[a].updatedAt ?? 0) - (movies[b].updatedAt ?? 0))
-      .slice(0, slugs.length - MAX_MOVIES)
-      .forEach((s) => delete movies[s]);
-  }
-
-  write({ ...prefs, movies });
+    return movies;
+  });
 }
 
 export function getVolumePrefs(): { volume?: number; muted?: boolean } {
-  const { volume, muted } = read();
-
-  return { volume, muted };
+  return usePreferencesStore.getState().prefs.player ?? {};
 }
 
 export function saveVolumePrefs(patch: { volume?: number; muted?: boolean }): void {
-  if (typeof window === "undefined") return;
-
-  write({ ...read(), ...patch });
+  usePreferencesStore.getState().set("player", (prev) => ({ ...prev, ...patch }));
 }

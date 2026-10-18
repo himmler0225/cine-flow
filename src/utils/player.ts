@@ -3,7 +3,7 @@ import {
   HLS_EXTENSION_PATTERN,
   PLAYER_PATH_PATTERN,
 } from "@/constants/patterns";
-import { readStorageKey, writeStorageKey } from "@/constants/storage";
+import { usePreferencesStore } from "@/store/preferencesStore";
 
 export const PLAYBACK_SPEEDS = [0.5, 1, 1.25, 1.5, 2] as const;
 
@@ -40,15 +40,9 @@ export function resolvePlayableSrc(src?: string | null, embed?: string | null): 
 }
 
 export function readSkipAdsPreference(): boolean {
-  if (typeof window === "undefined") return false;
-
-  const v = readStorageKey("skipAds");
-
-  return v === "1";
+  return usePreferencesStore.getState().prefs.settings?.skipAds === true;
 }
 
 export function writeSkipAdsPreference(enabled: boolean): void {
-  if (typeof window === "undefined") return;
-
-  writeStorageKey("skipAds", enabled ? "1" : "0");
+  usePreferencesStore.getState().set("settings", (prev) => ({ ...prev, skipAds: enabled }));
 }

@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "@/store/settingsStore";
+import { usePreferencesStore } from "@/store/preferencesStore";
 import { useHydrated } from "@/hooks/useHydrated";
 import { usePremium } from "@/hooks/usePremium";
 import {
@@ -102,9 +103,11 @@ export function useVideoPlayer({
   // The profile (and so isPremium) loads after the player mounts: apply the saved
   // preference once it is known. The old effect wrote state.skipAds back to storage as soon
   // as isPremium flipped, overwriting the saved "on" with the initial "off" on every visit.
+  const skipAdsSaved = usePreferencesStore((s) => s.prefs.settings?.skipAds === true);
+
   useEffect(() => {
-    dispatch({ type: "setSkipAds", skipAds: isPremium && readSkipAdsPreference() });
-  }, [isPremium]);
+    dispatch({ type: "setSkipAds", skipAds: isPremium && skipAdsSaved });
+  }, [isPremium, skipAdsSaved]);
 
   usePlayerEmbedMode(
     videoRef,

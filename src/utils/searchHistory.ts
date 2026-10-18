@@ -1,15 +1,9 @@
-import { readStorageKey, writeStorageKey } from "@/constants/storage";
+import { usePreferencesStore } from "@/store/preferencesStore";
 
 const MAX = 8;
 
 export function getRecentSearches(): string[] {
-  try {
-    const raw = readStorageKey("recentSearches");
-
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch {
-    return [];
-  }
+  return usePreferencesStore.getState().prefs.recentSearches ?? [];
 }
 
 export function pushRecentSearch(q: string): void {
@@ -17,15 +11,13 @@ export function pushRecentSearch(q: string): void {
 
   if (trimmed.length < 2) return;
 
-  try {
-    const prev = getRecentSearches().filter((s) => s.toLowerCase() !== trimmed.toLowerCase());
-
-    writeStorageKey("recentSearches", JSON.stringify([trimmed, ...prev].slice(0, MAX)));
-  } catch {}
+  usePreferencesStore
+    .getState()
+    .set("recentSearches", (prev = []) =>
+      [trimmed, ...prev.filter((s) => s.toLowerCase() !== trimmed.toLowerCase())].slice(0, MAX),
+    );
 }
 
 export function clearRecentSearches(): void {
-  try {
-    writeStorageKey("recentSearches", null);
-  } catch {}
+  usePreferencesStore.getState().set("recentSearches", () => []);
 }

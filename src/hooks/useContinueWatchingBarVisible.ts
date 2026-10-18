@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useLocation } from "@tanstack/react-router";
 import { useWatchHistory } from "@/hooks/user/useWatchHistory";
 import { isWatchFinished } from "@/utils/watchProgress";
-import type { WatchHistoryItem } from "@/utils/localHistory";
+import type { WatchHistoryItem } from "@/utils/watchHistoryMerge";
 
 const HIDDEN_PREFIXES = ["/watch/", "/watch-party/", "/admin"];
 

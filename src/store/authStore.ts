@@ -4,9 +4,7 @@ import { t } from "@/lib/i18n";
 import type { Session, User } from "@/services/platform/auth.service";
 import { authApi } from "@/services/platform/auth.service";
 import { profilesApi } from "@/services/platform/profiles.service";
-import { watchHistoryApi } from "@/services/platform/watchHistory.service";
-import { favoritesApi } from "@/services/platform/favorites.service";
-import { watchlistApi } from "@/services/platform/watchlist.service";
+import { usePreferencesStore } from "@/store/preferencesStore";
 import type { Profile } from "@/types/database";
 import { goToAuth } from "@/lib/auth/authNavigation";
 import { STORAGE_KEYS } from "@/constants/storage";
@@ -35,6 +33,15 @@ interface AuthState {
 
 let initPromise: Promise<void> | null = null;
 
+/** Loads the account's DB-backed preferences, then moves any old browser-saved data there. */
+async function loadUserData(userId: string) {
+  await usePreferencesStore.getState().load(userId);
+
+  const { importLegacyLocalData } = await import("@/lib/legacyLocalData");
+
+  await importLegacyLocalData();
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
@@ -59,15 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (session?.user) {
         void get().fetchProfile(session.user.id);
 
-        void watchHistoryApi.migrateLocalToServer();
-
-        void favoritesApi.migrateLocalToServer().then(async () => {
-          const { clearFavoritesCache } = await import("@/hooks/useFavorites");
-
-          clearFavoritesCache();
-        });
-
-        void watchlistApi.migrateLocalToServer();
+        void loadUserData(session.user.id);
       }
 
       // Another tab signed out (or its refresh was rejected) and removed the shared refresh
@@ -81,6 +80,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           clearAuthTokens();
 
           set({ session: null, user: null, profile: null, isAuthenticated: false });
+
+          usePreferencesStore.getState().reset();
         });
       }
 
@@ -96,18 +97,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           void get().fetchProfile(newSession.user.id);
 
           if (event === "SIGNED_IN") {
-            void watchHistoryApi.migrateLocalToServer();
-
-            void favoritesApi.migrateLocalToServer().then(async () => {
-              const { clearFavoritesCache } = await import("@/hooks/useFavorites");
-
-              clearFavoritesCache();
-            });
-
-            void watchlistApi.migrateLocalToServer();
+            void loadUserData(newSession.user.id);
           }
         } else {
           set({ profile: null });
+
+          usePreferencesStore.getState().reset();
         }
       });
     })().catch((error) => {
@@ -191,6 +186,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await authApi.signOut();
 
     set({ user: null, profile: null, session: null, isAuthenticated: false });
+
+    usePreferencesStore.getState().reset();
 
     toast.success(t("toast.loggedOut"));
 
