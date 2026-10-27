@@ -8,7 +8,6 @@ import { usePreferencesStore } from "@/store/preferencesStore";
 import type { Profile } from "@/types/database";
 import { goToAuth } from "@/lib/auth/authNavigation";
 import { STORAGE_KEYS } from "@/constants/storage";
-import { clearAuthTokens } from "@/lib/auth/authToken";
 
 export type { Profile };
 
@@ -54,7 +53,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     initPromise = (async () => {
       set({ isLoading: true });
 
-      const session = await authApi.getSession();
+      // An unreachable API (deploy, flaky network) is not a sign-out: keep the loading state
+      // and retry instead of sending the user to the login page.
+      let session: Session | null = null;
+
+      for (let attempt = 0; ; attempt += 1) {
+        try {
+          session = await authApi.getSession();
+
+          break;
+        } catch (error) {
+          console.warn("[auth] session restore failed, retrying", error);
+
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.min(2000 * (attempt + 1), 10000)),
+          );
+        }
+      }
 
       set({
         session,
@@ -69,21 +84,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         void loadUserData(session.user.id);
       }
 
-      // Another tab signed out (or its refresh was rejected) and removed the shared refresh
-      // token: drop this tab's in-memory session too instead of staying "logged in".
-      if (typeof window !== "undefined") {
-        window.addEventListener("storage", (event) => {
-          if (event.key !== STORAGE_KEYS.refreshToken || event.newValue !== null) return;
-
-          if (!get().isAuthenticated) return;
-
-          clearAuthTokens();
-
-          set({ session: null, user: null, profile: null, isAuthenticated: false });
-
-          usePreferencesStore.getState().reset();
-        });
-      }
+      // Another tab signed out: drop this tab's in-memory session too (arrives as a
+      // SIGNED_OUT event below).
+      authApi.listenAcrossTabs();
 
       authApi.onAuthStateChange(async (event, newSession) => {
         set({

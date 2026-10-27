@@ -50,6 +50,8 @@ export async function platformFetch<T>(path: string, options?: PlatformFetchOpti
       headers,
       signal: options?.signal ?? undefined,
       skipAuth: options?.auth === false,
+      // The refresh-token cookie is scoped to /api/auth; nothing else needs cookies.
+      withCredentials: path.startsWith("/api/auth/"),
     });
 
     if (response.status === 204) return undefined as T;

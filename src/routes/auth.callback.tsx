@@ -63,18 +63,15 @@ function AuthCallbackPage() {
 
         const tokenFromHash = hash.get("access_token");
 
-        const refreshFromHash = hash.get("refresh_token");
-
         if (!tokenFromHash) {
           finish("/login", { type: "error", text: "Không nhận được token đăng nhập. Thử lại." });
 
           return;
         }
 
-        applySessionTokens({
-          access_token: tokenFromHash,
-          refresh_token: refreshFromHash ?? undefined,
-        });
+        // The API already set the refresh cookie on its redirect; only the access token
+        // travels in the URL hash.
+        applySessionTokens({ access_token: tokenFromHash });
 
         window.history.replaceState(null, "", window.location.pathname);
 
