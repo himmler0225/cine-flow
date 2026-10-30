@@ -281,7 +281,16 @@
     "skipIntro": "Bỏ qua intro",
     "skipOutro": "Bỏ qua đoạn cuối",
     "skipToNextEpisode": "Tập tiếp theo",
-    "introSkipped": "Đã bỏ qua intro"
+    "introSkipped": "Đã bỏ qua intro",
+    "sleepTimer": "Hẹn giờ tắt",
+    "sleepOff": "Tắt",
+    "sleepEpisode": "Hết tập này",
+    "sleepMinutes": "{{count}} phút",
+    "sleepMinutesLeft": "còn {{count}} phút",
+    "sleepPaused": "Đã tạm dừng theo hẹn giờ. Ngủ ngon nhé!",
+    "cast": "Phát lên TV (Chromecast)",
+    "casting": "Đang phát trên TV",
+    "castFailed": "Không phát lên TV được"
   },
   "hero": {
     "goToSlide": "Chuyển slide {{index}}"

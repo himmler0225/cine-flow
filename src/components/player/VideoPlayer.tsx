@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import {
+  Airplay,
+  Cast,
   MessageSquareOff,
   MessageSquareText,
   PenLine,
@@ -14,6 +17,8 @@ import { canUsePictureInPicture } from "@/hooks/player/usePlayerControls";
 import { useMoments } from "@/hooks/player/useMoments";
 import { useDanmaku } from "@/hooks/player/useDanmaku";
 import { useSkipMarkers } from "@/hooks/player/useSkipMarkers";
+import { useSleepTimer } from "@/hooks/player/useSleepTimer";
+import { useCasting } from "@/hooks/player/useCasting";
 import { usePreferencesStore } from "@/store/preferencesStore";
 import type { DanmakuSettings } from "@/services/platform/preferences.service";
 import { DanmakuLayer } from "@/components/player/DanmakuLayer";
@@ -47,6 +52,8 @@ interface Props {
   prefsKey?: string;
   /** Episode name: enables the reaction heatmap and reactions for this episode. */
   momentsEpisode?: string;
+  /** Shown on the TV when casting. */
+  title?: string;
 }
 
 const EMPTY_DANMAKU_SETTINGS: DanmakuSettings = {};
@@ -54,7 +61,27 @@ const EMPTY_DANMAKU_SETTINGS: DanmakuSettings = {};
 export function VideoPlayer(props: Props) {
   const { t } = useTranslation();
 
-  const player = useVideoPlayer(props);
+  // "Sleep at end of episode" swallows the end so playback doesn't roll on.
+  const sleepEndedRef = useRef<() => boolean>(() => false);
+
+  const player = useVideoPlayer({
+    ...props,
+    onEnded: () => {
+      if (sleepEndedRef.current()) return;
+
+      props.onEnded?.();
+    },
+  });
+
+  const sleep = useSleepTimer(() => {
+    player.videoRef.current?.pause();
+
+    toast.message(t("player.sleepPaused"));
+  });
+
+  sleepEndedRef.current = sleep.handleEnded;
+
+  const casting = useCasting(player.videoRef, player.playableSrc, props.title);
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -322,8 +349,33 @@ export function VideoPlayer(props: Props) {
           heatmap={heatmap}
           onReact={isAuthenticated && props.momentsEpisode ? sendReaction : undefined}
           extraControls={
-            episodeFeatures ? (
-              <>
+            <>
+              {casting.castAvailable && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    void casting
+                      .cast()
+                      .then((ok) => ok && toast.message(t("player.casting")))
+                      .catch(() => toast.error(t("player.castFailed")))
+                  }
+                  className="rounded p-1.5 hover:bg-white/10"
+                  aria-label={t("player.cast")}
+                >
+                  <Cast className="h-5 w-5" />
+                </button>
+              )}
+              {casting.airplayAvailable && (
+                <button
+                  type="button"
+                  onClick={casting.airplay}
+                  className="rounded p-1.5 hover:bg-white/10"
+                  aria-label="AirPlay"
+                >
+                  <Airplay className="h-5 w-5" />
+                </button>
+              )}
+              {episodeFeatures && (
                 <button
                   type="button"
                   onClick={() => changeDanmaku({ enabled: !danmakuOn })}
@@ -337,34 +389,47 @@ export function VideoPlayer(props: Props) {
                     <MessageSquareOff className="h-5 w-5 text-white/60" />
                   )}
                 </button>
-                {danmakuOn && (
-                  <button
-                    type="button"
-                    onClick={() => setComposing((v) => !v)}
-                    className="rounded p-1.5 hover:bg-white/10"
-                    aria-label={t("player.danmakuWrite")}
-                    aria-expanded={composing}
-                  >
-                    <PenLine className="h-5 w-5" />
-                  </button>
-                )}
-                <PlayerSettingsMenu
-                  onOpenChange={setMenuOpen}
-                  danmaku={{ settings: danmakuSettings, onChange: changeDanmaku }}
-                  skip={{
-                    intro: skipMarkers.intro,
-                    outro: skipMarkers.outro,
-                    autoSkipIntro,
-                    onAutoSkipIntroChange: (v) =>
-                      updateSettings("settings", (prev) => ({ ...prev, autoSkipIntro: v })),
-                    getTime: () => player.videoRef.current?.currentTime ?? player.progress,
-                    duration: player.duration,
-                    onMark: skipMarkers.mark,
-                    onUnmark: skipMarkers.unmark,
-                  }}
-                />
-              </>
-            ) : undefined
+              )}
+              {danmakuOn && (
+                <button
+                  type="button"
+                  onClick={() => setComposing((v) => !v)}
+                  className="rounded p-1.5 hover:bg-white/10"
+                  aria-label={t("player.danmakuWrite")}
+                  aria-expanded={composing}
+                >
+                  <PenLine className="h-5 w-5" />
+                </button>
+              )}
+              <PlayerSettingsMenu
+                onOpenChange={setMenuOpen}
+                sleep={{
+                  mode: sleep.mode,
+                  minutesLeft: sleep.minutesLeft,
+                  onChange: sleep.setMode,
+                }}
+                danmaku={
+                  episodeFeatures
+                    ? { settings: danmakuSettings, onChange: changeDanmaku }
+                    : undefined
+                }
+                skip={
+                  episodeFeatures
+                    ? {
+                        intro: skipMarkers.intro,
+                        outro: skipMarkers.outro,
+                        autoSkipIntro,
+                        onAutoSkipIntroChange: (v) =>
+                          updateSettings("settings", (prev) => ({ ...prev, autoSkipIntro: v })),
+                        getTime: () => player.videoRef.current?.currentTime ?? player.progress,
+                        duration: player.duration,
+                        onMark: skipMarkers.mark,
+                        onUnmark: skipMarkers.unmark,
+                      }
+                    : undefined
+                }
+              />
+            </>
           }
         />
       </div>

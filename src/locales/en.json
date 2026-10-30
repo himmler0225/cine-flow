@@ -282,7 +282,16 @@
     "skipIntro": "Skip intro",
     "skipOutro": "Skip credits",
     "skipToNextEpisode": "Next episode",
-    "introSkipped": "Intro skipped"
+    "introSkipped": "Intro skipped",
+    "sleepTimer": "Sleep timer",
+    "sleepOff": "Off",
+    "sleepEpisode": "End of episode",
+    "sleepMinutes": "{{count}} min",
+    "sleepMinutesLeft": "{{count}} min left",
+    "sleepPaused": "Paused by the sleep timer. Good night!",
+    "cast": "Cast to TV",
+    "casting": "Playing on your TV",
+    "castFailed": "Couldn't cast to the TV"
   },
   "hero": {
     "goToSlide": "Go to slide {{index}}"

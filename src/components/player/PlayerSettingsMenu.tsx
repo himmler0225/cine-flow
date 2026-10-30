@@ -7,10 +7,18 @@ import { formatTime } from "@/utils/formatTime";
 import type { DanmakuSettings } from "@/services/platform/preferences.service";
 import type { SkipKind } from "@/services/platform/skipMarkers.service";
 import type { ActiveSegment } from "@/hooks/player/useSkipMarkers";
+import type { SleepMode } from "@/hooks/player/useSleepTimer";
 
 const DENSITIES = ["low", "medium", "high"] as const;
 
+const SLEEP_OPTIONS: SleepMode[] = ["off", 15, 30, 60, "episode"];
+
 interface Props {
+  sleep?: {
+    mode: SleepMode;
+    minutesLeft: number | null;
+    onChange: (mode: SleepMode) => void;
+  };
   danmaku?: {
     settings: DanmakuSettings;
     onChange: (patch: DanmakuSettings) => void;
@@ -165,7 +173,7 @@ function SegmentEditor({
 }
 
 /** Gear menu: comment overlay options and community intro/outro marking. */
-export function PlayerSettingsMenu({ danmaku, skip, onOpenChange }: Props) {
+export function PlayerSettingsMenu({ sleep, danmaku, skip, onOpenChange }: Props) {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
@@ -195,7 +203,7 @@ export function PlayerSettingsMenu({ danmaku, skip, onOpenChange }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  if (!danmaku && !skip) return null;
+  if (!sleep && !danmaku && !skip) return null;
 
   return (
     <div ref={rootRef} className="relative">
@@ -213,6 +221,40 @@ export function PlayerSettingsMenu({ danmaku, skip, onOpenChange }: Props) {
           onPointerDown={(e) => e.stopPropagation()}
           className="absolute bottom-full right-0 mb-2 max-h-[min(26rem,70vh)] w-[min(18rem,85vw)] space-y-3 overflow-y-auto rounded-xl bg-black/95 p-3 text-left ring-1 ring-white/10"
         >
+          {sleep && (
+            <section className="space-y-1">
+              <h3 className="flex justify-between text-xs font-semibold uppercase tracking-wide text-white/50">
+                {t("player.sleepTimer")}
+                {sleep.minutesLeft != null && (
+                  <span className="normal-case tracking-normal text-netflix-red">
+                    {t("player.sleepMinutesLeft", { count: sleep.minutesLeft })}
+                  </span>
+                )}
+              </h3>
+              <div className="grid grid-cols-3 gap-1">
+                {SLEEP_OPTIONS.map((option) => (
+                  <button
+                    key={String(option)}
+                    type="button"
+                    onClick={() => sleep.onChange(option)}
+                    className={cn(
+                      "rounded py-1 text-xs",
+                      sleep.mode === option
+                        ? "bg-netflix-red text-white"
+                        : "bg-white/10 text-white/80 hover:bg-white/20",
+                      option === "episode" && "col-span-2",
+                    )}
+                  >
+                    {option === "off"
+                      ? t("player.sleepOff")
+                      : option === "episode"
+                        ? t("player.sleepEpisode")
+                        : t("player.sleepMinutes", { count: option })}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
           {danmaku && (
             <section className="space-y-1">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-white/50">
