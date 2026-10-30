@@ -6,6 +6,9 @@ export interface Watchlist {
   name: string;
   slugs: string[];
   createdAt: number;
+  /** Public link state (server-managed; absent until shared). */
+  isPublic?: boolean;
+  shareId?: string | null;
 }
 
 interface WatchlistState {
@@ -16,6 +19,7 @@ interface WatchlistState {
   removeFromList: (listId: string, slug: string) => void;
   isInList: (listId: string, slug: string) => boolean;
   replaceLists: (lists: Watchlist[]) => void;
+  setSharing: (listId: string, isPublic: boolean, shareId: string | null) => void;
 }
 
 export function defaultWatchlists(): Watchlist[] {
@@ -62,4 +66,8 @@ export const useWatchlistStore = create<WatchlistState>()((set, get) => ({
     return list?.slugs.includes(slug) ?? false;
   },
   replaceLists: (lists) => set({ lists }),
+  setSharing: (listId, isPublic, shareId) =>
+    set((s) => ({
+      lists: s.lists.map((l) => (l.id === listId ? { ...l, isPublic, shareId } : l)),
+    })),
 }));

@@ -9,10 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WrappedRouteImport } from './routes/wrapped'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -30,6 +32,7 @@ import { Route as YearYearRouteImport } from './routes/year.$year'
 import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as WatchPartyCodeRouteImport } from './routes/watch-party.$code'
 import { Route as MovieSlugRouteImport } from './routes/movie.$slug'
+import { Route as ListShareIdRouteImport } from './routes/list.$shareId'
 import { Route as GenreSlugRouteImport } from './routes/genre.$slug'
 import { Route as CountrySlugRouteImport } from './routes/country.$slug'
 import { Route as CatalogSlugRouteImport } from './routes/catalog.$slug'
@@ -41,6 +44,11 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCommentsRouteImport } from './routes/admin.comments'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 
+const WrappedRoute = WrappedRouteImport.update({
+  id: '/wrapped',
+  path: '/wrapped',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
@@ -59,6 +67,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScheduleRoute = ScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -146,6 +159,11 @@ const MovieSlugRoute = MovieSlugRouteImport.update({
   path: '/movie/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListShareIdRoute = ListShareIdRouteImport.update({
+  id: '/list/$shareId',
+  path: '/list/$shareId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GenreSlugRoute = GenreSlugRouteImport.update({
   id: '/genre/$slug',
   path: '/genre/$slug',
@@ -208,10 +226,12 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/wrapped': typeof WrappedRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -222,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/catalog/$slug': typeof CatalogSlugRoute
   '/country/$slug': typeof CountrySlugRoute
   '/genre/$slug': typeof GenreSlugRoute
+  '/list/$shareId': typeof ListShareIdRoute
   '/movie/$slug': typeof MovieSlugRoute
   '/watch-party/$code': typeof WatchPartyCodeRoute
   '/watch/$slug': typeof WatchSlugRoute
@@ -240,10 +261,12 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/wrapped': typeof WrappedRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -254,6 +277,7 @@ export interface FileRoutesByTo {
   '/catalog/$slug': typeof CatalogSlugRoute
   '/country/$slug': typeof CountrySlugRoute
   '/genre/$slug': typeof GenreSlugRoute
+  '/list/$shareId': typeof ListShareIdRoute
   '/movie/$slug': typeof MovieSlugRoute
   '/watch-party/$code': typeof WatchPartyCodeRoute
   '/watch/$slug': typeof WatchSlugRoute
@@ -274,10 +298,12 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/schedule': typeof ScheduleRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/wrapped': typeof WrappedRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -288,6 +314,7 @@ export interface FileRoutesById {
   '/catalog/$slug': typeof CatalogSlugRoute
   '/country/$slug': typeof CountrySlugRoute
   '/genre/$slug': typeof GenreSlugRoute
+  '/list/$shareId': typeof ListShareIdRoute
   '/movie/$slug': typeof MovieSlugRoute
   '/watch-party/$code': typeof WatchPartyCodeRoute
   '/watch/$slug': typeof WatchSlugRoute
@@ -309,10 +336,12 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/reset-password'
+    | '/schedule'
     | '/search'
     | '/sitemap.xml'
     | '/terms'
     | '/watchlist'
+    | '/wrapped'
     | '/admin/analytics'
     | '/admin/comments'
     | '/admin/dashboard'
@@ -323,6 +352,7 @@ export interface FileRouteTypes {
     | '/catalog/$slug'
     | '/country/$slug'
     | '/genre/$slug'
+    | '/list/$shareId'
     | '/movie/$slug'
     | '/watch-party/$code'
     | '/watch/$slug'
@@ -341,10 +371,12 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/reset-password'
+    | '/schedule'
     | '/search'
     | '/sitemap.xml'
     | '/terms'
     | '/watchlist'
+    | '/wrapped'
     | '/admin/analytics'
     | '/admin/comments'
     | '/admin/dashboard'
@@ -355,6 +387,7 @@ export interface FileRouteTypes {
     | '/catalog/$slug'
     | '/country/$slug'
     | '/genre/$slug'
+    | '/list/$shareId'
     | '/movie/$slug'
     | '/watch-party/$code'
     | '/watch/$slug'
@@ -374,10 +407,12 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/reset-password'
+    | '/schedule'
     | '/search'
     | '/sitemap.xml'
     | '/terms'
     | '/watchlist'
+    | '/wrapped'
     | '/admin/analytics'
     | '/admin/comments'
     | '/admin/dashboard'
@@ -388,6 +423,7 @@ export interface FileRouteTypes {
     | '/catalog/$slug'
     | '/country/$slug'
     | '/genre/$slug'
+    | '/list/$shareId'
     | '/movie/$slug'
     | '/watch-party/$code'
     | '/watch/$slug'
@@ -408,14 +444,17 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ScheduleRoute: typeof ScheduleRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   WatchlistRoute: typeof WatchlistRoute
+  WrappedRoute: typeof WrappedRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   CatalogSlugRoute: typeof CatalogSlugRoute
   CountrySlugRoute: typeof CountrySlugRoute
   GenreSlugRoute: typeof GenreSlugRoute
+  ListShareIdRoute: typeof ListShareIdRoute
   MovieSlugRoute: typeof MovieSlugRoute
   WatchPartyCodeRoute: typeof WatchPartyCodeRoute
   WatchSlugRoute: typeof WatchSlugRoute
@@ -426,6 +465,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wrapped': {
+      id: '/wrapped'
+      path: '/wrapped'
+      fullPath: '/wrapped'
+      preLoaderRoute: typeof WrappedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/watchlist': {
       id: '/watchlist'
       path: '/watchlist'
@@ -452,6 +498,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schedule': {
+      id: '/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof ScheduleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -573,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MovieSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/list/$shareId': {
+      id: '/list/$shareId'
+      path: '/list/$shareId'
+      fullPath: '/list/$shareId'
+      preLoaderRoute: typeof ListShareIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/genre/$slug': {
       id: '/genre/$slug'
       path: '/genre/$slug'
@@ -679,14 +739,17 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ScheduleRoute: ScheduleRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   WatchlistRoute: WatchlistRoute,
+  WrappedRoute: WrappedRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   CatalogSlugRoute: CatalogSlugRoute,
   CountrySlugRoute: CountrySlugRoute,
   GenreSlugRoute: GenreSlugRoute,
+  ListShareIdRoute: ListShareIdRoute,
   MovieSlugRoute: MovieSlugRoute,
   WatchPartyCodeRoute: WatchPartyCodeRoute,
   WatchSlugRoute: WatchSlugRoute,

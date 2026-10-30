@@ -12,6 +12,8 @@ import {
   Wifi,
   ListPlus,
   Users,
+  CalendarDays,
+  Sparkles,
 } from "lucide-react";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import { resolveUserDisplay } from "@/lib/userDisplay";
@@ -107,6 +109,18 @@ export function UserMenu() {
                 search={{ tab: "history" }}
                 icon={<Clock className="h-4 w-4" />}
                 label={t("auth.history")}
+                onClick={() => setOpen(false)}
+              />
+              <Item
+                to="/schedule"
+                icon={<CalendarDays className="h-4 w-4" />}
+                label={t("auth.schedule")}
+                onClick={() => setOpen(false)}
+              />
+              <Item
+                to="/wrapped"
+                icon={<Sparkles className="h-4 w-4" />}
+                label={t("auth.wrapped")}
                 onClick={() => setOpen(false)}
               />
               <button

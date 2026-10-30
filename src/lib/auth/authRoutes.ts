@@ -13,6 +13,7 @@ const PUBLIC_BROWSE_PREFIXES = [
   "/year/",
   "/search",
   "/actor/",
+  "/list/",
 ] as const;
 
 export function isPublicAuthPath(pathname: string): boolean {

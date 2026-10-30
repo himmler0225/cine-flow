@@ -104,11 +104,29 @@
     "checkInbox": "Kiểm tra hộp thư của bạn",
     "openResetLink": "Vui lòng mở link đặt lại mật khẩu từ email của bạn.",
     "updating": "Đang cập nhật...",
-    "strengthLabel": "Độ mạnh: {{level}}"
+    "strengthLabel": "Độ mạnh: {{level}}",
+    "schedule": "Lịch phim",
+    "wrapped": "Tổng kết năm"
   },
   "watchlist": {
     "defaultWeekend": "Xem cuối tuần",
-    "watchLater": "Xem sau"
+    "watchLater": "Xem sau",
+    "public": "Công khai",
+    "private": "Riêng tư",
+    "makePublic": "Chia sẻ công khai",
+    "makePrivate": "Tắt chia sẻ",
+    "shareLink": "Gửi link",
+    "madePrivate": "Danh sách đã chuyển về riêng tư",
+    "shareFailed": "Không chia sẻ được, thử lại sau",
+    "linkCopied": "Đã sao chép link danh sách",
+    "shareText": "Xem danh sách phim “{{name}}” của mình trên Cine-Flow:",
+    "sharedTitle": "Danh sách phim được chia sẻ — Cine-Flow",
+    "sharedBy": "Danh sách của {{name}}",
+    "sharedList": "Danh sách được chia sẻ",
+    "titleCount": "{{count}} phim",
+    "saveCopy": "Lưu vào danh sách của tôi",
+    "savedCopy": "Đã lưu “{{name}}” vào danh sách của bạn",
+    "sharedNotFound": "Danh sách này không tồn tại hoặc đã tắt chia sẻ."
   },
   "movie": {
     "share": "Chia sẻ",
@@ -943,6 +961,51 @@
           "body": "Chính sách bảo mật này có thể được cập nhật theo thời gian. Chúng tôi khuyến khích bạn xem lại trang này định kỳ để nắm các thay đổi mới nhất."
         }
       ]
+    }
+  },
+  "schedule": {
+    "seoTitle": "Lịch phim bộ — Cine-Flow",
+    "title": "Lịch phim của bạn",
+    "subtitle": "Dự kiến tập mới của các phim bộ bạn theo dõi (yêu thích, danh sách, đang xem dở) trong 7 ngày tới.",
+    "today": "Hôm nay",
+    "tomorrow": "Ngày mai",
+    "episode": "Tập {{n}}",
+    "guess": "dự đoán, chưa chắc",
+    "learning": "Đang học lịch",
+    "learningHint": "Hệ thống ghi lại mỗi lần phim ra tập mới để đoán lịch. Sau 1–2 tập nữa phim sẽ hiện trên lịch.",
+    "empty": "Bạn chưa theo dõi phim bộ nào đang chiếu.",
+    "findSeries": "Tìm phim bộ"
+  },
+  "wrapped": {
+    "seoTitle": "Tổng kết năm — Cine-Flow",
+    "title": "Năm {{year}} của bạn",
+    "cardTitle": "Năm {{year}} của tôi trên Cine-Flow",
+    "youWatched": "Bạn đã xem",
+    "hoursShort": "{{hours}} giờ",
+    "share": "Tạo ảnh chia sẻ",
+    "downloaded": "Đã lưu ảnh",
+    "shareFailed": "Không tạo được ảnh, thử lại sau",
+    "episodes": "Tập đã xem",
+    "titles": "Phim",
+    "activeDays": "Ngày có xem",
+    "streak": "Chuỗi dài nhất",
+    "days": "{{count}} ngày",
+    "topTitles": "Phim bạn cày nhiều nhất",
+    "titleStats": "{{hours}} giờ · {{count}} tập",
+    "topGenres": "Gu của bạn",
+    "habits": "Thói quen",
+    "peakHour": "Hay xem nhất lúc {{hour}}h",
+    "peakWeekday": "Ngày xem nhiều nhất: {{day}}",
+    "activity": "{{comments}} bình luận · {{ratings}} đánh giá · {{favorites}} phim yêu thích mới",
+    "byMonth": "Theo tháng",
+    "empty": "Chưa có dữ liệu xem phim trong năm {{year}}.",
+    "persona": {
+      "nightOwl": "🦉 Cú đêm chính hiệu",
+      "lateNight": "🌙 Chiến thần cày khuya",
+      "evening": "🍿 Fan giờ vàng buổi tối",
+      "daytime": "☀️ Mọt phim ban ngày",
+      "earlyBird": "🌅 Dậy sớm xem phim",
+      "newbie": "🎬 Tân binh"
     }
   }
 }

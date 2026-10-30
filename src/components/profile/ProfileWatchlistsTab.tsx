@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQueries } from "@tanstack/react-query";
-import { ListPlus, Trash2, Plus } from "lucide-react";
+import { Globe, ListPlus, Lock, Share2, Trash2, Plus } from "lucide-react";
+import { watchlistApi } from "@/services/platform/watchlist.service";
+import { shareRoomInvite } from "@/lib/watchParty/shareInvite";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useWatchlistStore } from "@/store/watchlistStore";
@@ -21,6 +23,10 @@ export function ProfileWatchlistsTab() {
 
   const removeFromList = useWatchlistStore((s) => s.removeFromList);
 
+  const setSharing = useWatchlistStore((s) => s.setSharing);
+
+  const [sharingBusy, setSharingBusy] = useState(false);
+
   const [newName, setNewName] = useState("");
 
   const [activeId, setActiveId] = useState(lists[0]?.id ?? "default");
@@ -36,6 +42,41 @@ export function ProfileWatchlistsTab() {
       staleTime: CACHE_TTL.fiveMinutes,
     })),
   });
+
+  const shareUrl = (shareId: string) => `${window.location.origin}/list/${shareId}`;
+
+  const toggleSharing = async (isPublic: boolean) => {
+    if (!active) return;
+
+    setSharingBusy(true);
+
+    try {
+      // Default lists exist only locally until first edited: make sure the server has them.
+      await watchlistApi.save(useWatchlistStore.getState().lists);
+
+      const res = await watchlistApi.share(active.id, isPublic);
+
+      setSharing(active.id, res.isPublic, res.shareId);
+
+      if (res.isPublic && res.shareId) await copyLink(res.shareId);
+      else toast.success(t("watchlist.madePrivate"));
+    } catch {
+      toast.error(t("watchlist.shareFailed"));
+    } finally {
+      setSharingBusy(false);
+    }
+  };
+
+  const copyLink = async (shareId: string) => {
+    const result = await shareRoomInvite({
+      title: active?.name ?? "Cine-Flow",
+      text: t("watchlist.shareText", { name: active?.name ?? "" }),
+      url: shareUrl(shareId),
+    });
+
+    if (result === "copied") toast.success(t("watchlist.linkCopied"));
+    else if (result === "failed") toast.error(t("watchlist.shareFailed"));
+  };
 
   const handleCreate = () => {
     const name = newName.trim();
@@ -129,7 +170,46 @@ export function ProfileWatchlistsTab() {
       <div className="min-w-0 flex-1">
         {active && (
           <>
-            <h2 className="mb-4 text-lg font-semibold text-white">{active.name}</h2>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+                {active.name}
+                {active.isPublic ? (
+                  <Globe className="h-4 w-4 text-emerald-400" aria-label={t("watchlist.public")} />
+                ) : (
+                  <Lock className="h-4 w-4 text-zinc-500" aria-label={t("watchlist.private")} />
+                )}
+              </h2>
+              <div className="flex gap-2">
+                {active.isPublic && active.shareId && (
+                  <button
+                    type="button"
+                    onClick={() => void copyLink(active.shareId!)}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-netflix-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-netflix-red-hover"
+                  >
+                    <Share2 className="h-3.5 w-3.5" />
+                    {t("watchlist.shareLink")}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  disabled={sharingBusy}
+                  onClick={() => void toggleSharing(!active.isPublic)}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 disabled:opacity-50"
+                >
+                  {active.isPublic ? (
+                    <>
+                      <Lock className="h-3.5 w-3.5" />
+                      {t("watchlist.makePrivate")}
+                    </>
+                  ) : (
+                    <>
+                      <Globe className="h-3.5 w-3.5" />
+                      {t("watchlist.makePublic")}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
             {slugs.length === 0 ? (
               <p className="py-12 text-center text-sm text-zinc-500">
                 {t("profile.emptyListHint")}

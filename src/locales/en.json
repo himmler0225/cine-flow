@@ -104,11 +104,30 @@
     "checkInbox": "Check your inbox",
     "openResetLink": "Please open the reset link from your email.",
     "updating": "Updating...",
-    "strengthLabel": "Strength: {{level}}"
+    "strengthLabel": "Strength: {{level}}",
+    "schedule": "Schedule",
+    "wrapped": "Year in review"
   },
   "watchlist": {
     "defaultWeekend": "Weekend watchlist",
-    "watchLater": "Watch later"
+    "watchLater": "Watch later",
+    "public": "Public",
+    "private": "Private",
+    "makePublic": "Share publicly",
+    "makePrivate": "Stop sharing",
+    "shareLink": "Send link",
+    "madePrivate": "The list is private again",
+    "shareFailed": "Couldn't share, try again later",
+    "linkCopied": "List link copied",
+    "shareText": "Check out my “{{name}}” list on Cine-Flow:",
+    "sharedTitle": "Shared list — Cine-Flow",
+    "sharedBy": "{{name}}'s list",
+    "sharedList": "Shared list",
+    "titleCount_one": "{{count}} title",
+    "titleCount_other": "{{count}} titles",
+    "saveCopy": "Save to my lists",
+    "savedCopy": "Saved “{{name}}” to your lists",
+    "sharedNotFound": "This list doesn't exist or is no longer shared."
   },
   "movie": {
     "share": "Share",
@@ -944,6 +963,52 @@
           "body": "This privacy policy may be updated from time to time. We encourage you to review this page periodically for the latest changes."
         }
       ]
+    }
+  },
+  "schedule": {
+    "seoTitle": "Series schedule — Cine-Flow",
+    "title": "Your schedule",
+    "subtitle": "Expected new episodes of series you follow (favourites, lists, in progress) over the next 7 days.",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "episode": "Ep {{n}}",
+    "guess": "estimate",
+    "learning": "Learning the schedule",
+    "learningHint": "Each new episode is recorded to learn the release days. These show up after 1–2 more episodes.",
+    "empty": "You don't follow any ongoing series yet.",
+    "findSeries": "Browse series"
+  },
+  "wrapped": {
+    "seoTitle": "Year in review — Cine-Flow",
+    "title": "Your {{year}}",
+    "cardTitle": "My {{year}} on Cine-Flow",
+    "youWatched": "You watched",
+    "hoursShort": "{{hours}} hours",
+    "share": "Create share image",
+    "downloaded": "Image saved",
+    "shareFailed": "Couldn't create the image, try again later",
+    "episodes": "Episodes",
+    "titles": "Titles",
+    "activeDays": "Active days",
+    "streak": "Longest streak",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "topTitles": "Most watched",
+    "titleStats": "{{hours}} h · {{count}} episodes",
+    "topGenres": "Your taste",
+    "habits": "Habits",
+    "peakHour": "Peak time: {{hour}}:00",
+    "peakWeekday": "Favourite day: {{day}}",
+    "activity": "{{comments}} comments · {{ratings}} ratings · {{favorites}} new favourites",
+    "byMonth": "By month",
+    "empty": "No viewing data for {{year}} yet.",
+    "persona": {
+      "nightOwl": "🦉 True night owl",
+      "lateNight": "🌙 Late-night binger",
+      "evening": "🍿 Prime-time fan",
+      "daytime": "☀️ Daytime watcher",
+      "earlyBird": "🌅 Early bird",
+      "newbie": "🎬 Rookie"
     }
   }
 }
