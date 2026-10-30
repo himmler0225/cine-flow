@@ -39,6 +39,9 @@ async function loadUserData(userId: string) {
   const { importLegacyLocalData } = await import("@/lib/legacyLocalData");
 
   await importLegacyLocalData();
+
+  // Attach this browser's push subscription (if any) to the signed-in account.
+  void import("@/lib/pushNotifications").then((m) => m.resyncPushSubscription());
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({

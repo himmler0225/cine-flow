@@ -246,7 +246,42 @@
     "volumeAria": "Âm lượng",
     "nextEpisodeIn": "Tập tiếp theo sau {{seconds}}s",
     "playNextNow": "Xem ngay",
-    "react": "Thả cảm xúc"
+    "react": "Thả cảm xúc",
+    "settings": "Cài đặt",
+    "danmaku": "Bình luận chạy",
+    "danmakuShow": "Hiện bình luận chạy",
+    "danmakuHide": "Ẩn bình luận chạy",
+    "danmakuWrite": "Viết bình luận chạy",
+    "danmakuPlaceholder": "Bình luận tại thời điểm này…",
+    "danmakuSend": "Gửi",
+    "danmakuSendFailed": "Không gửi được bình luận, thử lại sau",
+    "danmakuOpacity": "Độ rõ",
+    "danmakuDensity": "Mật độ",
+    "density": {
+      "low": "Ít",
+      "medium": "Vừa",
+      "high": "Nhiều"
+    },
+    "danmakuBlocked": "Ẩn bình luận chứa từ",
+    "danmakuBlockedPlaceholder": "spoiler, từ khoá… (cách nhau bằng dấu phẩy)",
+    "introOutro": "Intro & đoạn cuối",
+    "autoSkipIntro": "Tự động bỏ qua intro",
+    "skipMarkHint": "Đánh dấu giúp mọi người: khi đủ 2 người đánh dấu giống nhau, nút “Bỏ qua intro” sẽ hiện cho tất cả.",
+    "markIntro": "Đoạn intro",
+    "markOutro": "Đoạn cuối (credit)",
+    "segmentStart": "Bắt đầu",
+    "segmentEnd": "Kết thúc",
+    "useCurrentTime": "Lấy thời điểm hiện tại",
+    "skipMarkMine": "Bạn đã đánh dấu",
+    "skipMarkVotes": "{{count}} người xác nhận",
+    "skipMarkSaved": "Đã lưu đánh dấu, cảm ơn bạn!",
+    "skipMarkRemoved": "Đã xoá đánh dấu",
+    "skipMarkRemove": "Xoá",
+    "skipMarkFailed": "Không lưu được, thử lại sau",
+    "skipIntro": "Bỏ qua intro",
+    "skipOutro": "Bỏ qua đoạn cuối",
+    "skipToNextEpisode": "Tập tiếp theo",
+    "introSkipped": "Đã bỏ qua intro"
   },
   "hero": {
     "goToSlide": "Chuyển slide {{index}}"
@@ -548,7 +583,16 @@
     "closeAria": "Đóng thông báo",
     "newEpisodes": "Tập mới",
     "favoritesUpdate": "Phim yêu thích có cập nhật",
-    "emptyHint": "Chưa có tập mới. Thêm phim bộ vào yêu thích để nhận thông báo."
+    "emptyHint": "Chưa có tập mới. Thêm phim bộ vào yêu thích để nhận thông báo.",
+    "pushTitle": "Thông báo tập mới",
+    "pushHint": "Báo cả khi bạn không mở web (phim yêu thích, watchlist, phim đang xem dở)",
+    "pushNeedsInstall": "Trên iPhone: bấm Chia sẻ → “Thêm vào MH chính”, mở app từ màn hình chính rồi bật tại đây",
+    "pushBlockedHint": "Trình duyệt đang chặn thông báo của trang này. Mở cài đặt trang để cho phép.",
+    "pushEnabled": "Đã bật thông báo tập mới",
+    "pushDenied": "Bạn đã chặn thông báo",
+    "pushFailed": "Không bật được thông báo, thử lại sau",
+    "pushTest": "Gửi thông báo thử",
+    "pushTestSent": "Đã gửi, thông báo sẽ hiện trong giây lát"
   },
   "admin": {
     "noAccess": "Bạn không có quyền truy cập",
@@ -818,7 +862,9 @@
   },
   "home": {
     "rows": {
-      "newUpdates": "Mới Cập Nhật"
+      "newUpdates": "Mới Cập Nhật",
+      "forYou": "Dành cho bạn",
+      "forYouBasis": "Dựa trên thể loại bạn hay xem: {{basis}}"
     }
   },
   "legal": {

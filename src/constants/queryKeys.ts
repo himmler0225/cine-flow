@@ -21,6 +21,16 @@ export const queryKeys = {
   moments: {
     heatmap: (slug: string, episode: string) => ["moments", "heatmap", slug, episode] as const,
   },
+  danmaku: {
+    window: (slug: string, episode: string, window: number) =>
+      ["danmaku", slug, episode, window] as const,
+  },
+  skipMarkers: {
+    episode: (slug: string, episode: string) => ["skip-markers", slug, episode] as const,
+  },
+  recommendations: {
+    forUser: (userId: string) => ["recommendations", userId] as const,
+  },
   ratings: {
     aggregate: (slug: string) => ["ratings", "aggregate", slug] as const,
     user: (userId: string, slug: string) => ["ratings", "user", userId, slug] as const,

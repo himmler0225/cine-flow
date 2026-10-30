@@ -8,6 +8,7 @@ import { TopRanking, useTop10 } from "@/components/movie/TopRanking";
 import { useNewMovies, useMoviesByType } from "@/hooks/useMovies";
 import { getHomeRows } from "@/constants/movie";
 import { ContinueWatchingRow } from "@/components/movie/ContinueWatchingRow";
+import { ForYouRow } from "@/components/movie/ForYouRow";
 import { t } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
@@ -40,6 +41,7 @@ function HomePage() {
       <HeroBanner movies={heroItems} />
       <div className="relative z-10 space-y-2 pb-12 md:-mt-16">
         <ContinueWatchingRow />
+        <ForYouRow />
         <MovieRow
           title={t("home.rows.newUpdates")}
           movies={newMovies.data?.items}

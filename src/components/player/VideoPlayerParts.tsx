@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Play,
   Pause,
@@ -61,6 +61,8 @@ interface VideoPlayerControlsProps {
   heatmap?: MomentsHeatmap;
   /** Present when reactions can be sent (signed-in viewer). */
   onReact?: (emoji: ReactionEmoji) => void;
+  /** Extra buttons (comments, settings) shown before the speed menu. */
+  extraControls?: ReactNode;
 }
 
 export function VideoPlayerControls({
@@ -96,6 +98,7 @@ export function VideoPlayerControls({
   onSelectSubtitle,
   heatmap,
   onReact,
+  extraControls,
 }: VideoPlayerControlsProps) {
   const [showReactions, setShowReactions] = useState(false);
 
@@ -320,6 +323,7 @@ export function VideoPlayerControls({
               )}
             </div>
           )}
+          {extraControls}
           <div className="relative">
             <button
               ref={speedButtonRef}

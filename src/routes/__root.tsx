@@ -379,6 +379,9 @@ const USER_DATA_SCOPES = new Set([
   "favorites-count",
   "ratings",
   "episode-notifications",
+  "recommendations",
+  "skip-markers",
+  "danmaku",
 ]);
 
 function shouldPersistQuery(queryKey: readonly unknown[]): boolean {

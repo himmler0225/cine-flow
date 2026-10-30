@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Bell } from "lucide-react";
 import { useEpisodeNotifications } from "@/hooks/useEpisodeNotifications";
 import { MoviePosterImg } from "@/components/movie/MoviePosterImg";
+import { PushToggle } from "@/components/notifications/PushToggle";
 
 export function NotificationBell() {
   const { t } = useTranslation();
@@ -45,6 +46,7 @@ export function NotificationBell() {
               <p className="text-sm font-semibold text-white">{t("notifications.newEpisodes")}</p>
               <p className="text-xs text-netflix-muted">{t("notifications.favoritesUpdate")}</p>
             </div>
+            <PushToggle />
             <div className="max-h-80 overflow-y-auto">
               {notifications.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm text-netflix-muted">

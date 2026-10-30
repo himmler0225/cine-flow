@@ -1,10 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pause, Play, SkipForward } from "lucide-react";
+import {
+  MessageSquareOff,
+  MessageSquareText,
+  PenLine,
+  Pause,
+  Play,
+  SkipForward,
+} from "lucide-react";
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { usePlayerChrome } from "@/hooks/player/usePlayerChrome";
 import { canUsePictureInPicture } from "@/hooks/player/usePlayerControls";
 import { useMoments } from "@/hooks/player/useMoments";
+import { useDanmaku } from "@/hooks/player/useDanmaku";
+import { useSkipMarkers } from "@/hooks/player/useSkipMarkers";
+import { usePreferencesStore } from "@/store/preferencesStore";
+import type { DanmakuSettings } from "@/services/platform/preferences.service";
+import { DanmakuLayer } from "@/components/player/DanmakuLayer";
+import { DanmakuComposer } from "@/components/player/DanmakuComposer";
+import { PlayerSettingsMenu } from "@/components/player/PlayerSettingsMenu";
+import { SkipSegmentButton } from "@/components/player/SkipSegmentButton";
 import { useAuthStore } from "@/store/authStore";
 import type { ReactionEmoji } from "@/services/platform/moments.service";
 import { VideoPlayerControls, VideoPlayerError } from "@/components/player/VideoPlayerParts";
@@ -34,14 +49,20 @@ interface Props {
   momentsEpisode?: string;
 }
 
+const EMPTY_DANMAKU_SETTINGS: DanmakuSettings = {};
+
 export function VideoPlayer(props: Props) {
   const { t } = useTranslation();
 
   const player = useVideoPlayer(props);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const [composing, setComposing] = useState(false);
+
   const chrome = usePlayerChrome({
     playing: player.playing,
-    keepVisible: player.showSpeed,
+    keepVisible: player.showSpeed || menuOpen || composing,
     togglePlay: player.togglePlay,
     seekBy: player.seekBy,
     toggleFullscreen: player.toggleFullscreen,
@@ -52,6 +73,28 @@ export function VideoPlayer(props: Props) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const { heatmap, react } = useMoments(props.prefsKey, props.momentsEpisode);
+
+  const episodeFeatures = isAuthenticated && !!props.prefsKey && !!props.momentsEpisode;
+
+  const danmakuSettings = usePreferencesStore(
+    (s) => s.prefs.settings?.danmaku ?? EMPTY_DANMAKU_SETTINGS,
+  );
+
+  const autoSkipIntro = usePreferencesStore((s) => s.prefs.settings?.autoSkipIntro === true);
+
+  const updateSettings = usePreferencesStore((s) => s.set);
+
+  const danmakuOn = episodeFeatures && danmakuSettings.enabled !== false;
+
+  const danmaku = useDanmaku(props.prefsKey, props.momentsEpisode, player.progress, danmakuOn);
+
+  const skipMarkers = useSkipMarkers(
+    episodeFeatures ? props.prefsKey : undefined,
+    props.momentsEpisode,
+  );
+
+  const changeDanmaku = (patch: DanmakuSettings) =>
+    updateSettings("settings", (prev) => ({ ...prev, danmaku: { ...prev?.danmaku, ...patch } }));
 
   const [floating, setFloating] = useState<{ id: number; emoji: ReactionEmoji; left: number }[]>(
     [],
@@ -171,6 +214,35 @@ export function VideoPlayer(props: Props) {
             )}
           </button>
         )}
+        {danmakuOn && (
+          <DanmakuLayer
+            items={danmaku.items}
+            own={danmaku.own}
+            time={player.progress}
+            playing={player.playing}
+            settings={danmakuSettings}
+          />
+        )}
+        {episodeFeatures && (
+          <SkipSegmentButton
+            intro={skipMarkers.intro}
+            outro={skipMarkers.outro}
+            time={player.progress}
+            episodeKey={`${props.prefsKey}:${props.momentsEpisode}`}
+            autoSkipIntro={autoSkipIntro}
+            hasNextEpisode={!!props.onNextEpisode}
+            onSeek={player.seekTo}
+            onNextEpisode={props.onNextEpisode}
+          />
+        )}
+        {composing && danmakuOn && (
+          <DanmakuComposer
+            onSend={(content) =>
+              danmaku.send(content, player.videoRef.current?.currentTime ?? player.progress)
+            }
+            onClose={() => setComposing(false)}
+          />
+        )}
         {floating.map((f) => (
           <span
             key={f.id}
@@ -248,6 +320,51 @@ export function VideoPlayer(props: Props) {
           onSelectSubtitle={player.selectSubtitle}
           heatmap={heatmap}
           onReact={isAuthenticated && props.momentsEpisode ? sendReaction : undefined}
+          extraControls={
+            episodeFeatures ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => changeDanmaku({ enabled: !danmakuOn })}
+                  className="rounded p-1.5 hover:bg-white/10"
+                  aria-label={danmakuOn ? t("player.danmakuHide") : t("player.danmakuShow")}
+                  aria-pressed={danmakuOn}
+                >
+                  {danmakuOn ? (
+                    <MessageSquareText className="h-5 w-5" />
+                  ) : (
+                    <MessageSquareOff className="h-5 w-5 text-white/60" />
+                  )}
+                </button>
+                {danmakuOn && (
+                  <button
+                    type="button"
+                    onClick={() => setComposing((v) => !v)}
+                    className="rounded p-1.5 hover:bg-white/10"
+                    aria-label={t("player.danmakuWrite")}
+                    aria-expanded={composing}
+                  >
+                    <PenLine className="h-5 w-5" />
+                  </button>
+                )}
+                <PlayerSettingsMenu
+                  onOpenChange={setMenuOpen}
+                  danmaku={{ settings: danmakuSettings, onChange: changeDanmaku }}
+                  skip={{
+                    intro: skipMarkers.intro,
+                    outro: skipMarkers.outro,
+                    autoSkipIntro,
+                    onAutoSkipIntroChange: (v) =>
+                      updateSettings("settings", (prev) => ({ ...prev, autoSkipIntro: v })),
+                    getTime: () => player.videoRef.current?.currentTime ?? player.progress,
+                    duration: player.duration,
+                    onMark: skipMarkers.mark,
+                    onUnmark: skipMarkers.unmark,
+                  }}
+                />
+              </>
+            ) : undefined
+          }
         />
       </div>
     </div>

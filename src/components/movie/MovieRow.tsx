@@ -10,6 +10,8 @@ import { UI_DELAY_MS } from "@/constants/timing";
 
 interface Props {
   title?: string;
+  /** Small line under the title (e.g. why a row was picked). */
+  subtitle?: string;
   movies?: MovieListItem[];
   isLoading?: boolean;
   href?: {
@@ -32,7 +34,7 @@ function readScrollEdges(el: HTMLElement) {
   };
 }
 
-export function MovieRow({ title, movies, isLoading, href }: Props) {
+export function MovieRow({ title, subtitle, movies, isLoading, href }: Props) {
   const { t } = useTranslation();
 
   const ref = useRef<HTMLDivElement>(null);
@@ -122,7 +124,10 @@ export function MovieRow({ title, movies, isLoading, href }: Props) {
             <ChevronRight className="h-5 w-5 shrink-0 opacity-0 transition-opacity group-hover/title:opacity-100 group-focus-visible/title:opacity-100" />
           </Link>
         ) : title ? (
-          <h2 className="text-lg font-semibold tracking-tight text-white md:text-xl">{title}</h2>
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold tracking-tight text-white md:text-xl">{title}</h2>
+            {subtitle && <p className="truncate text-xs text-netflix-muted">{subtitle}</p>}
+          </div>
         ) : (
           <span />
         )}

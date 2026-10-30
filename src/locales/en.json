@@ -246,7 +246,43 @@
     "volumeAria": "Volume",
     "nextEpisodeIn": "Next episode in {{seconds}}s",
     "playNextNow": "Play now",
-    "react": "React"
+    "react": "React",
+    "settings": "Settings",
+    "danmaku": "Live comments",
+    "danmakuShow": "Show live comments",
+    "danmakuHide": "Hide live comments",
+    "danmakuWrite": "Write a live comment",
+    "danmakuPlaceholder": "Comment at this moment…",
+    "danmakuSend": "Send",
+    "danmakuSendFailed": "Couldn't send the comment, try again later",
+    "danmakuOpacity": "Opacity",
+    "danmakuDensity": "Density",
+    "density": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "danmakuBlocked": "Hide comments containing",
+    "danmakuBlockedPlaceholder": "spoiler, keyword… (comma separated)",
+    "introOutro": "Intro & credits",
+    "autoSkipIntro": "Skip intros automatically",
+    "skipMarkHint": "Help everyone: once 2 people mark the same segment, a “Skip intro” button shows for all viewers.",
+    "markIntro": "Intro",
+    "markOutro": "Credits",
+    "segmentStart": "Start",
+    "segmentEnd": "End",
+    "useCurrentTime": "Use current time",
+    "skipMarkMine": "Marked by you",
+    "skipMarkVotes_one": "{{count}} confirmation",
+    "skipMarkVotes_other": "{{count}} confirmations",
+    "skipMarkSaved": "Saved, thank you!",
+    "skipMarkRemoved": "Mark removed",
+    "skipMarkRemove": "Remove",
+    "skipMarkFailed": "Couldn't save, try again later",
+    "skipIntro": "Skip intro",
+    "skipOutro": "Skip credits",
+    "skipToNextEpisode": "Next episode",
+    "introSkipped": "Intro skipped"
   },
   "hero": {
     "goToSlide": "Go to slide {{index}}"
@@ -548,7 +584,16 @@
     "closeAria": "Close notifications",
     "newEpisodes": "New episodes",
     "favoritesUpdate": "Updates on your favorite series",
-    "emptyHint": "No new episodes yet. Add series to favorites to get notified."
+    "emptyHint": "No new episodes yet. Add series to favorites to get notified.",
+    "pushTitle": "New episode alerts",
+    "pushHint": "Even when the site is closed (favourites, watchlists, shows in progress)",
+    "pushNeedsInstall": "On iPhone: tap Share → “Add to Home Screen”, open the app from there, then turn this on",
+    "pushBlockedHint": "Your browser blocks notifications for this site. Allow them in the site settings.",
+    "pushEnabled": "New episode alerts are on",
+    "pushDenied": "Notifications are blocked",
+    "pushFailed": "Couldn't turn on notifications, try again later",
+    "pushTest": "Send a test notification",
+    "pushTestSent": "Sent — it should appear in a moment"
   },
   "admin": {
     "noAccess": "You don't have access",
@@ -818,7 +863,9 @@
   },
   "home": {
     "rows": {
-      "newUpdates": "Recently Updated"
+      "newUpdates": "Recently Updated",
+      "forYou": "For you",
+      "forYouBasis": "Based on what you watch: {{basis}}"
     }
   },
   "legal": {
