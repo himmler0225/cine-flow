@@ -165,6 +165,7 @@ export function VideoPlayer(props: Props) {
         ref={player.containerRef}
         className={cn(
           "group/player relative aspect-video w-full overflow-hidden bg-black",
+          player.pseudoFullscreen && "cf-pseudo-fullscreen",
           !chrome.visible && "cursor-none",
         )}
         {...chrome.containerProps}

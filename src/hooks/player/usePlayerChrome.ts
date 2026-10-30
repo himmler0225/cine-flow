@@ -121,7 +121,11 @@ export function usePlayerChrome({
 
     const rect = e.currentTarget.getBoundingClientRect();
 
-    const zone = (e.clientX - rect.left) / rect.width;
+    // Rotated 90° (pseudo fullscreen in portrait): "left/right" runs top-to-bottom.
+    const zone =
+      rect.height > rect.width
+        ? (e.clientY - rect.top) / rect.height
+        : (e.clientX - rect.left) / rect.width;
 
     const now = Date.now();
 

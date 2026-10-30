@@ -57,14 +57,24 @@ export function SeekBar({
 
   const [scrubTime, setScrubTime] = useState<number | null>(null);
 
-  const timeAt = (clientX: number) => {
+  const timeAt = (e: { clientX: number; clientY: number }) => {
     const el = trackRef.current;
 
     if (!el || !duration) return 0;
 
     const rect = el.getBoundingClientRect();
 
-    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    // A track taller than wide is rotated 90° (iPhone landscape fullscreen): its
+    // length runs down the screen.
+    const ratio = Math.min(
+      1,
+      Math.max(
+        0,
+        rect.height > rect.width
+          ? (e.clientY - rect.top) / rect.height
+          : (e.clientX - rect.left) / rect.width,
+      ),
+    );
 
     return ratio * duration;
   };
@@ -78,7 +88,7 @@ export function SeekBar({
 
     onScrubChange?.(false);
 
-    if (commit) onSeek(timeAt(e.clientX));
+    if (commit) onSeek(timeAt(e));
   };
 
   const shown = scrubTime ?? progress;
@@ -114,12 +124,12 @@ export function SeekBar({
 
         e.currentTarget.setPointerCapture(e.pointerId);
 
-        setScrubTime(timeAt(e.clientX));
+        setScrubTime(timeAt(e));
 
         onScrubChange?.(true);
       }}
       onPointerMove={(e) => {
-        if (activePointerRef.current === e.pointerId) setScrubTime(timeAt(e.clientX));
+        if (activePointerRef.current === e.pointerId) setScrubTime(timeAt(e));
       }}
       onPointerUp={(e) => endScrub(e, true)}
       onPointerCancel={(e) => endScrub(e, false)}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PlayerUiAction } from "@/hooks/player/playerReducer";
 import type { WebkitPresentationVideo } from "@/hooks/player/usePlayerControls";
 import { PLAYER_SEEK_STEP_SEC } from "@/constants/timing";
@@ -20,7 +20,59 @@ export function usePlayerKeyboard(
   dispatch: React.Dispatch<PlayerUiAction>,
   onNextEpisode?: () => void,
 ) {
+  // iPhone Safari can only fullscreen the <video> itself (native player), which hides
+  // every overlay (skip-ad / skip-intro buttons, comments) and can't be forced to
+  // landscape. There we fill the viewport ourselves instead (CSS rotates it in portrait).
+  const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
+
+  const pseudoRef = useRef(false);
+
+  const setPseudo = (on: boolean) => {
+    pseudoRef.current = on;
+
+    setPseudoFullscreen(on);
+  };
+
+  useEffect(() => {
+    if (!pseudoFullscreen) return;
+
+    const root = document.documentElement;
+
+    const prev = root.style.overflow;
+
+    root.style.overflow = "hidden";
+
+    return () => {
+      root.style.overflow = prev;
+    };
+  }, [pseudoFullscreen]);
+
+  // Leaving fullscreen any way (Esc, back gesture, system UI) releases the landscape lock.
+  useEffect(() => {
+    const onChange = () => {
+      const doc = document as Document & { webkitFullscreenElement?: Element | null };
+
+      if (!doc.fullscreenElement && !doc.webkitFullscreenElement) screenOrientation()?.unlock?.();
+    };
+
+    document.addEventListener("fullscreenchange", onChange);
+
+    document.addEventListener("webkitfullscreenchange", onChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+
+      document.removeEventListener("webkitfullscreenchange", onChange);
+    };
+  }, []);
+
   const toggleFullscreen = () => {
+    if (pseudoRef.current) {
+      setPseudo(false);
+
+      return;
+    }
+
     const el = containerRef.current as
       | (HTMLDivElement & { webkitRequestFullscreen?: () => void })
       | null;
@@ -53,8 +105,9 @@ export function usePlayerKeyboard(
         .catch(() => video?.webkitEnterFullscreen?.());
     } else if (el?.webkitRequestFullscreen) {
       el.webkitRequestFullscreen();
+    } else if (el) {
+      setPseudo(true);
     } else {
-      // iPhone Safari cannot fullscreen arbitrary elements, only the <video> itself.
       video?.webkitEnterFullscreen?.();
     }
   };
@@ -107,5 +160,5 @@ export function usePlayerKeyboard(
     return () => window.removeEventListener("keydown", onKey);
   }, [useEmbed, onNextEpisode, videoRef, dispatch]);
 
-  return { toggleFullscreen };
+  return { toggleFullscreen, pseudoFullscreen };
 }

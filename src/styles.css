@@ -187,6 +187,29 @@
 }
 
 /* Reaction emoji rising over the player (watch page moments). */
+/* iPhone fullscreen (usePlayerKeyboard): fill the viewport ourselves so overlays stay
+   visible; in portrait, rotate the player 90° so the video plays landscape. */
+.cf-pseudo-fullscreen {
+  position: fixed !important;
+  inset: 0;
+  z-index: 100;
+  width: 100vw !important;
+  height: 100dvh;
+  aspect-ratio: auto;
+}
+
+@media (orientation: portrait) {
+  .cf-pseudo-fullscreen {
+    inset: auto;
+    top: 0;
+    left: 100vw;
+    width: 100dvh !important;
+    height: 100vw;
+    transform-origin: top left;
+    transform: rotate(90deg);
+  }
+}
+
 /* Scrolling player comments (DanmakuLayer). */
 @keyframes cf-danmaku-move {
   from {

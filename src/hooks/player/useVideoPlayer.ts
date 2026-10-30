@@ -161,7 +161,7 @@ export function useVideoPlayer({
 
   usePlayerSeekEvent(videoRef, state.useEmbed, dispatch, seekLockRef);
 
-  const { toggleFullscreen } = usePlayerKeyboard(
+  const { toggleFullscreen, pseudoFullscreen } = usePlayerKeyboard(
     videoRef,
     containerRef,
     state.useEmbed,
@@ -259,6 +259,7 @@ export function useVideoPlayer({
     selectQuality: hls.selectQuality,
     selectSubtitle: hls.selectSubtitle,
     toggleFullscreen: controls.toggleFullscreen,
+    pseudoFullscreen,
     togglePiP: controls.togglePiP,
     seekTo: controls.seekTo,
     seekBy: controls.seekBy,
